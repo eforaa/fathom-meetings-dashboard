@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TYPE_LABELS } from '@/lib/format';
+import styles from './filters.module.css';
 
 //CSS class for each meeting type chip
 const CHIP_CLASS = {
