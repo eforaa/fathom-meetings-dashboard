@@ -1,79 +1,112 @@
+
 :root {
-  --ink: #16191d;
-  --ink-70: #4b5560;
-  --ink-45: #79838f;
-  --ink-25: #aeb6bf;
- 
-  --rule: #e4e8ea;
-  --rule-soft: #f1f4f5;
- 
-  --paper: #ffffff;
-  --wash: #f7f9f9;
- 
-  --sage: #5f8285;
-  --sage-soft: #eaf0f0;
- 
-  --type-internal: #4a6fa5;
-  --type-client: #8a5cd0;
-  --type-automation: #0e8f9e;
-  --type-onboarding: #c96a2c;
-  --type-other: #6b7684;
- 
-  --warn: #b45309;
-  --error: #c0392b;
- 
-  --radius: 5px;
+  color-scheme: light dark;
+
+  --ink: light-dark(#16191d, #eef1f3);
+  --ink-70: light-dark(#4b5560, #b3bcc4);
+  --ink-45: light-dark(#79838f, #828d97);
+  --ink-25: light-dark(#aeb6bf, #5a636c);
+
+  --rule: light-dark(#e5e9eb, #262b31);
+  --rule-soft: light-dark(#f0f3f4, #1e2328);
+
+  --paper: light-dark(#ffffff, #101317);
+  --paper-raised: light-dark(#ffffff, #171b20);
+  --wash: light-dark(#f7f9f9, #171b20);
+
+  --sage: light-dark(#4f7376, #7fa9ac);
+  --sage-soft: light-dark(#e8efef, #1d2a2b);
+
+  --type-internal: light-dark(#4a6fa5, #7ba0d4);
+  --type-client: light-dark(#8250c8, #b18cf0);
+  --type-automation: light-dark(#0d7f8c, #47b3bf);
+  --type-onboarding: light-dark(#bd6224, #e0975a);
+  --type-other: light-dark(#6b7684, #97a1ad);
+
+  --warn: light-dark(#a35a09, #e0a92f);
+  --warn-dot: #e0a92f;
+  --error: light-dark(#b8332a, #f0837a);
+
+  --shadow-panel: 0 14px 28px -10px light-dark(rgb(22 25 29 / 0.16), rgb(0 0 0 / 0.5)),
+    0 2px 6px -2px light-dark(rgb(22 25 29 / 0.08), rgb(0 0 0 / 0.4));
+
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  /* Tinted chip backgrounds need more opacity on a dark surface to stay
+     visible. Not a colour, so light-dark() cannot help here. */
+  --tint: 11%;
 }
- 
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tint: 18%;
+  }
+}
+
+/* An explicit choice overrides the system preference. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --tint: 11%;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --tint: 18%;
+}
+
 * {
   box-sizing: border-box;
 }
- 
+
 html {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
- 
+
 body {
   margin: 0;
   background: var(--paper);
   font-family: var(--font-ui), system-ui, sans-serif;
   color: var(--ink);
 }
- 
+
 a {
   color: inherit;
 }
- 
+
 :focus-visible {
   outline: 2px solid var(--sage);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 4px;
 }
- 
+
 ::selection {
   background: var(--sage-soft);
 }
- 
+
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
- 
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
- 
+
 ::-webkit-scrollbar-thumb {
-  border-radius: 4px;
+  border: 2px solid transparent;
+  border-radius: 6px;
   background: var(--ink-25);
+  background-clip: content-box;
 }
- 
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ink-45);
+  background-clip: content-box;
 }
- 
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -82,4 +115,3 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
- 
