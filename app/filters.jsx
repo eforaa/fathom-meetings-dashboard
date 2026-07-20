@@ -55,10 +55,13 @@ export default function Filters({ people }) {
   const searchParams = useSearchParams();
   // dropdown open/closed
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isSortOpen, setSortOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef(null);
+  const sortRef = useRef(null);
 
   useDismissOnOutside(dropdownRef, isDropdownOpen, () => setDropdownOpen(false));
+  useDismissOnOutside(sortRef, isSortOpen, () => setSortOpen(false));
 
   const selectedTypes = (searchParams.get('type') ?? '').split(',').filter(Boolean);
   const selectedPeople = (searchParams.get('person') ?? '').split(',').filter(Boolean);
@@ -91,7 +94,12 @@ export default function Filters({ people }) {
   function changeSort(value) {
     const [nextSort, nextDir] = value.split(':');
     applyChanges({ sort: nextSort, dir: nextDir });
+    setSortOpen(false);
   }
+
+  const currentSort = `${sort}:${dir}`;
+  const currentSortLabel =
+    SORT_OPTIONS.find((option) => option.value === currentSort)?.label ?? 'Sort';
 
   //transfer uppercase to lowercase when searching
   //filtering participants by search
@@ -169,23 +177,39 @@ export default function Filters({ people }) {
           )}
         </div>
 
-        <div className={styles.sortWrap}>
-          <select
-            aria-label="Sort meetings"
-            value={`${sort}:${dir}`}
-            onChange={(event) => changeSort(event.target.value)}
-            className={styles.sort}
+        <div className={styles.dropdown} ref={sortRef}>
+          <button
+            type="button"
+            onClick={() => setSortOpen((open) => !open)}
+            aria-expanded={isSortOpen}
+            className={styles.dropdownButton}
           >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            {currentSortLabel}
+            <ChevronIcon open={isSortOpen} />
+          </button>
 
-          <ChevronIcon className={styles.sortIcon} />
+          {isSortOpen && (
+            <div className={`${styles.panel} ${styles.panelNarrow}`}>
+              <div className={styles.options}>
+                {SORT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => changeSort(option.value)}
+                    className={styles.option}
+                  >
+                    <span
+                      className={`${styles.checkbox} ${option.value === currentSort ? styles.checkboxOn : ''}`}
+                    >
+                      {option.value === currentSort && <CheckIcon />}
+                    </span>
+                    <span className={styles.optionLabel}>{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-
         <span className={styles.spacer} />
 
         {hasFilters && (
