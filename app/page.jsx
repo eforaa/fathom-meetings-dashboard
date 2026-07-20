@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getMeetings, getAllParticipants } from '@/lib/queries';
 import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
 import Filters from './filters';
+import ThemeToggle from './toggle';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -70,7 +71,10 @@ export default async function MeetingsPage({ searchParams }) {
             <h1 className={styles.title}>Meetings</h1>
             <p className={styles.subtitle}>Searchable archive of recorded calls</p>
           </div>
-          <span className={styles.count}>{meetings.length} shown</span>
+         <div className={styles.headerActions}>
+            <span className={styles.count}>{meetings.length} shown</span>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

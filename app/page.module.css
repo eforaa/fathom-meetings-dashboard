@@ -1,12 +1,14 @@
 
-.shell {
-  min-height: 100vh;
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-/* Header */
 
-.header {
-  padding: 28px 32px 20px;
+.count {
+  font-family: var(--font-mono), monospace;
 }
 
 .headerInner {
@@ -14,8 +16,9 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  max-width: 1320px;
+  max-width: 1600px;
   margin: 0 auto;
+  padding:30px;
 }
 
 .title {
@@ -42,7 +45,7 @@
 }
 
 .body {
-  max-width: 1320px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 4px 32px 72px;
 }
@@ -61,10 +64,9 @@
 
 .table thead th {
   position: sticky;
-  top: 49px;
+  top:3px;
   z-index: 5;
   padding: 10px 20px 10px 0;
-  border-bottom: 1px solid var(--rule);
   background: var(--paper);
   font-family: var(--font-mono), monospace;
   font-size: 10px;
@@ -428,6 +430,10 @@
 
   .subtitle {
     display: none;
+  }
+
+  .headerActions {
+    gap: 10px;
   }
 
   .body {

@@ -1,19 +1,23 @@
-import { Golos_Text, JetBrains_Mono } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const ui = Golos_Text({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600'],
+const ui = Geist({
+  subsets: ['latin'],
   variable: '--font-ui',
   display: 'swap',
 });
-
-const mono = JetBrains_Mono({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500'],
+const mono = Geist_Mono({
+  subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
 });
+
+const applyStoredTheme = `
+try {
+  var t = localStorage.getItem('theme');
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+} catch (e) {}
+`;
 
 export const metadata = {
   title: 'Meetings',
@@ -31,7 +35,10 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${ui.variable} ${mono.variable}`}>
+    <html lang="en" className={`${ui.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: applyStoredTheme }} />
+      </head>
       <body>{children}</body>
     </html>
   );
