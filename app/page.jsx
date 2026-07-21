@@ -4,6 +4,9 @@ import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
 import Filters from './filters';
 import ThemeToggle from './toggle';
 import styles from './page.module.css';
+import { cookies } from 'next/headers';
+import { createClientForServer } from '@/lib/supabase-auth';
+import SignOut from './signout';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,12 +55,17 @@ function readFilters(searchParams) {
 export default async function MeetingsPage({ searchParams }) {
   const filters = readFilters(await searchParams);
 
+  const supabase = createClientForServer(await cookies());
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const [{ meetings, participantsByMeeting }, people] = await Promise.all([
     getMeetings(filters),
     getAllParticipants(),
   ]);
 
-  
+
   const longest = meetings.reduce(
     (max, meeting) => Math.max(max, meeting.duration_minutes ?? 0),
     0,
@@ -71,8 +79,9 @@ export default async function MeetingsPage({ searchParams }) {
             <h1 className={styles.title}>Meetings</h1>
             <p className={styles.subtitle}>Searchable archive of recorded calls</p>
           </div>
-         <div className={styles.headerActions}>
+          <div className={styles.headerActions}>
             <span className={styles.count}>{meetings.length} shown</span>
+            <SignOut email={user?.email} />
             <ThemeToggle />
           </div>
         </div>

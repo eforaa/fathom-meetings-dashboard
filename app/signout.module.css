@@ -1,0 +1,26 @@
+.button {
+  padding: 0 10px;
+  height: 30px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink-45);
+  cursor: pointer;
+  transition: border-color 0.14s ease, color 0.14s ease, background-color 0.14s ease;
+}
+
+.button:hover {
+  border-color: var(--ink-25);
+  background: var(--wash);
+  color: var(--ink-70);
+}
+
+@media (max-width: 860px) {
+  .button {
+    height: 36px;
+  }
+}
