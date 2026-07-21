@@ -159,7 +159,7 @@
     top: calc(100% + 6px);
     left: 0;
     z-index: 30;
-    width: min(272px, calc(100vw - 32px));
+    width: min(240px, calc(100vw - 32px));
     border: 1px solid var(--rule);
     border-radius: var(--radius-lg);
     background: var(--paper-raised);
@@ -214,6 +214,7 @@
     text-align: left;
     cursor: pointer;
     transition: background-color 0.14s ease;
+    max-height: 180px;
 }
 
 .option:hover {
@@ -295,23 +296,22 @@
     color: var(--ink);
 }
 
-.panel {
-    width: min(240px, calc(100vw - 32px));
-}
-
-.options {
-    max-height: 180px;
-}
-
-.searchInput {
-    padding: 6px 9px;
-}
-
 @media (max-width: 860px) {
     .bar {
         padding: 8px 16px;
     }
 
+    .panel {
+    width: min(240px, calc(100vw - 32px));
+    }
+
+    .searchInput {
+    padding: 6px 9px;
+    }
+
+    .options {
+    max-height: 180px;
+}
     .barInner {
         flex-wrap: nowrap;
         overflow: visible;
