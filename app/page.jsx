@@ -1,12 +1,13 @@
 import Link from 'next/link';
-import { getMeetings, getAllParticipants } from '@/lib/queries';
+import { cookies } from 'next/headers';
+import { getMeetings } from '@/lib/queries';
 import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
-import Filters from './filters';
+import { applySlot, collectFacets, readSlot } from '@/lib/tags';
+import { createClientForServer } from '@/lib/supabase-auth';
+import Slot from './slot';
+import SignOut from './signout';
 import ThemeToggle from './toggle';
 import styles from './page.module.css';
-import { cookies } from 'next/headers';
-import { createClientForServer } from '@/lib/supabase-auth';
-import SignOut from './signout';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,43 +30,29 @@ const STATUS = {
 const VISIBLE_AVATARS = 3;
 const VISIBLE_TOPICS = 4;
 
-//converting query into an array
-//empty value return empty array
-//if it is already array - return
-//split values with comma
-function parseList(value) {
-  if (!value) return [];
-  return Array.isArray(value) ? value : value.split(',').filter(Boolean);
-}
-
-//reading filters from the url
-//default sorting by date
-function readFilters(searchParams) {
-  return {
-    types: parseList(searchParams.type),
-    participants: parseList(searchParams.person),
-    sort: searchParams.sort === 'duration' ? 'duration' : 'date',
-    dir: searchParams.dir === 'asc' ? 'asc' : 'desc',
-  };
-}
-
 //main meeting page
-//reading current filters
-//load meetings and participants 
+//reading the slot from the url, loading meetings, applying the slot
 export default async function MeetingsPage({ searchParams }) {
-  const filters = readFilters(await searchParams);
+  const sp = await searchParams;
+  const slot = readSlot(sp);
 
+  //who is signed in
   const supabase = createClientForServer(await cookies());
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ meetings, participantsByMeeting }, people] = await Promise.all([
-    getMeetings({ ...filters, ownerEmail: user?.email }),
-    getAllParticipants(user?.email),
-  ]);
+  //all meetings of this person, the slot is applied after
+  const { meetings: all, participantsByMeeting } = await getMeetings({
+    ownerEmail: user?.email,
+  });
 
+  //values for the filter dropdown are collected before filtering,
+  //otherwise choosing one value would hide all the others
+  const facets = collectFacets(all, participantsByMeeting, slot.tag);
+  const meetings = applySlot(all, participantsByMeeting, slot);
 
+  //the longest meeting on screen sets the scale of the duration bars
   const longest = meetings.reduce(
     (max, meeting) => Math.max(max, meeting.duration_minutes ?? 0),
     0,
@@ -81,20 +68,22 @@ export default async function MeetingsPage({ searchParams }) {
           </div>
           <div className={styles.headerActions}>
             <span className={styles.count}>{meetings.length} shown</span>
-           <Link href="/settings" className={styles.settingsLink}>
+            <Link href="/settings" className={styles.settingsLink}>
               Settings
             </Link>
-           <SignOut email={user?.email} />
+            <SignOut email={user?.email} />
             <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <Filters people={people} />
+      <div className={styles.slotBar}>
+        <Slot slot={slot} facets={facets} />
+      </div>
 
       <main className={styles.body}>
         {meetings.length === 0 ? (
-          <EmptyState />
+          <EmptyState hasMeetings={all.length > 0} />
         ) : (
           <>
             <div className={styles.tableWrap}>
@@ -135,6 +124,7 @@ export default async function MeetingsPage({ searchParams }) {
     </div>
   );
 }
+
 //displaying one meeting inside the table
 function MeetingRow({ meeting, participants, longest }) {
   const topics = meeting.key_topics ?? [];
@@ -148,8 +138,8 @@ function MeetingRow({ meeting, participants, longest }) {
     <tr className={styles.row}>
       <td className={styles.meetingCell}>
         <Link href={`/meetings/${meeting.id}`} className={styles.link}>
-          {/* ai_title is empty until the meeting is analyzed, so the
-              original Fathom title stays as the fallback. */}
+          {/* ai_title is empty until the meeting is analyzed,
+              so the original Fathom title stays as the fallback */}
           {meeting.ai_title || meeting.title || 'Untitled'}
           <ArrowIcon />
         </Link>
@@ -162,9 +152,7 @@ function MeetingRow({ meeting, participants, longest }) {
       </td>
 
       <td>
-        {meeting.meeting_type && (
-          <TypeChip type={meeting.meeting_type} />
-        )}
+        {meeting.meeting_type && <TypeChip type={meeting.meeting_type} />}
       </td>
 
       <td>
@@ -191,6 +179,7 @@ function MeetingRow({ meeting, participants, longest }) {
     </tr>
   );
 }
+
 //mobile meeting card
 function MeetingCard({ meeting, participants }) {
   const topics = meeting.key_topics ?? [];
@@ -235,6 +224,7 @@ function MeetingCard({ meeting, participants }) {
     </li>
   );
 }
+
 //displays meeting type with color
 function TypeChip({ type }) {
   return (
@@ -245,7 +235,7 @@ function TypeChip({ type }) {
   );
 }
 
-//displays participants initials 
+//displays participants initials
 function AvatarStack({ participants }) {
   if (participants.length === 0) {
     return <span className={styles.dash}>—</span>;
@@ -268,21 +258,39 @@ function AvatarStack({ participants }) {
     </span>
   );
 }
+
 //message when no meetings is found
-function EmptyState() {
+//two different reasons: nothing connected yet, or the filter hid everything
+function EmptyState({ hasMeetings }) {
+  if (!hasMeetings) {
+    return (
+      <div className={styles.empty}>
+        <p className={styles.emptyTitle}>No meetings yet</p>
+        <p className={styles.emptyHint}>
+          Connect your Fathom key in{' '}
+          <Link href="/settings" className={styles.emptyLink}>
+            settings
+          </Link>{' '}
+          to pull your own calls.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.empty}>
-      <p className={styles.emptyTitle}>No meetings match these filters</p>
+      <p className={styles.emptyTitle}>Nothing matches this filter</p>
       <p className={styles.emptyHint}>
-        Try again, or{' '}
+        Try another value, or{' '}
         <Link href="/" className={styles.emptyLink}>
-          clear all filters
+          reset the slot
         </Link>
         .
       </p>
     </div>
   );
 }
+
 function ArrowIcon() {
   return (
     <svg

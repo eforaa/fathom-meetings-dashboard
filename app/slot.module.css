@@ -1,0 +1,206 @@
+
+.slot {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* the C and F letters from the sketch */
+.marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--wash);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-45);
+}
+
+.dropdown {
+  position: relative;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 168px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink-70);
+  cursor: pointer;
+  transition: border-color 0.14s ease, color 0.14s ease;
+}
+
+.control:hover {
+  border-color: var(--ink-25);
+  color: var(--ink);
+}
+
+.control[data-active='true'] {
+  border-color: var(--sage);
+  color: var(--sage);
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* direction and mode buttons */
+
+.direction,
+.mode {
+  height: 28px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--ink-70);
+  cursor: pointer;
+  transition: border-color 0.14s ease, color 0.14s ease, background-color 0.14s ease;
+}
+
+.direction {
+  width: 28px;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+}
+
+.mode {
+  width: 84px;
+  padding: 0;
+}
+
+.direction:hover,
+.mode:hover {
+  border-color: var(--ink-25);
+  color: var(--ink);
+}
+
+/* exclude is the unusual choice, so it is marked */
+.mode[data-mode='exclude'] {
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) var(--tint), transparent);
+  color: var(--error);
+}
+
+/* panel */
+
+.panel {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 30;
+  width: 232px;
+  max-height: 264px;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-panel);
+  overflow-y: auto;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 8px;
+  border: none;
+  border-radius: var(--radius);
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink-70);
+  cursor: pointer;
+  transition: background-color 0.14s ease;
+}
+
+.option:hover {
+  background: var(--wash);
+}
+
+.option[data-active='true'] {
+  color: var(--sage);
+}
+
+.optionLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: var(--ink-25);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: 1px solid var(--ink-25);
+  border-radius: 4px;
+  color: var(--paper);
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.checkboxOn {
+  border-color: var(--sage);
+  background: var(--sage);
+}
+
+.empty {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--ink-45);
+}
+
+@media (max-width: 860px) {
+  .slot {
+    width: 100%;
+  }
+
+  .control {
+    flex: 1;
+    width: auto;
+  }
+}
