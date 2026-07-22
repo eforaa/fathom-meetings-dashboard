@@ -81,7 +81,10 @@ export default async function MeetingsPage({ searchParams }) {
           </div>
           <div className={styles.headerActions}>
             <span className={styles.count}>{meetings.length} shown</span>
-            <SignOut email={user?.email} />
+           <Link href="/settings" className={styles.settingsLink}>
+              Settings
+            </Link>
+           <SignOut email={user?.email} />
             <ThemeToggle />
           </div>
         </div>

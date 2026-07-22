@@ -6,6 +6,26 @@
   flex-shrink: 0;
 }
 
+.settingsLink {
+  padding: 0 10px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink-45);
+  text-decoration: none;
+  transition: border-color 0.14s ease, color 0.14s ease, background-color 0.14s ease;
+}
+
+.settingsLink:hover {
+  border-color: var(--ink-25);
+  background: var(--wash);
+  color: var(--ink-70);
+}
 
 .count {
   font-family: var(--font-mono), monospace;
