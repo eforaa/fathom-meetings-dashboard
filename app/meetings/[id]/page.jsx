@@ -10,6 +10,8 @@ import {
   initials,
 } from '@/lib/format';
 import styles from './meeting.module.css';
+import { cookies } from 'next/headers';
+import { createClientForServer } from '@/lib/supabase-auth';
 
 export const dynamic = 'force-dynamic';
 //creating css class for each type
@@ -24,7 +26,13 @@ const TYPE_CLASS = {
 //meeting id is taken from url
 export default async function MeetingPage({ params }) {
   const { id } = await params;
-  const result = await getMeeting(id);
+
+  const supabase = createClientForServer(await cookies());
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const result = await getMeeting(id, user?.email);
 
   if (!result) notFound();
   //loading meetings from database

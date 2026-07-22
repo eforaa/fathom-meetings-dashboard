@@ -61,8 +61,8 @@ export default async function MeetingsPage({ searchParams }) {
   } = await supabase.auth.getUser();
 
   const [{ meetings, participantsByMeeting }, people] = await Promise.all([
-    getMeetings(filters),
-    getAllParticipants(),
+    getMeetings({ ...filters, ownerEmail: user?.email }),
+    getAllParticipants(user?.email),
   ]);
 
 
