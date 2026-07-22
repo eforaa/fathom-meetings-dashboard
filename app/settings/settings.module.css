@@ -1,0 +1,244 @@
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 32px 96px;
+}
+
+/* Back link */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 32px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-45);
+  text-decoration: none;
+  transition: color 0.14s ease;
+}
+
+.back:hover {
+  color: var(--sage);
+}
+
+.backIcon {
+  transition: transform 0.14s ease;
+}
+
+.back:hover .backIcon {
+  transform: translateX(-2px);
+}
+
+/* Header */
+
+.head {
+  margin-bottom: 32px;
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--ink-45);
+}
+
+/* Sections */
+
+.section {
+  margin-top: 32px;
+}
+
+.sectionTitle {
+  margin: 0 0 14px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-45);
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+}
+
+.hint {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-70);
+}
+
+.note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-45);
+}
+
+/* Key entry */
+
+.field {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-family: var(--font-mono), monospace;
+  /* 16px stops iOS Safari zooming in when the field gets focus. */
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.14s ease;
+}
+
+.input::placeholder {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--ink-25);
+}
+
+.input:focus {
+  border-color: var(--sage);
+}
+
+/* Connected state */
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin: 0 0 20px;
+}
+
+.fact {
+  margin: 0;
+}
+
+.factLabel {
+  margin: 0 0 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-45);
+}
+
+.factValue {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.syncError {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--error);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--error);
+}
+
+/* Buttons */
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.primary,
+.danger {
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.14s ease, background-color 0.14s ease, color 0.14s ease;
+}
+
+.primary {
+  border: 1px solid var(--sage);
+  background: var(--sage);
+  color: var(--paper);
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.danger {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-45);
+}
+
+.danger:hover:not(:disabled) {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.primary:disabled,
+.danger:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Result messages */
+
+.ok,
+.error {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ok {
+  color: var(--sage);
+}
+
+.error {
+  color: var(--error);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 20px 16px 64px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .field {
+    flex-direction: column;
+  }
+
+  .facts {
+    gap: 20px;
+  }
+}
