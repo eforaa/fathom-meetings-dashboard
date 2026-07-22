@@ -22,7 +22,7 @@ export async function POST() {
 
     try {
         //only this person, so one manual sync does not pull everyone else
-        const result = await runIngest({ onlyEmail: user.email });
+         const result = await runIngest({ onlyEmail: user.email, maxPages: 3 });
         //success response
         return NextResponse.json({ ok: true, ...result });
     } catch (caught) {

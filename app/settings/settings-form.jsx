@@ -89,7 +89,13 @@ export default function SettingsForm({ account }) {
             });
             router.refresh();
         } catch (error) {
-            setMessage({ ok: false, text: error.message });
+            //timeout comes back without a message
+            setMessage({
+                ok: false,
+                text: error.message === 'Something went wrong'
+                    ? 'Sync took too long. Part of the meetings loaded, the rest will follow tonight.'
+                    : error.message,
+            });
         } finally {
             setBusy(null);
         }
