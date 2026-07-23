@@ -10,8 +10,9 @@ export async function middleware(request) {
     //current path
   const { pathname } = request.nextUrl;
 
-  //ignoring cron 
-  if (pathname.startsWith('/api/cron')) 
+  //ignoring cron and mcp
+  //they use their own secrets, a redirect would give clients html instead of json
+  if (pathname.startsWith('/api/cron') || pathname.startsWith('/api/mcp'))
     return NextResponse.next();
 
   //creating default response 
