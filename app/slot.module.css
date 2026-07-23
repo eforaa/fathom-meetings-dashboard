@@ -1,4 +1,19 @@
 
+/* the whole bar: sorting slots on top, one grouping row under them */
+.bar {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* three sorting columns, they wrap on a narrow screen */
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .slot {
   display: inline-flex;
   flex-direction: column;
@@ -7,6 +22,11 @@
   border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   background: var(--paper-raised);
+}
+
+/* an empty slot stays quiet until it gets a tag */
+.control[data-empty='true'] {
+  color: var(--ink-45);
 }
 
 .row {

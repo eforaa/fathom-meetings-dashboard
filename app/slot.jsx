@@ -28,19 +28,14 @@ function useDismissOnOutside(ref, isOpen, close) {
     }, [ref, isOpen, close]);
 }
 
-//one slot: a column the person fills with a tag
-//S is the sorting row, F is the filter row
-export default function Slot({ slot, facets }) {
+//the whole sorting bar: three slots side by side and one grouping row
+export default function Slot({ slots, facetsBySlot, group }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [openPanel, setOpenPanel] = useState(null);
-    const tagRef = useRef(null);
-    const filterRef = useRef(null);
     const groupRef = useRef(null);
 
-    useDismissOnOutside(tagRef, openPanel === 'tag', () => setOpenPanel(null));
-    useDismissOnOutside(filterRef, openPanel === 'filter', () => setOpenPanel(null));
     useDismissOnOutside(groupRef, openPanel === 'group', () => setOpenPanel(null));
 
     //state lives in the URL, so a view can be sent as a link
@@ -55,19 +50,105 @@ export default function Slot({ slot, facets }) {
         router.push(next.toString() ? `/?${next.toString()}` : '/');
     }
 
+    //empty id clears grouping
+    function chooseGroup(groupId) {
+        apply({ group: groupId || null });
+        setOpenPanel(null);
+    }
+
+    const groupLabel = group ? (TAGS[group]?.label ?? 'None') : 'None';
+
+    return (
+        <div className={styles.bar}>
+            <div className={styles.slots}>
+                {slots.map((slot) => (
+                    <SlotColumn
+                        key={slot.index}
+                        slot={slot}
+                        facets={facetsBySlot[slot.index] ?? []}
+                        apply={apply}
+                        openPanel={openPanel}
+                        setOpenPanel={setOpenPanel}
+                    />
+                ))}
+            </div>
+
+            {/* grouping is one for the whole table, not per slot */}
+            <div className={styles.row}>
+                <span className={styles.marker}>G</span>
+
+                <div className={styles.dropdown} ref={groupRef}>
+                    <button
+                        type="button"
+                        onClick={() => setOpenPanel(openPanel === 'group' ? null : 'group')}
+                        data-active={Boolean(group)}
+                        className={styles.control}
+                    >
+                        {groupLabel}
+                        <Chevron open={openPanel === 'group'} />
+                    </button>
+
+                    {openPanel === 'group' && (
+                        <div className={styles.panel}>
+                            {/* first option turns grouping off */}
+                            <button
+                                type="button"
+                                onClick={() => chooseGroup('')}
+                                data-active={!group}
+                                className={styles.option}
+                            >
+                                None
+                            </button>
+                            {TAG_OPTIONS.map((option) => (
+                                <button
+                                    key={option.id}
+                                    type="button"
+                                    onClick={() => chooseGroup(option.id)}
+                                    data-active={option.id === group}
+                                    className={styles.option}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+//one slot: a column the person fills with a tag
+//S is the sorting row, F is the filter row
+function SlotColumn({ slot, facets, apply, openPanel, setOpenPanel }) {
+    const tagRef = useRef(null);
+    const filterRef = useRef(null);
+
+    //panel ids are unique per slot, so only one panel is open at a time
+    const tagPanel = `tag-${slot.index}`;
+    const filterPanel = `filter-${slot.index}`;
+
+    useDismissOnOutside(tagRef, openPanel === tagPanel, () => setOpenPanel(null));
+    useDismissOnOutside(filterRef, openPanel === filterPanel, () => setOpenPanel(null));
+
     //choosing another tag drops the filter: its values belong to the old tag
     function chooseTag(tagId) {
-        apply({ tag: tagId, fval: null });
+        apply({
+            [slot.keys.tag]: tagId,
+            [slot.keys.fval]: null,
+            //an emptied slot leaves nothing behind in the address bar
+            ...(tagId ? {} : { [slot.keys.dir]: null, [slot.keys.fmode]: null }),
+        });
         setOpenPanel(null);
     }
 
     //direction changes by pressing again, like in Finder
     function toggleDirection() {
-        apply({ dir: slot.direction === 'asc' ? 'desc' : 'asc' });
+        apply({ [slot.keys.dir]: slot.direction === 'asc' ? 'desc' : 'asc' });
     }
 
     function toggleMode() {
-        apply({ fmode: slot.filterMode === 'keep' ? 'exclude' : 'keep' });
+        apply({ [slot.keys.fmode]: slot.filterMode === 'keep' ? 'exclude' : 'keep' });
     }
 
     function toggleValue(value) {
@@ -75,37 +156,43 @@ export default function Slot({ slot, facets }) {
             ? slot.filterValues.filter((item) => item !== value)
             : [...slot.filterValues, value];
 
-        apply({ fval: next.join('~') || null });
+        apply({ [slot.keys.fval]: next.join('~') || null });
     }
 
-    //empty id clears grouping
-    function chooseGroup(groupId) {
-        apply({ group: groupId || null });
-        setOpenPanel(null);
-    }
-
-    const tagLabel = TAGS[slot.tag]?.label ?? 'Tag';
+    const filled = Boolean(TAGS[slot.tag]);
+    const tagLabel = filled ? TAGS[slot.tag].label : 'Add';
     const chosenCount = slot.filterValues.length;
-    const groupLabel = slot.group ? (TAGS[slot.group]?.label ?? 'None') : 'None';
 
     return (
         <div className={styles.slot}>
             {/* sorting row */}
             <div className={styles.row}>
-                <span className={styles.marker}>S</span>
+                <span className={styles.marker}>{slot.index === 0 ? 'S' : slot.index + 1}</span>
 
                 <div className={styles.dropdown} ref={tagRef}>
                     <button
                         type="button"
-                        onClick={() => setOpenPanel(openPanel === 'tag' ? null : 'tag')}
+                        onClick={() => setOpenPanel(openPanel === tagPanel ? null : tagPanel)}
+                        data-empty={!filled}
                         className={styles.control}
                     >
                         {tagLabel}
-                        <Chevron open={openPanel === 'tag'} />
+                        <Chevron open={openPanel === tagPanel} />
                     </button>
 
-                    {openPanel === 'tag' && (
+                    {openPanel === tagPanel && (
                         <div className={styles.panel}>
+                            {/* the first slot always sorts, the others can be emptied */}
+                            {slot.index > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => chooseTag('')}
+                                    data-active={!filled}
+                                    className={styles.option}
+                                >
+                                    None
+                                </button>
+                            )}
                             {TAG_OPTIONS.map((option) => (
                                 <button
                                     key={option.id}
@@ -121,113 +208,77 @@ export default function Slot({ slot, facets }) {
                     )}
                 </div>
 
-                <button
-                    type="button"
-                    onClick={toggleDirection}
-                    className={styles.direction}
-                    title={slot.direction === 'asc' ? 'Ascending' : 'Descending'}
-                >
-                    {slot.direction === 'asc' ? '↑' : '↓'}
-                </button>
-            </div>
-
-            {/* filter row */}
-            <div className={styles.row}>
-                <span className={styles.marker}>F</span>
-
-                <div className={styles.dropdown} ref={filterRef}>
+                {filled && (
                     <button
                         type="button"
-                        onClick={() => setOpenPanel(openPanel === 'filter' ? null : 'filter')}
-                        data-active={chosenCount > 0}
-                        className={styles.control}
+                        onClick={toggleDirection}
+                        className={styles.direction}
+                        title={slot.direction === 'asc' ? 'Ascending' : 'Descending'}
                     >
-                        {chosenCount ? `${chosenCount} selected` : 'All values'}
-                        <Chevron open={openPanel === 'filter'} />
+                        {slot.direction === 'asc' ? '↑' : '↓'}
                     </button>
+                )}
+            </div>
 
-                    {openPanel === 'filter' && (
-                        <div className={styles.panel}>
-                            {facets.length === 0 ? (
-                                <p className={styles.empty}>No values</p>
-                            ) : (
-                                facets.map((facet) => {
-                                    const on = slot.filterValues.includes(facet.value);
+            {/* filter row, only for a slot that holds a tag */}
+            {filled && (
+                <div className={styles.row}>
+                    <span className={styles.marker}>F</span>
 
-                                    return (
-                                        <button
-                                            key={facet.value}
-                                            type="button"
-                                            onClick={() => toggleValue(facet.value)}
-                                            className={styles.option}
-                                        >
-                                            <span
-                                                className={`${styles.checkbox} ${on ? styles.checkboxOn : ''}`}
+                    <div className={styles.dropdown} ref={filterRef}>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setOpenPanel(openPanel === filterPanel ? null : filterPanel)
+                            }
+                            data-active={chosenCount > 0}
+                            className={styles.control}
+                        >
+                            {chosenCount ? `${chosenCount} selected` : 'All values'}
+                            <Chevron open={openPanel === filterPanel} />
+                        </button>
+
+                        {openPanel === filterPanel && (
+                            <div className={styles.panel}>
+                                {facets.length === 0 ? (
+                                    <p className={styles.empty}>No values</p>
+                                ) : (
+                                    facets.map((facet) => {
+                                        const on = slot.filterValues.includes(facet.value);
+
+                                        return (
+                                            <button
+                                                key={facet.value}
+                                                type="button"
+                                                onClick={() => toggleValue(facet.value)}
+                                                className={styles.option}
                                             >
-                                                {on && <Check />}
-                                            </span>
-                                            <span className={styles.optionLabel}>{facet.value}</span>
-                                            <span className={styles.count}>{facet.count}</span>
-                                        </button>
-                                    );
-                                })
-                            )}
-                        </div>
-                    )}
-                </div>
+                                                <span
+                                                    className={`${styles.checkbox} ${on ? styles.checkboxOn : ''}`}
+                                                >
+                                                    {on && <Check />}
+                                                </span>
+                                                <span className={styles.optionLabel}>{facet.value}</span>
+                                                <span className={styles.count}>{facet.count}</span>
+                                            </button>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        )}
+                    </div>
 
-                <button
-                    type="button"
-                    onClick={toggleMode}
-                    data-mode={slot.filterMode}
-                    className={styles.mode}
-                    title="Keep or exclude the chosen values"
-                >
-                    {slot.filterMode === 'keep' ? 'keep' : 'exclude'}
-                </button>
-            </div>
-
-            {/* group-by row */}
-            <div className={styles.row}>
-                <span className={styles.marker}>G</span>
-
-                <div className={styles.dropdown} ref={groupRef}>
                     <button
                         type="button"
-                        onClick={() => setOpenPanel(openPanel === 'group' ? null : 'group')}
-                        data-active={Boolean(slot.group)}
-                        className={styles.control}
+                        onClick={toggleMode}
+                        data-mode={slot.filterMode}
+                        className={styles.mode}
+                        title="Keep or exclude the chosen values"
                     >
-                        {groupLabel}
-                        <Chevron open={openPanel === 'group'} />
+                        {slot.filterMode === 'keep' ? 'keep' : 'exclude'}
                     </button>
-
-                    {openPanel === 'group' && (
-                        <div className={styles.panel}>
-                            {/* first option turns grouping off */}
-                            <button
-                                type="button"
-                                onClick={() => chooseGroup('')}
-                                data-active={!slot.group}
-                                className={styles.option}
-                            >
-                                None
-                            </button>
-                            {TAG_OPTIONS.map((option) => (
-                                <button
-                                    key={option.id}
-                                    type="button"
-                                    onClick={() => chooseGroup(option.id)}
-                                    data-active={option.id === slot.group}
-                                    className={styles.option}
-                                >
-                                    {option.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
-            </div>
+            )}
         </div>
     );
 }

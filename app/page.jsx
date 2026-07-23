@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings } from '@/lib/queries';
 import { typeLabel, formatDate, formatDuration, initials, meetingTypes } from '@/lib/format';
-import { applySlot, collectFacets, readSlot, groupMeetings } from '@/lib/tags';
+import { applySlots, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { TableGroup, CardGroup } from './grouped';
 import Stars from './stars';
@@ -30,7 +30,7 @@ const VISIBLE_TOPICS = 4;
 //reading the slot from the url, loading meetings, applying the slot
 export default async function MeetingsPage({ searchParams }) {
   const sp = await searchParams;
-  const slot = readSlot(sp);
+  const { slots, group } = readView(sp);
 
   //who is signed in
   const supabase = createClientForServer(await cookies());
@@ -43,10 +43,13 @@ export default async function MeetingsPage({ searchParams }) {
     ownerEmail: user?.email,
   });
 
-  //values for the filter dropdown are collected before filtering,
+  //values for the filter dropdowns are collected before filtering,
   //otherwise choosing one value would hide all the others
-  const facets = collectFacets(all, participantsByMeeting, slot.tag);
-  const meetings = applySlot(all, participantsByMeeting, slot);
+  const facetsBySlot = slots.map((slot) =>
+    slot.tag ? collectFacets(all, participantsByMeeting, slot.tag) : [],
+  );
+
+  const meetings = applySlots(all, participantsByMeeting, slots);
 
   //the longest meeting on screen sets the scale of the duration bars
   const longest = meetings.reduce(
@@ -55,9 +58,7 @@ export default async function MeetingsPage({ searchParams }) {
   );
 
   //groups are built on the already sorted list, so their order follows the sort
-  const groups = slot.group
-    ? groupMeetings(meetings, participantsByMeeting, slot.group)
-    : null;
+  const groups = group ? groupMeetings(meetings, participantsByMeeting, group) : null;
 
   return (
     <div className={styles.shell}>
@@ -79,7 +80,7 @@ export default async function MeetingsPage({ searchParams }) {
       </header>
 
       <div className={styles.slotBar}>
-        <Slot slot={slot} facets={facets} />
+        <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
       </div>
 
       <main className={styles.body}>
