@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings } from '@/lib/queries';
 import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
-import { applySlot, collectFacets, readSlot } from '@/lib/tags';
+import { applySlot, collectFacets, readSlot, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
+import { TableGroup, CardGroup } from './grouped';
 import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
@@ -52,6 +53,11 @@ export default async function MeetingsPage({ searchParams }) {
     0,
   );
 
+  //groups are built on the already sorted list, so their order follows the sort
+  const groups = slot.group
+    ? groupMeetings(meetings, participantsByMeeting, slot.group)
+    : null;
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
@@ -91,26 +97,60 @@ export default async function MeetingsPage({ searchParams }) {
                 </thead>
 
                 <tbody>
-                  {meetings.map((meeting) => (
-                    <MeetingRow
-                      key={meeting.id}
-                      meeting={meeting}
-                      participants={participantsByMeeting.get(meeting.id) ?? []}
-                      longest={longest}
-                    />
-                  ))}
+                  {groups
+                    ? groups.map((group) => (
+                        <TableGroup
+                          key={group.label}
+                          label={group.label}
+                          count={group.items.length}
+                          colSpan={COLUMNS.length}
+                        >
+                          {group.items.map((meeting) => (
+                            <MeetingRow
+                              key={meeting.id}
+                              meeting={meeting}
+                              participants={participantsByMeeting.get(meeting.id) ?? []}
+                              longest={longest}
+                            />
+                          ))}
+                        </TableGroup>
+                      ))
+                    : meetings.map((meeting) => (
+                        <MeetingRow
+                          key={meeting.id}
+                          meeting={meeting}
+                          participants={participantsByMeeting.get(meeting.id) ?? []}
+                          longest={longest}
+                        />
+                      ))}
                 </tbody>
               </table>
             </div>
 
             <ul className={styles.cards}>
-              {meetings.map((meeting) => (
-                <MeetingCard
-                  key={meeting.id}
-                  meeting={meeting}
-                  participants={participantsByMeeting.get(meeting.id) ?? []}
-                />
-              ))}
+              {groups
+                ? groups.map((group) => (
+                    <CardGroup
+                      key={group.label}
+                      label={group.label}
+                      count={group.items.length}
+                    >
+                      {group.items.map((meeting) => (
+                        <MeetingCard
+                          key={meeting.id}
+                          meeting={meeting}
+                          participants={participantsByMeeting.get(meeting.id) ?? []}
+                        />
+                      ))}
+                    </CardGroup>
+                  ))
+                : meetings.map((meeting) => (
+                    <MeetingCard
+                      key={meeting.id}
+                      meeting={meeting}
+                      participants={participantsByMeeting.get(meeting.id) ?? []}
+                    />
+                  ))}
             </ul>
           </>
         )}

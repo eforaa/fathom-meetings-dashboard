@@ -37,9 +37,11 @@ export default function Slot({ slot, facets }) {
     const [openPanel, setOpenPanel] = useState(null);
     const tagRef = useRef(null);
     const filterRef = useRef(null);
+    const groupRef = useRef(null);
 
     useDismissOnOutside(tagRef, openPanel === 'tag', () => setOpenPanel(null));
     useDismissOnOutside(filterRef, openPanel === 'filter', () => setOpenPanel(null));
+    useDismissOnOutside(groupRef, openPanel === 'group', () => setOpenPanel(null));
 
     //state lives in the URL, so a view can be sent as a link
     function apply(changes) {
@@ -76,8 +78,15 @@ export default function Slot({ slot, facets }) {
         apply({ fval: next.join('~') || null });
     }
 
+    //empty id clears grouping
+    function chooseGroup(groupId) {
+        apply({ group: groupId || null });
+        setOpenPanel(null);
+    }
+
     const tagLabel = TAGS[slot.tag]?.label ?? 'Tag';
     const chosenCount = slot.filterValues.length;
+    const groupLabel = slot.group ? (TAGS[slot.group]?.label ?? 'None') : 'None';
 
     return (
         <div className={styles.slot}>
@@ -176,6 +185,48 @@ export default function Slot({ slot, facets }) {
                 >
                     {slot.filterMode === 'keep' ? 'keep' : 'exclude'}
                 </button>
+            </div>
+
+            {/* group-by row */}
+            <div className={styles.row}>
+                <span className={styles.marker}>G</span>
+
+                <div className={styles.dropdown} ref={groupRef}>
+                    <button
+                        type="button"
+                        onClick={() => setOpenPanel(openPanel === 'group' ? null : 'group')}
+                        data-active={Boolean(slot.group)}
+                        className={styles.control}
+                    >
+                        {groupLabel}
+                        <Chevron open={openPanel === 'group'} />
+                    </button>
+
+                    {openPanel === 'group' && (
+                        <div className={styles.panel}>
+                            {/* first option turns grouping off */}
+                            <button
+                                type="button"
+                                onClick={() => chooseGroup('')}
+                                data-active={!slot.group}
+                                className={styles.option}
+                            >
+                                None
+                            </button>
+                            {TAG_OPTIONS.map((option) => (
+                                <button
+                                    key={option.id}
+                                    type="button"
+                                    onClick={() => chooseGroup(option.id)}
+                                    data-active={option.id === slot.group}
+                                    className={styles.option}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
