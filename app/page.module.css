@@ -156,6 +156,17 @@
   color: var(--ink-45);
 }
 
+.cardOuter {
+  position: relative;
+}
+
+/* stars pinned to the top-right corner of the card */
+.cardStars {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
 .cardGroup {
   list-style: none;
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import Stars from '../../stars';
 //formatting helpeer functions
 import { getMeeting } from '@/lib/queries';
 import {
@@ -71,6 +72,11 @@ export default async function MeetingPage({ params }) {
         {(meeting.ai_title || meeting.fathom_title) && meeting.title && (
           <p className={styles.originalTitle}>Recorded as “{meeting.title}”</p>
         )}
+
+        <div className={styles.priority}>
+          <span className={styles.priorityLabel}>Priority</span>
+          <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+        </div>
       </header>
 
       <Facts meeting={meeting} participantCount={participants.length} />

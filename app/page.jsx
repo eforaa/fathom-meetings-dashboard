@@ -5,6 +5,7 @@ import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
 import { applySlot, collectFacets, readSlot, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { TableGroup, CardGroup } from './grouped';
+import Stars from './stars';
 import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
@@ -12,7 +13,7 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const COLUMNS = ['Meeting', 'Type', 'Duration', 'People', 'Date'];
+const COLUMNS = ['Meeting', 'Type', 'Duration', 'People', 'Date', 'Priority'];
 
 const TYPE_CLASS = {
   internal_planning: styles.typeInternal,
@@ -202,6 +203,10 @@ function MeetingRow({ meeting, participants, longest }) {
       </td>
 
       <td className={styles.dateCell}>{formatDate(meeting.date)}</td>
+
+      <td>
+        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+      </td>
     </tr>
   );
 }
@@ -211,7 +216,7 @@ function MeetingCard({ meeting, participants }) {
   const topics = meeting.key_topics ?? [];
 
   return (
-    <li>
+    <li className={styles.cardOuter}>
       <Link href={`/meetings/${meeting.id}`} className={styles.card}>
         {meeting.meeting_type && (
           <div className={styles.cardTop}>
@@ -239,6 +244,11 @@ function MeetingCard({ meeting, participants }) {
           </span>
         </div>
       </Link>
+
+      {/* stars sit outside the link: a button inside <a> is invalid markup */}
+      <span className={styles.cardStars}>
+        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+      </span>
     </li>
   );
 }
