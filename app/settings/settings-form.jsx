@@ -26,6 +26,8 @@ export default function SettingsForm({ account }) {
     //which button is working right now
     const [busy, setBusy] = useState(null);
     const [message, setMessage] = useState(null);
+    //live text while the archive is loading
+    const [progress, setProgress] = useState(null);
 
     //one place for all requests
     async function send(url, options) {
@@ -35,6 +37,40 @@ export default function SettingsForm({ account }) {
         //error handling
         if (!response.ok) throw new Error(data.error ?? 'Something went wrong');
         return data;
+    }
+
+    //downloading the whole archive piece by piece
+    //every call continues from the saved cursor, so it survives timeouts
+    async function backfillLoop() {
+        setBusy('backfill');
+        setMessage(null);
+
+        let saved = 0;
+
+        try {
+            let done = false;
+
+            while (!done) {
+                const result = await send('/api/account/backfill', { method: 'POST' });
+
+                done = result.done;
+                saved += result.inserted ?? 0;
+                setProgress(`Loading the archive… ${result.total ?? saved} meetings in the database.`);
+            }
+
+            setProgress(null);
+            setMessage({ ok: true, text: `Archive loaded. ${saved} new meetings saved.` });
+            router.refresh();
+        } catch (error) {
+            //cursor is stored on the server, nothing is lost
+            setProgress(null);
+            setMessage({
+                ok: false,
+                text: `Archive loading paused: ${error.message}. Press "Load archive" to continue.`,
+            });
+        } finally {
+            setBusy(null);
+        }
     }
 
     //saving the key
@@ -51,11 +87,13 @@ export default function SettingsForm({ account }) {
 
             //field is cleared, the key is never shown again
             setApiKey('');
-            setMessage({ ok: true, text: 'Key saved. Fathom accepted it.' });
+            setMessage({ ok: true, text: 'Key saved. Loading your meetings…' });
             router.refresh();
+
+            //the archive starts downloading right away
+            await backfillLoop();
         } catch (error) {
             setMessage({ ok: false, text: error.message });
-        } finally {
             setBusy(null);
         }
     }
@@ -128,6 +166,17 @@ export default function SettingsForm({ account }) {
                     )}
 
                     <div className={styles.actions}>
+                        {/* archive download is not finished: offer to continue */}
+                        {account.backfill_done === false && (
+                            <button
+                                type="button"
+                                onClick={backfillLoop}
+                                disabled={busy !== null}
+                                className={styles.primary}
+                            >
+                                {busy === 'backfill' ? 'Loading archive…' : 'Load archive'}
+                            </button>
+                        )}
                         <button
                             type="button"
                             onClick={syncNow}
@@ -179,6 +228,9 @@ export default function SettingsForm({ account }) {
                     </p>
                 </div>
             )}
+
+            {/* live progress while the archive is loading */}
+            {progress && <p className={styles.ok}>{progress}</p>}
 
             {message && (
                 <p className={message.ok ? styles.ok : styles.error}>{message.text}</p>
