@@ -87,25 +87,6 @@ export default async function MeetingPage({ params }) {
         </a>
       )}
 
-      {/* the warning only matters when there is nothing to read at all:
-          with fathom notes on the page the queue is a background detail */}
-      {meeting.analysis_status === 'pending' && !meeting.fathom_summary && (
-        <div className={`${styles.notice} ${styles.noticePending}`}>
-          <p className={styles.noticeTitle}>Not analyzed yet</p>
-          <p className={styles.noticeText}>
-            This meeting is waiting in the queue. The participants below are
-            already available.
-          </p>
-        </div>
-      )}
-
-      {meeting.analysis_status === 'failed' && (
-        <div className={`${styles.notice} ${styles.noticeError}`}>
-          <p className={styles.noticeTitle}>Analysis failed</p>
-          <p className={styles.noticeText}>{meeting.analysis_error}</p>
-        </div>
-      )}
-
       {/* Sections are hidden rather than shown empty: an unanalyzed meeting
           should not display four headings with nothing under them. */}
       {meeting.summary && (

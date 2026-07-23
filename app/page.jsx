@@ -11,7 +11,7 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const COLUMNS = ['Meeting', 'Type', 'Duration', 'People', 'Date', 'Status'];
+const COLUMNS = ['Meeting', 'Type', 'Duration', 'People', 'Date'];
 
 const TYPE_CLASS = {
   internal_planning: styles.typeInternal,
@@ -19,12 +19,6 @@ const TYPE_CLASS = {
   automation: styles.typeAutomation,
   onboarding: styles.typeOnboarding,
   other: styles.typeOther,
-};
-
-const STATUS = {
-  done: { label: 'analyzed', className: styles.statusDone },
-  pending: { label: 'queued', className: styles.statusPending },
-  failed: { label: 'failed', className: styles.statusError },
 };
 
 const VISIBLE_AVATARS = 3;
@@ -128,7 +122,6 @@ export default async function MeetingsPage({ searchParams }) {
 //displaying one meeting inside the table
 function MeetingRow({ meeting, participants, longest }) {
   const topics = meeting.key_topics ?? [];
-  const status = STATUS[meeting.analysis_status] ?? STATUS.done;
 
   const minutes = meeting.duration_minutes;
   const barWidth =
@@ -169,13 +162,6 @@ function MeetingRow({ meeting, participants, longest }) {
       </td>
 
       <td className={styles.dateCell}>{formatDate(meeting.date)}</td>
-
-      <td>
-        <span className={`${styles.status} ${status.className}`}>
-          <span className={styles.statusDot} />
-          {status.label}
-        </span>
-      </td>
     </tr>
   );
 }
@@ -183,23 +169,15 @@ function MeetingRow({ meeting, participants, longest }) {
 //mobile meeting card
 function MeetingCard({ meeting, participants }) {
   const topics = meeting.key_topics ?? [];
-  const status = STATUS[meeting.analysis_status] ?? STATUS.done;
 
   return (
     <li>
       <Link href={`/meetings/${meeting.id}`} className={styles.card}>
-        <div className={styles.cardTop}>
-          {meeting.meeting_type ? (
+        {meeting.meeting_type && (
+          <div className={styles.cardTop}>
             <TypeChip type={meeting.meeting_type} />
-          ) : (
-            <span />
-          )}
-
-          <span className={`${styles.status} ${status.className}`}>
-            <span className={styles.statusDot} />
-            {status.label}
-          </span>
-        </div>
+          </div>
+        )}
 
         <p className={styles.cardTitle}>
           {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
