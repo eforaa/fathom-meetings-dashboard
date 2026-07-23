@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
 //formatting helpeer functions
 import { getMeeting } from '@/lib/queries';
 import {
@@ -40,6 +41,10 @@ export default async function MeetingPage({ params }) {
   //meetings topics
   const topics = meeting.key_topics ?? [];
   const tasks = meeting.action_items ?? [];
+  //ready-made action items that came from fathom
+  const fathomTasks = Array.isArray(meeting.fathom_action_items)
+    ? meeting.fathom_action_items
+    : [];
 
   return (
     <main className={styles.page}>
@@ -81,7 +86,9 @@ export default async function MeetingPage({ params }) {
         </a>
       )}
 
-      {meeting.analysis_status === 'pending' && (
+      {/* the warning only matters when there is nothing to read at all:
+          with fathom notes on the page the queue is a background detail */}
+      {meeting.analysis_status === 'pending' && !meeting.fathom_summary && (
         <div className={`${styles.notice} ${styles.noticePending}`}>
           <p className={styles.noticeTitle}>Not analyzed yet</p>
           <p className={styles.noticeText}>
@@ -104,6 +111,23 @@ export default async function MeetingPage({ params }) {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Summary</h2>
           <p className={styles.summary}>{meeting.summary}</p>
+        </section>
+      )}
+
+      {/* fathom writes its own notes for every meeting, shown as they are */}
+      {meeting.fathom_summary && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Meeting notes · Fathom</h2>
+          <div className={styles.fathomNotes}>
+            <ReactMarkdown
+              components={{
+                //timestamp links should open the recording in a new tab
+                a: (props) => <a {...props} target="_blank" rel="noreferrer" />,
+              }}
+            >
+              {meeting.fathom_summary}
+            </ReactMarkdown>
+          </div>
         </section>
       )}
 
@@ -134,6 +158,40 @@ export default async function MeetingPage({ params }) {
                   {task.assignee && (
                     <span className={styles.taskAssignee}>{task.assignee}</span>
                   )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* fathom's action items step in while our own analysis is not there yet */}
+      {tasks.length === 0 && fathomTasks.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Action items · Fathom</h2>
+          <ul className={styles.tasks}>
+            {fathomTasks.map((task, index) => (
+              <li key={index} className={styles.task}>
+                <span className={styles.taskIndex}>
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className={styles.taskBody}>
+                  <span className={styles.taskText}>{task.description}</span>
+                  <span className={styles.taskMeta}>
+                    {task.assignee?.name && (
+                      <span className={styles.taskAssignee}>{task.assignee.name}</span>
+                    )}
+                    {task.recording_playback_url && (
+                      <a
+                        href={task.recording_playback_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.taskLink}
+                      >
+                        {task.recording_timestamp ?? 'open moment'}
+                      </a>
+                    )}
+                  </span>
                 </span>
               </li>
             ))}

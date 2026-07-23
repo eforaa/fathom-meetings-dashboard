@@ -327,6 +327,68 @@
   color: var(--ink-45);
 }
 /*mobile version*/
+/* fathom meeting notes, rendered from markdown */
+
+.fathomNotes {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.fathomNotes h2 {
+  margin: 24px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fathomNotes h2:first-child {
+  margin-top: 0;
+}
+
+.fathomNotes h3 {
+  margin: 16px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fathomNotes p {
+  margin: 0 0 10px;
+}
+
+.fathomNotes ul,
+.fathomNotes ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.fathomNotes li {
+  margin: 4px 0;
+}
+
+.fathomNotes a {
+  color: inherit;
+  text-decoration-color: var(--sage);
+  text-underline-offset: 2px;
+}
+
+.fathomNotes a:hover {
+  color: var(--sage);
+}
+
+/* extra line under a fathom action item */
+
+.taskMeta {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.taskLink {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-45);
+}
+
 @media (max-width: 640px) {
   .page {
     padding: 20px 16px 64px;
