@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MEETING_TYPES } from '@/lib/ai';
-import { typeLabel, MAX_TYPES } from '@/lib/format';
+import { typeLabel, MAX_TYPES, MEETING_TYPES } from '@/lib/format';
 import styles from './type-picker.module.css';
 
 //picking up to MAX_TYPES types for one meeting
@@ -69,17 +68,18 @@ export default function TypePicker({ meetingId, value = [] }) {
                 onClick={() => setOpen(!open)}
                 className={styles.trigger}
             >
-                {types.length ? (
-                    <span className={styles.chips}>
-                        {types.map((type) => (
-                            <span key={type} className={styles.chip}>
-                                {typeLabel(type)}
-                            </span>
-                        ))}
-                    </span>
-                ) : (
-                    <span className={styles.placeholder}>Set type</span>
-                )}
+                <span className={styles.chips}>
+                    {types.map((type) => (
+                        <span key={type} className={styles.chip}>
+                            <span
+                                className={styles.chipDot}
+                                style={{ background: `var(--type-${type.split('_')[0]})` }}
+                            />
+                            {typeLabel(type)}
+                        </span>
+                    ))}
+                    <span className={styles.add}>+ type</span>
+                </span>
             </button>
 
             {open && (

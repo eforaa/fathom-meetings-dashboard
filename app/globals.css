@@ -3,25 +3,25 @@
   color-scheme: light dark;
 
   --ink: light-dark(#16191d, #eef1f3);
-  --ink-70: light-dark(#4b5560, #b3bcc4);
-  --ink-45: light-dark(#79838f, #828d97);
-  --ink-25: light-dark(#aeb6bf, #5a636c);
+  --ink-70: light-dark(#4a4f56, #b7bec5);
+  --ink-45: light-dark(#7c8188, #838a92);
+  --ink-25: light-dark(#a9adb2, #565c63);
 
-  --rule: light-dark(#e5e9eb, #262b31);
-  --rule-soft: light-dark(#f0f3f4, #1e2328);
+  --rule: light-dark(#e5e9eb, #2b3036);
+  --rule-soft: light-dark(#f0f3f4, #23282e);
 
-  --paper: light-dark(#ffffff, #101317);
-  --paper-raised: light-dark(#ffffff, #171b20);
-  --wash: light-dark(#f7f9f9, #171b20);
+  --paper: light-dark(#fcfcfb, #14171b);
+  --paper-raised: light-dark(#ffffff, #1b1f24);
+  --wash: light-dark(#f6f7f7, #202529);
 
-  --sage: light-dark(#4f7376, #7fa9ac);
-  --sage-soft: light-dark(#e8efef, #1d2a2b);
+  --sage: light-dark(#4f7376, #82b0b3);
+  --sage-soft: light-dark(#eaf0f0, #22383a);
 
-  --type-internal: light-dark(#4a6fa5, #7ba0d4);
-  --type-client: light-dark(#8250c8, #b18cf0);
-  --type-automation: light-dark(#0d7f8c, #47b3bf);
-  --type-onboarding: light-dark(#bd6224, #e0975a);
-  --type-other: light-dark(#6b7684, #97a1ad);
+  --type-internal: light-dark(#4a6fa5, #86a6d3);
+  --type-client: light-dark(#8250c8, #b892e8);
+  --type-automation: light-dark(#0d7f8c, #4fb8c2);
+  --type-onboarding: light-dark(#bd6224, #e28c4c);
+  --type-other: light-dark(#6b7684, #98a3ae);
 
   --warn: light-dark(#a35a09, #e0a92f);
   --warn-dot: #e0a92f;

@@ -1,10 +1,17 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings } from '@/lib/queries';
-import { typeLabel, formatDate, formatDuration, initials, meetingTypes } from '@/lib/format';
+import {
+  typeLabel,
+  formatDayMonth,
+  formatTime,
+  formatDuration,
+  initials,
+  meetingTypes,
+} from '@/lib/format';
 import { applySlots, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
-import { TableGroup, CardGroup } from './grouped';
+import Group from './grouped';
 import Stars from './stars';
 import Slot from './slot';
 import SignOut from './signout';
@@ -13,21 +20,12 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const COLUMNS = ['Meeting', 'Type', 'Duration', 'People', 'Date', 'Priority'];
-
-const TYPE_CLASS = {
-  internal_planning: styles.typeInternal,
-  client_meeting: styles.typeClient,
-  automation: styles.typeAutomation,
-  onboarding: styles.typeOnboarding,
-  other: styles.typeOther,
-};
+const COLUMNS = ['Meeting', 'Types', 'Duration', 'People', 'Date', 'Priority'];
 
 const VISIBLE_AVATARS = 3;
-const VISIBLE_TOPICS = 4;
 
 //main meeting page
-//reading the slot from the url, loading meetings, applying the slot
+//reading the view from the url, loading meetings, applying it
 export default async function MeetingsPage({ searchParams }) {
   const sp = await searchParams;
   const { slots, group } = readView(sp);
@@ -38,12 +36,12 @@ export default async function MeetingsPage({ searchParams }) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  //all meetings of this person, the slot is applied after
+  //all meetings of this person, the view is applied after
   const { meetings: all, participantsByMeeting } = await getMeetings({
     ownerEmail: user?.email,
   });
 
-  //values for the filter dropdowns are collected before filtering,
+  //values for the filter chips are collected before filtering,
   //otherwise choosing one value would hide all the others
   const facetsBySlot = slots.map((slot) =>
     slot.tag ? collectFacets(all, participantsByMeeting, slot.tag) : [],
@@ -60,100 +58,92 @@ export default async function MeetingsPage({ searchParams }) {
   //groups are built on the already sorted list, so their order follows the sort
   const groups = group ? groupMeetings(meetings, participantsByMeeting, group) : null;
 
+  //one row, rendered the same way inside a group and without one
+  const row = (meeting) => (
+    <MeetingRow
+      key={meeting.id}
+      meeting={meeting}
+      participants={participantsByMeeting.get(meeting.id) ?? []}
+      longest={longest}
+    />
+  );
+
+  const card = (meeting) => (
+    <MeetingCard
+      key={meeting.id}
+      meeting={meeting}
+      participants={participantsByMeeting.get(meeting.id) ?? []}
+    />
+  );
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <div>
-            <h1 className={styles.title}>Meetings</h1>
-            <p className={styles.subtitle}>Searchable archive of recorded calls</p>
-          </div>
-          <div className={styles.headerActions}>
-            <span className={styles.count}>{meetings.length} shown</span>
-            <Link href="/settings" className={styles.settingsLink}>
-              Settings
-            </Link>
-            <SignOut email={user?.email} />
-            <ThemeToggle />
-          </div>
+        <div className={styles.brand}>
+          <span className={styles.brandName}>Fathom</span>
+          <span className={styles.brandKicker}>meetings&nbsp;explorer</span>
+        </div>
+
+        <div className={styles.headerActions}>
+          <Link href="/settings" className={styles.settingsLink}>
+            Settings
+          </Link>
+          <SignOut email={user?.email} />
+          <ThemeToggle />
         </div>
       </header>
 
-      <div className={styles.slotBar}>
-        <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
-      </div>
-
       <main className={styles.body}>
-        {meetings.length === 0 ? (
-          <EmptyState hasMeetings={all.length > 0} />
+        <div className={styles.pageHead}>
+          <h1 className={styles.title}>My meetings</h1>
+          <span className={styles.count}>
+            {meetings.length} of {all.length}
+          </span>
+        </div>
+
+        <div className={styles.slotBar}>
+          <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
+        </div>
+
+        {all.length === 0 ? (
+          <EmptyState />
+        ) : meetings.length === 0 ? (
+          <NoResults />
         ) : (
           <>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    {COLUMNS.map((column) => (
-                      <th key={column}>{column}</th>
-                    ))}
-                  </tr>
-                </thead>
+            <div className={styles.table}>
+              <div className={styles.tableHead}>
+                {COLUMNS.map((column) => (
+                  <span key={column}>{column}</span>
+                ))}
+              </div>
 
-                <tbody>
-                  {groups
-                    ? groups.map((group) => (
-                        <TableGroup
-                          key={group.label}
-                          label={group.label}
-                          count={group.items.length}
-                          colSpan={COLUMNS.length}
-                        >
-                          {group.items.map((meeting) => (
-                            <MeetingRow
-                              key={meeting.id}
-                              meeting={meeting}
-                              participants={participantsByMeeting.get(meeting.id) ?? []}
-                              longest={longest}
-                            />
-                          ))}
-                        </TableGroup>
-                      ))
-                    : meetings.map((meeting) => (
-                        <MeetingRow
-                          key={meeting.id}
-                          meeting={meeting}
-                          participants={participantsByMeeting.get(meeting.id) ?? []}
-                          longest={longest}
-                        />
-                      ))}
-                </tbody>
-              </table>
+              {groups
+                ? groups.map((section) => (
+                    <Group
+                      key={section.label}
+                      label={section.label}
+                      count={section.items.length}
+                    >
+                      {section.items.map(row)}
+                    </Group>
+                  ))
+                : meetings.map(row)}
             </div>
 
-            <ul className={styles.cards}>
+            <div className={styles.cards}>
               {groups
-                ? groups.map((group) => (
-                    <CardGroup
-                      key={group.label}
-                      label={group.label}
-                      count={group.items.length}
+                ? groups.map((section) => (
+                    <Group
+                      key={section.label}
+                      label={section.label}
+                      count={section.items.length}
                     >
-                      {group.items.map((meeting) => (
-                        <MeetingCard
-                          key={meeting.id}
-                          meeting={meeting}
-                          participants={participantsByMeeting.get(meeting.id) ?? []}
-                        />
-                      ))}
-                    </CardGroup>
+                      {section.items.map(card)}
+                    </Group>
                   ))
-                : meetings.map((meeting) => (
-                    <MeetingCard
-                      key={meeting.id}
-                      meeting={meeting}
-                      participants={participantsByMeeting.get(meeting.id) ?? []}
-                    />
-                  ))}
-            </ul>
+                : meetings.map(card)}
+            </div>
           </>
         )}
       </main>
@@ -161,112 +151,82 @@ export default async function MeetingsPage({ searchParams }) {
   );
 }
 
-//displaying one meeting inside the table
+//one meeting as a row of the grid
 function MeetingRow({ meeting, participants, longest }) {
-  const topics = meeting.key_topics ?? [];
-
   const minutes = meeting.duration_minutes;
   const barWidth =
     longest > 0 && minutes ? Math.max(4, Math.round((minutes / longest) * 100)) : 0;
 
   return (
-    <tr className={styles.row}>
-      <td className={styles.meetingCell}>
-        <Link href={`/meetings/${meeting.id}`} className={styles.link}>
-          {/* ai_title is empty until the meeting is analyzed;
-              the fathom purpose line is a better fallback than a raw zoom title */}
-          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
-          <ArrowIcon />
-        </Link>
+    <div className={styles.row}>
+      <Link href={`/meetings/${meeting.id}`} className={styles.rowLink}>
+        {/* ai_title is empty until the meeting is analyzed;
+            the fathom purpose line is a better fallback than a raw zoom title */}
+        {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
+      </Link>
 
-        {topics.length > 0 && (
-          <p className={styles.topicLine}>
-            {topics.slice(0, VISIBLE_TOPICS).join(' · ')}
-          </p>
-        )}
-      </td>
+      <TypeDots meeting={meeting} />
 
-      <td>
-        <span className={styles.typeCell}>
-          {meetingTypes(meeting).map((type) => (
-            <TypeChip key={type} type={type} />
-          ))}
+      <span className={styles.duration}>
+        <span className={styles.durationTrack}>
+          <span className={styles.durationFill} style={{ width: `${barWidth}%` }} />
         </span>
-      </td>
+        <span className={styles.durationValue}>{formatDuration(minutes)}</span>
+      </span>
 
-      <td>
-        <span className={styles.duration}>
-          <span className={styles.durationValue}>{formatDuration(minutes)}</span>
-          <span className={styles.durationTrack}>
-            <span className={styles.durationFill} style={{ width: `${barWidth}%` }} />
-          </span>
-        </span>
-      </td>
+      <AvatarStack participants={participants} />
 
-      <td>
-        <AvatarStack participants={participants} />
-      </td>
+      <span className={styles.date}>
+        {formatDayMonth(meeting.date)}
+        <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date)}</span>
+      </span>
 
-      <td className={styles.dateCell}>{formatDate(meeting.date)}</td>
-
-      <td>
-        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
-      </td>
-    </tr>
+      <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+    </div>
   );
 }
 
-//mobile meeting card
+//the same meeting on a narrow screen
 function MeetingCard({ meeting, participants }) {
-  const topics = meeting.key_topics ?? [];
+  return (
+    <div className={styles.card}>
+      <Link href={`/meetings/${meeting.id}`} className={styles.cardBody}>
+        <span className={styles.cardTitle}>
+          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
+        </span>
+
+        <span className={styles.cardMeta}>
+          {formatDayMonth(meeting.date)}
+          <span className={styles.cardSep}>·</span>
+          {formatDuration(meeting.duration_minutes)}
+          <span className={styles.cardSep}>·</span>
+          {participants.length} people
+        </span>
+      </Link>
+
+      <div className={styles.cardSide}>
+        {/* stars sit outside the link: a button inside <a> is invalid markup */}
+        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+        <TypeDots meeting={meeting} />
+      </div>
+    </div>
+  );
+}
+
+//types as small coloured dots, the full name shows on hover
+function TypeDots({ meeting }) {
   const types = meetingTypes(meeting);
 
   return (
-    <li className={styles.cardOuter}>
-      <Link href={`/meetings/${meeting.id}`} className={styles.card}>
-        {types.length > 0 && (
-          <div className={styles.cardTop}>
-            {types.map((type) => (
-              <TypeChip key={type} type={type} />
-            ))}
-          </div>
-        )}
-
-        <p className={styles.cardTitle}>
-          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
-        </p>
-
-        {topics.length > 0 && (
-          <p className={styles.cardTopics}>
-            {topics.slice(0, VISIBLE_TOPICS).join(' · ')}
-          </p>
-        )}
-
-        <div className={styles.cardBottom}>
-          <AvatarStack participants={participants} />
-
-          <span className={styles.cardMeta}>
-            {formatDuration(meeting.duration_minutes)}
-            <span className={styles.cardMetaSep}>·</span>
-            {formatDate(meeting.date)}
-          </span>
-        </div>
-      </Link>
-
-      {/* stars sit outside the link: a button inside <a> is invalid markup */}
-      <span className={styles.cardStars}>
-        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
-      </span>
-    </li>
-  );
-}
-
-//displays meeting type with color
-function TypeChip({ type }) {
-  return (
-    <span className={`${styles.chip} ${TYPE_CLASS[type] ?? styles.typeOther}`}>
-      <span className={styles.chipDot} />
-      {typeLabel(type)}
+    <span className={styles.dots}>
+      {types.map((type) => (
+        <span
+          key={type}
+          title={typeLabel(type)}
+          className={styles.dot}
+          style={{ background: `var(--type-${type.split('_')[0]})` }}
+        />
+      ))}
     </span>
   );
 }
@@ -288,62 +248,34 @@ function AvatarStack({ participants }) {
           {initials(person.name || person.email)}
         </span>
       ))}
-      {hidden > 0 && (
-        <span className={`${styles.avatar} ${styles.avatarMore}`}>+{hidden}</span>
-      )}
+      {hidden > 0 && <span className={styles.avatarMore}>+{hidden}</span>}
     </span>
   );
 }
 
-//message when no meetings is found
-//two different reasons: nothing connected yet, or the filter hid everything
-function EmptyState({ hasMeetings }) {
-  if (!hasMeetings) {
-    return (
-      <div className={styles.empty}>
-        <p className={styles.emptyTitle}>No meetings yet</p>
-        <p className={styles.emptyHint}>
-          Connect your Fathom key in{' '}
-          <Link href="/settings" className={styles.emptyLink}>
-            settings
-          </Link>{' '}
-          to pull your own calls.
-        </p>
-      </div>
-    );
-  }
-
+//nothing connected yet
+function EmptyState() {
   return (
     <div className={styles.empty}>
-      <p className={styles.emptyTitle}>Nothing matches this filter</p>
-      <p className={styles.emptyHint}>
-        Try another value, or{' '}
-        <Link href="/" className={styles.emptyLink}>
-          reset the slot
-        </Link>
-        .
+      <div className={styles.emptyMark} />
+      <h2 className={styles.emptyTitle}>No meetings yet</h2>
+      <p className={styles.emptyText}>
+        Once you connect Fathom, your calls appear here on their own — with notes,
+        action items and transcripts.
       </p>
+      <Link href="/settings" className={styles.emptyAction}>
+        Connect Fathom
+      </Link>
     </div>
   );
 }
 
-function ArrowIcon() {
+//the filter hid everything
+function NoResults() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      aria-hidden="true"
-      className={styles.arrow}
-    >
-      <path
-        d="M4 2.5L7.5 6L4 9.5"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div className={styles.noResults}>
+      <p className={styles.noResultsTitle}>Nothing found</p>
+      <p className={styles.noResultsHint}>Loosen the filters in the panel above</p>
+    </div>
   );
 }
