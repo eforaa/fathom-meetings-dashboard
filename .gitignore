@@ -42,3 +42,5 @@ test.mjs
 next-env.d.ts
 
 scripts/
+
+DEPLOY-GUIDE.md
