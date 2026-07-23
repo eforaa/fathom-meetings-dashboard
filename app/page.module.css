@@ -156,6 +156,13 @@
   color: var(--ink-45);
 }
 
+/* a meeting can carry several type chips */
+.typeCell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .cardOuter {
   position: relative;
 }

@@ -439,3 +439,8 @@
   letter-spacing: 0.1em;
   color: var(--ink-45);
 }
+
+/* editable type picker above the title */
+.typeRow {
+  margin-bottom: 12px;
+}

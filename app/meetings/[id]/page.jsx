@@ -2,28 +2,21 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import Stars from '../../stars';
+import TypePicker from '../../type-picker';
 //formatting helpeer functions
 import { getMeeting } from '@/lib/queries';
 import {
-  typeLabel,
   formatDate,
   formatTimeRange,
   formatDuration,
   initials,
+  meetingTypes,
 } from '@/lib/format';
 import styles from './meeting.module.css';
 import { cookies } from 'next/headers';
 import { createClientForServer } from '@/lib/supabase-auth';
 
 export const dynamic = 'force-dynamic';
-//creating css class for each type
-const TYPE_CLASS = {
-  internal_planning: styles.typeInternal,
-  client_meeting: styles.typeClient,
-  automation: styles.typeAutomation,
-  onboarding: styles.typeOnboarding,
-  other: styles.typeOther,
-};
 
 //meeting id is taken from url
 export default async function MeetingPage({ params }) {
@@ -55,14 +48,9 @@ export default async function MeetingPage({ params }) {
       </Link>
 
       <header className={styles.head}>
-        {meeting.meeting_type && (
-          <span
-            className={`${styles.chip} ${TYPE_CLASS[meeting.meeting_type] ?? styles.typeOther}`}
-          >
-            <span className={styles.chipDot} />
-            {typeLabel(meeting.meeting_type)}
-          </span>
-        )}
+        <div className={styles.typeRow}>
+          <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} />
+        </div>
 
         <h1 className={styles.title}>
           {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}

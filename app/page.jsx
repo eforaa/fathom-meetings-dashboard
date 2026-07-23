@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings } from '@/lib/queries';
-import { typeLabel, formatDate, formatDuration, initials } from '@/lib/format';
+import { typeLabel, formatDate, formatDuration, initials, meetingTypes } from '@/lib/format';
 import { applySlot, collectFacets, readSlot, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { TableGroup, CardGroup } from './grouped';
@@ -186,7 +186,11 @@ function MeetingRow({ meeting, participants, longest }) {
       </td>
 
       <td>
-        {meeting.meeting_type && <TypeChip type={meeting.meeting_type} />}
+        <span className={styles.typeCell}>
+          {meetingTypes(meeting).map((type) => (
+            <TypeChip key={type} type={type} />
+          ))}
+        </span>
       </td>
 
       <td>
@@ -214,13 +218,16 @@ function MeetingRow({ meeting, participants, longest }) {
 //mobile meeting card
 function MeetingCard({ meeting, participants }) {
   const topics = meeting.key_topics ?? [];
+  const types = meetingTypes(meeting);
 
   return (
     <li className={styles.cardOuter}>
       <Link href={`/meetings/${meeting.id}`} className={styles.card}>
-        {meeting.meeting_type && (
+        {types.length > 0 && (
           <div className={styles.cardTop}>
-            <TypeChip type={meeting.meeting_type} />
+            {types.map((type) => (
+              <TypeChip key={type} type={type} />
+            ))}
           </div>
         )}
 
