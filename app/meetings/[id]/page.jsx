@@ -64,10 +64,11 @@ export default async function MeetingPage({ params }) {
         )}
 
         <h1 className={styles.title}>
-          {meeting.ai_title || meeting.title || 'Untitled'}
+          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
         </h1>
 
-        {meeting.ai_title && meeting.title && (
+        {/* show the raw recording title when a nicer title took its place */}
+        {(meeting.ai_title || meeting.fathom_title) && meeting.title && (
           <p className={styles.originalTitle}>Recorded as “{meeting.title}”</p>
         )}
       </header>

@@ -138,9 +138,9 @@ function MeetingRow({ meeting, participants, longest }) {
     <tr className={styles.row}>
       <td className={styles.meetingCell}>
         <Link href={`/meetings/${meeting.id}`} className={styles.link}>
-          {/* ai_title is empty until the meeting is analyzed,
-              so the original Fathom title stays as the fallback */}
-          {meeting.ai_title || meeting.title || 'Untitled'}
+          {/* ai_title is empty until the meeting is analyzed;
+              the fathom purpose line is a better fallback than a raw zoom title */}
+          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
           <ArrowIcon />
         </Link>
 
@@ -202,7 +202,7 @@ function MeetingCard({ meeting, participants }) {
         </div>
 
         <p className={styles.cardTitle}>
-          {meeting.ai_title || meeting.title || 'Untitled'}
+          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
         </p>
 
         {topics.length > 0 && (
