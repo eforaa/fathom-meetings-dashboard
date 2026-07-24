@@ -93,6 +93,22 @@
   margin-bottom: 22px;
 }
 
+/* the + column control sits above the table, on the right */
+.tableTools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+/* a wide table with many custom columns scrolls sideways on its own */
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 100%;
+}
+
 /* table head */
 
 .tableHead {
@@ -307,6 +323,20 @@
 .cardSep {
   margin: 0 6px;
   color: var(--ink-25);
+}
+
+/* custom field values under a card */
+.cardFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 2px;
+}
+
+.cardField {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-70);
 }
 
 .cardSide {

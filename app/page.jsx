@@ -12,9 +12,12 @@ import {
 } from '@/lib/format';
 import { applySlots, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
+import { listColumns } from '@/lib/columns';
 import Group from './grouped';
 import Stars from './stars';
 import EditableTitle from './editable-title';
+import CustomCell from './custom-cell';
+import ColumnManager, { ColumnHeader } from './column-manager';
 import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
@@ -23,6 +26,17 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 const COLUMNS = ['Meeting', 'Types', 'Duration', 'People', 'Date', 'Priority'];
+
+//the six built-in tracks; custom columns are appended after them
+const BUILTIN_GRID = 'minmax(230px, 2fr) 92px 132px 108px 108px 128px';
+
+//track width by custom column type
+function trackWidth(type) {
+  if (type === 'checkbox') return '70px';
+  if (type === 'number') return '100px';
+  if (type === 'select') return '140px';
+  return '150px';
+}
 
 const VISIBLE_AVATARS = 3;
 
@@ -42,6 +56,12 @@ export default async function MeetingsPage({ searchParams }) {
   const { meetings: all, participantsByMeeting } = await getMeetings({
     ownerEmail: user?.email,
   });
+
+  //custom columns this person added, shown after the built-in ones
+  const columns = await listColumns(user?.email);
+  const gridStyle = {
+    '--grid': [BUILTIN_GRID, ...columns.map((column) => trackWidth(column.type))].join(' '),
+  };
 
   //values for the filter chips are collected before filtering,
   //otherwise choosing one value would hide all the others
@@ -67,6 +87,7 @@ export default async function MeetingsPage({ searchParams }) {
       meeting={meeting}
       participants={participantsByMeeting.get(meeting.id) ?? []}
       longest={longest}
+      columns={columns}
     />
   );
 
@@ -75,6 +96,7 @@ export default async function MeetingsPage({ searchParams }) {
       key={meeting.id}
       meeting={meeting}
       participants={participantsByMeeting.get(meeting.id) ?? []}
+      columns={columns}
     />
   );
 
@@ -113,24 +135,35 @@ export default async function MeetingsPage({ searchParams }) {
           <NoResults />
         ) : (
           <>
-            <div className={styles.table}>
-              <div className={styles.tableHead}>
-                {COLUMNS.map((column) => (
-                  <span key={column}>{column}</span>
-                ))}
-              </div>
+            <div className={styles.tableTools}>
+              <ColumnManager />
+            </div>
 
-              {groups
-                ? groups.map((section) => (
-                    <Group
-                      key={section.label}
-                      label={section.label}
-                      count={section.items.length}
-                    >
-                      {section.items.map(row)}
-                    </Group>
-                  ))
-                : meetings.map(row)}
+            <div className={styles.tableScroll}>
+              <div className={styles.table} style={gridStyle}>
+                <div className={styles.tableHead}>
+                  {COLUMNS.map((column) => (
+                    <span key={column}>{column}</span>
+                  ))}
+                  {columns.map((column) => (
+                    <span key={column.id}>
+                      <ColumnHeader column={column} />
+                    </span>
+                  ))}
+                </div>
+
+                {groups
+                  ? groups.map((section) => (
+                      <Group
+                        key={section.label}
+                        label={section.label}
+                        count={section.items.length}
+                      >
+                        {section.items.map(row)}
+                      </Group>
+                    ))
+                  : meetings.map(row)}
+              </div>
             </div>
 
             <div className={styles.cards}>
@@ -154,10 +187,11 @@ export default async function MeetingsPage({ searchParams }) {
 }
 
 //one meeting as a row of the grid
-function MeetingRow({ meeting, participants, longest }) {
+function MeetingRow({ meeting, participants, longest, columns }) {
   const minutes = meeting.duration_minutes;
   const barWidth =
     longest > 0 && minutes ? Math.max(4, Math.round((minutes / longest) * 100)) : 0;
+  const fields = meeting.custom_fields ?? {};
 
   return (
     <div className={styles.row}>
@@ -185,12 +219,27 @@ function MeetingRow({ meeting, participants, longest }) {
       </span>
 
       <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+
+      {columns.map((column) => (
+        <CustomCell
+          key={column.id}
+          meetingId={meeting.id}
+          column={column}
+          value={fields[column.id]}
+        />
+      ))}
     </div>
   );
 }
 
 //the same meeting on a narrow screen
-function MeetingCard({ meeting, participants }) {
+function MeetingCard({ meeting, participants, columns }) {
+  const fields = meeting.custom_fields ?? {};
+  const filled = columns.filter((column) => {
+    const value = fields[column.id];
+    return value !== undefined && value !== null && value !== '';
+  });
+
   return (
     <div className={styles.card}>
       <Link href={`/meetings/${meeting.id}`} className={styles.cardBody}>
@@ -203,6 +252,17 @@ function MeetingCard({ meeting, participants }) {
           <span className={styles.cardSep}>·</span>
           {participants.length} people
         </span>
+
+        {filled.length > 0 && (
+          <span className={styles.cardFields}>
+            {filled.map((column) => (
+              <span key={column.id} className={styles.cardField}>
+                {column.name}:{' '}
+                {fields[column.id] === true ? '✓' : String(fields[column.id])}
+              </span>
+            ))}
+          </span>
+        )}
       </Link>
 
       <div className={styles.cardSide}>
