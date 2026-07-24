@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -39,7 +40,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${ui.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: applyStoredTheme }} />
+        {/* runs before hydration so the stored theme applies with no flash */}
+        <Script id="apply-theme" strategy="beforeInteractive">
+          {applyStoredTheme}
+        </Script>
       </head>
       <body>{children}</body>
     </html>
