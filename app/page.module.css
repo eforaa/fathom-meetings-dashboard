@@ -18,9 +18,12 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  height: 60px;
+  height: 56px;
   padding: 0 28px;
-  background: var(--paper);
+  /* translucent bar with blur, the way Linear / Superhuman feel */
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--rule);
 }
 
@@ -64,33 +67,82 @@
 /* page body */
 
 .body {
-  max-width: 1200px;
-  margin: 0 auto;
+  /* full width, aligned left — no centered column */
   padding: 28px;
+}
+
+/* sorting and title share one line, aligned to the left */
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
 }
 
 .pageHead {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
 .title {
   margin: 0;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
+/* count as a subtle pill next to the title */
 .count {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--wash);
+  border: 1px solid var(--rule);
   font-family: var(--font-mono), monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--ink-45);
 }
 
+/* two columns: sorting panel on the left, meetings on the right */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  /* drop down so "SORTING" lines up with the "MEETING" column header,
+     past the "+ column" tools row above the table */
+  margin-top: 34px;
+  position: sticky;
+  top: 76px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* narrow screens: the panel goes back on top */
+@media (max-width: 860px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+  }
+}
+
+/* sorting sits on the right of the title line; the folding panel opens below */
 .slotBar {
-  margin-bottom: 22px;
+  position: relative;
+  z-index: 20;
 }
 
 /* the + column control sits above the table, on the right */
@@ -115,13 +167,13 @@
   display: grid;
   grid-template-columns: var(--grid);
   gap: 16px;
-  padding: 0 14px 9px;
+  padding: 0 12px 10px;
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ink-45);
+  color: var(--ink-25);
 }
 
 /* one row */
@@ -131,13 +183,16 @@
   grid-template-columns: var(--grid);
   gap: 16px;
   align-items: center;
-  padding: 11px 14px;
+  padding: 12px;
+  border-radius: var(--radius);
   border-bottom: 1px solid var(--rule-soft);
-  transition: background-color 0.14s ease;
+  transition: background-color 0.12s ease;
 }
 
+/* full-bleed soft highlight on hover, rounded like Linear's rows */
 .row:hover {
   background: var(--wash);
+  border-bottom-color: transparent;
 }
 
 /* types as dots */
@@ -349,7 +404,7 @@
 /* empty states */
 
 .empty {
-  padding: 40px 32px;
+  padding: 56px 32px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   background: var(--paper-raised);
@@ -359,19 +414,19 @@
 .emptyMark {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 18px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  border-radius: 14px;
+  background: var(--sage-soft);
 }
 
 .emptyMark::after {
   content: '';
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--ink-25);
-  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  border: 1.75px solid var(--sage);
+  border-radius: 5px;
 }
 
 .emptyTitle {

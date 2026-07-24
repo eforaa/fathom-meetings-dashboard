@@ -20,25 +20,21 @@
     color: var(--sage);
 }
 
-/* the pencil stays hidden until the row or title is hovered */
+/* the pencil is always visible but faint, brightening on hover */
 .pencil {
     flex-shrink: 0;
-    padding: 0 2px;
+    padding: 0 3px;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1;
-    color: var(--ink-25);
-    opacity: 0;
-    transition: opacity 0.12s ease, color 0.12s ease;
+    color: var(--ink-45);
+    transition: color 0.12s ease;
 }
 
 .rowWrap:hover .pencil,
-.titleWrap:hover .pencil {
-    opacity: 1;
-}
-
+.titleWrap:hover .pencil,
 .pencil:hover {
     color: var(--sage);
 }

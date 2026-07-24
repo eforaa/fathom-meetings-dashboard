@@ -47,11 +47,18 @@ claude mcp add fathom-meetings --transport http https://fathom-meetings-dashboar
 | Инструмент | Что делает |
 |---|---|
 | `list_meetings` | список встреч с фильтрами: тип, даты, поиск по названию, участник |
-| `get_meeting` | карточка встречи: описание, темы, задачи, заметки, участники |
+| `get_meeting` | карточка встречи: саммари, темы, задачи, важность, типы, участники |
 | `get_transcript` | транскрипт кусками по 20 000 символов |
 | `search_participants` | поиск людей по имени или почте |
-| `set_meeting_notes` | заметки к встрече (не трогают машинный разбор) |
+| `set_meeting_title` | переименовать встречу |
+| `set_meeting_summary` | изменить саммари |
+| `set_meeting_importance` | важность 0–5 звёзд |
+| `set_meeting_types` | типы встречи, до 4 из списка |
 | `save_meeting_analysis` | запись разбора в базу, ставит статус done |
+| `list_custom_columns` | пользовательские колонки и их id |
+| `set_meeting_field` | значение пользовательской колонки на встрече |
+| `create_column` | создать колонку (text/number/select/checkbox) |
+| `delete_column` | удалить колонку |
 | `get_stats` | сводка: сколько встреч, по типам, по статусам |
 
 ## Безопасность

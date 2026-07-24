@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings } from '@/lib/queries';
 import {
-  typeLabel,
   formatDayMonth,
   formatTime,
   formatDuration,
@@ -16,6 +15,7 @@ import { listColumns } from '@/lib/columns';
 import Group from './grouped';
 import Stars from './stars';
 import EditableTitle from './editable-title';
+import TypePicker from './type-picker';
 import CustomCell from './custom-cell';
 import ColumnManager, { ColumnHeader } from './column-manager';
 import Slot from './slot';
@@ -28,7 +28,7 @@ export const dynamic = 'force-dynamic';
 const COLUMNS = ['Meeting', 'Types', 'Duration', 'People', 'Date', 'Priority'];
 
 //the six built-in tracks; custom columns are appended after them
-const BUILTIN_GRID = 'minmax(230px, 2fr) 92px 132px 108px 108px 128px';
+const BUILTIN_GRID = 'minmax(230px, 2fr) 96px 132px 108px 108px 128px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -125,62 +125,67 @@ export default async function MeetingsPage({ searchParams }) {
           </span>
         </div>
 
-        <div className={styles.slotBar}>
-          <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
-        </div>
+        <div className={styles.layout}>
+          {/* sorting sits beside the meetings, on the left */}
+          <aside className={styles.sidebar}>
+            <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
+          </aside>
 
-        {all.length === 0 ? (
-          <EmptyState />
-        ) : meetings.length === 0 ? (
-          <NoResults />
-        ) : (
-          <>
-            <div className={styles.tableTools}>
-              <ColumnManager />
-            </div>
-
-            <div className={styles.tableScroll}>
-              <div className={styles.table} style={gridStyle}>
-                <div className={styles.tableHead}>
-                  {COLUMNS.map((column) => (
-                    <span key={column}>{column}</span>
-                  ))}
-                  {columns.map((column) => (
-                    <span key={column.id}>
-                      <ColumnHeader column={column} />
-                    </span>
-                  ))}
+          <div className={styles.content}>
+            {all.length === 0 ? (
+              <EmptyState />
+            ) : meetings.length === 0 ? (
+              <NoResults />
+            ) : (
+              <>
+                <div className={styles.tableTools}>
+                  <ColumnManager />
                 </div>
 
-                {groups
-                  ? groups.map((section) => (
-                      <Group
-                        key={section.label}
-                        label={section.label}
-                        count={section.items.length}
-                      >
-                        {section.items.map(row)}
-                      </Group>
-                    ))
-                  : meetings.map(row)}
-              </div>
-            </div>
+                <div className={styles.tableScroll}>
+                  <div className={styles.table} style={gridStyle}>
+                    <div className={styles.tableHead}>
+                      {COLUMNS.map((column) => (
+                        <span key={column}>{column}</span>
+                      ))}
+                      {columns.map((column) => (
+                        <span key={column.id}>
+                          <ColumnHeader column={column} />
+                        </span>
+                      ))}
+                    </div>
 
-            <div className={styles.cards}>
-              {groups
-                ? groups.map((section) => (
-                    <Group
-                      key={section.label}
-                      label={section.label}
-                      count={section.items.length}
-                    >
-                      {section.items.map(card)}
-                    </Group>
-                  ))
-                : meetings.map(card)}
-            </div>
-          </>
-        )}
+                    {groups
+                      ? groups.map((section) => (
+                          <Group
+                            key={section.label}
+                            label={section.label}
+                            count={section.items.length}
+                          >
+                            {section.items.map(row)}
+                          </Group>
+                        ))
+                      : meetings.map(row)}
+                  </div>
+                </div>
+
+                <div className={styles.cards}>
+                  {groups
+                    ? groups.map((section) => (
+                        <Group
+                          key={section.label}
+                          label={section.label}
+                          count={section.items.length}
+                        >
+                          {section.items.map(card)}
+                        </Group>
+                      ))
+                    : meetings.map(card)}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -202,7 +207,7 @@ function MeetingRow({ meeting, participants, longest, columns }) {
         variant="row"
       />
 
-      <TypeDots meeting={meeting} />
+      <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
 
       <span className={styles.duration}>
         <span className={styles.durationTrack}>
@@ -266,29 +271,11 @@ function MeetingCard({ meeting, participants, columns }) {
       </Link>
 
       <div className={styles.cardSide}>
-        {/* stars sit outside the link: a button inside <a> is invalid markup */}
+        {/* stars and types sit outside the link: a button inside <a> is invalid */}
         <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
-        <TypeDots meeting={meeting} />
+        <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
       </div>
     </div>
-  );
-}
-
-//types as small coloured dots, the full name shows on hover
-function TypeDots({ meeting }) {
-  const types = meetingTypes(meeting);
-
-  return (
-    <span className={styles.dots}>
-      {types.map((type) => (
-        <span
-          key={type}
-          title={typeLabel(type)}
-          className={styles.dot}
-          style={{ background: `var(--type-${type.split('_')[0]})` }}
-        />
-      ))}
-    </span>
   );
 }
 

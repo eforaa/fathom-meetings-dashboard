@@ -11,10 +11,11 @@ import {
   initials,
   meetingTypes,
   meetingTitle,
+  meetingSummary,
 } from '@/lib/format';
 import Stars from '../../stars';
 import TypePicker from '../../type-picker';
-import EditableTitle from '../../editable-title';
+import MeetingEditor from '../../meeting-editor';
 import styles from './meeting.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -50,20 +51,16 @@ export default async function MeetingPage({ params }) {
       </Link>
 
       <div className={styles.titleRow}>
-        <h1 className={styles.title}>
-          <EditableTitle
+        <div className={styles.editorWrap}>
+          <MeetingEditor
             meetingId={meeting.id}
-            value={meetingTitle(meeting)}
-            variant="title"
+            title={meetingTitle(meeting)}
+            originalTitle={meeting.title}
+            summary={meetingSummary(meeting)}
           />
-        </h1>
+        </div>
         <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
       </div>
-
-      {/* show the raw recording title when a nicer title took its place */}
-      {(meeting.ai_title || meeting.fathom_title) && meeting.title && (
-        <p className={styles.originalTitle}>Recorded as “{meeting.title}”</p>
-      )}
 
       <div className={styles.typeRow}>
         <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} />
@@ -96,17 +93,10 @@ export default async function MeetingPage({ params }) {
 
       <div className={styles.columns}>
         <div className={styles.main}>
-          {meeting.summary && (
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Summary</h2>
-              <p className={styles.summary}>{meeting.summary}</p>
-            </section>
-          )}
-
           {/* fathom writes its own notes for every meeting, shown as they are */}
           {meeting.fathom_summary && (
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Notes</h2>
+              <h2 className={styles.sectionTitle}>Fathom notes</h2>
               <div className={styles.notes}>
                 <ReactMarkdown
                   components={{

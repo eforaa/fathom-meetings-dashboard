@@ -52,6 +52,29 @@
     color: var(--ink-45);
 }
 
+/* compact mode for the list: type dots on one line */
+.dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.addCompact {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    color: var(--ink-25);
+}
+
+.trigger:hover .addCompact {
+    color: var(--ink-45);
+}
+
 .panel {
     position: absolute;
     top: calc(100% + 4px);

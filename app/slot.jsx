@@ -17,6 +17,7 @@ export default function Slot({ slots, facetsBySlot, group }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    //open by default: it is a side panel, not a dropdown
     const [panelOpen, setPanelOpen] = useState(true);
     //which levels show their filter, kept in the component: it is not a view
     const [expanded, setExpanded] = useState([]);

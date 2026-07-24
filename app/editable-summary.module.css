@@ -1,0 +1,64 @@
+/* the summary shown as text, click to edit */
+.text {
+    display: block;
+    width: 100%;
+    padding: 6px 8px;
+    margin: -6px -8px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: text;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.7;
+    text-align: left;
+    color: var(--ink-70);
+}
+
+.text:hover {
+    border-color: var(--rule);
+}
+
+.pencil {
+    margin-left: 6px;
+    font-size: 13px;
+    color: var(--ink-45);
+}
+
+.text:hover .pencil {
+    color: var(--sage);
+}
+
+.empty {
+    color: var(--ink-45);
+    font-style: italic;
+}
+
+/* editing */
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--paper);
+    border: 1px solid var(--sage);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    outline: none;
+    resize: vertical;
+}
+
+.hint {
+    margin: 0;
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    color: var(--ink-45);
+}

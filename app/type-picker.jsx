@@ -6,7 +6,9 @@ import { typeLabel, MAX_TYPES, MEETING_TYPES } from '@/lib/format';
 import styles from './type-picker.module.css';
 
 //picking up to MAX_TYPES types for one meeting
-export default function TypePicker({ meetingId, value = [] }) {
+//variant "compact" (the list) shows coloured dots; "full" (the meeting page)
+//shows labelled chips
+export default function TypePicker({ meetingId, value = [], variant = 'full' }) {
     const router = useRouter();
     const [types, setTypes] = useState(value);
     const [open, setOpen] = useState(false);
@@ -68,18 +70,37 @@ export default function TypePicker({ meetingId, value = [] }) {
                 onClick={() => setOpen(!open)}
                 className={styles.trigger}
             >
-                <span className={styles.chips}>
-                    {types.map((type) => (
-                        <span key={type} className={styles.chip}>
-                            <span
-                                className={styles.chipDot}
-                                style={{ background: `var(--type-${type.split('_')[0]})` }}
-                            />
-                            {typeLabel(type)}
+                {variant === 'compact' ? (
+                    //list: coloured dots on one line, or a faint hint when empty
+                    types.length ? (
+                        <span className={styles.dots}>
+                            {types.map((type) => (
+                                <span
+                                    key={type}
+                                    title={typeLabel(type)}
+                                    className={styles.dot}
+                                    style={{ background: `var(--type-${type.split('_')[0]})` }}
+                                />
+                            ))}
                         </span>
-                    ))}
-                    <span className={styles.add}>+ type</span>
-                </span>
+                    ) : (
+                        <span className={styles.addCompact}>+ type</span>
+                    )
+                ) : (
+                    //meeting page: labelled chips plus an add pill
+                    <span className={styles.chips}>
+                        {types.map((type) => (
+                            <span key={type} className={styles.chip}>
+                                <span
+                                    className={styles.chipDot}
+                                    style={{ background: `var(--type-${type.split('_')[0]})` }}
+                                />
+                                {typeLabel(type)}
+                            </span>
+                        ))}
+                        <span className={styles.add}>+ type</span>
+                    </span>
+                )}
             </button>
 
             {open && (
