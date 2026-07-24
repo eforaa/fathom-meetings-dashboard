@@ -1,0 +1,86 @@
+/* title inside a table row */
+
+.rowWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.link:hover {
+    color: var(--sage);
+}
+
+/* the pencil stays hidden until the row or title is hovered */
+.pencil {
+    flex-shrink: 0;
+    padding: 0 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-25);
+    opacity: 0;
+    transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.rowWrap:hover .pencil,
+.titleWrap:hover .pencil {
+    opacity: 1;
+}
+
+.pencil:hover {
+    color: var(--sage);
+}
+
+.inputRow {
+    width: 100%;
+    padding: 3px 6px;
+    background: var(--paper);
+    border: 1px solid var(--sage);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+}
+
+/* big title on the meeting page */
+
+.titleWrap {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.heading {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+}
+
+.inputTitle {
+    width: 100%;
+    padding: 2px 8px;
+    background: var(--paper);
+    border: 1px solid var(--sage);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    outline: none;
+}

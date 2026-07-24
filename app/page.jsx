@@ -8,11 +8,13 @@ import {
   formatDuration,
   initials,
   meetingTypes,
+  meetingTitle,
 } from '@/lib/format';
 import { applySlots, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import Group from './grouped';
 import Stars from './stars';
+import EditableTitle from './editable-title';
 import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
@@ -159,11 +161,12 @@ function MeetingRow({ meeting, participants, longest }) {
 
   return (
     <div className={styles.row}>
-      <Link href={`/meetings/${meeting.id}`} className={styles.rowLink}>
-        {/* ai_title is empty until the meeting is analyzed;
-            the fathom purpose line is a better fallback than a raw zoom title */}
-        {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
-      </Link>
+      <EditableTitle
+        meetingId={meeting.id}
+        value={meetingTitle(meeting)}
+        href={`/meetings/${meeting.id}`}
+        variant="row"
+      />
 
       <TypeDots meeting={meeting} />
 
@@ -191,9 +194,7 @@ function MeetingCard({ meeting, participants }) {
   return (
     <div className={styles.card}>
       <Link href={`/meetings/${meeting.id}`} className={styles.cardBody}>
-        <span className={styles.cardTitle}>
-          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
-        </span>
+        <span className={styles.cardTitle}>{meetingTitle(meeting)}</span>
 
         <span className={styles.cardMeta}>
           {formatDayMonth(meeting.date)}

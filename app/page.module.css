@@ -124,20 +124,6 @@
   background: var(--wash);
 }
 
-.rowLink {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.rowLink:hover {
-  color: var(--sage);
-}
-
 /* types as dots */
 
 .dots {

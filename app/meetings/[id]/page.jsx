@@ -10,9 +10,11 @@ import {
   formatDuration,
   initials,
   meetingTypes,
+  meetingTitle,
 } from '@/lib/format';
 import Stars from '../../stars';
 import TypePicker from '../../type-picker';
+import EditableTitle from '../../editable-title';
 import styles from './meeting.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +51,11 @@ export default async function MeetingPage({ params }) {
 
       <div className={styles.titleRow}>
         <h1 className={styles.title}>
-          {meeting.ai_title || meeting.fathom_title || meeting.title || 'Untitled'}
+          <EditableTitle
+            meetingId={meeting.id}
+            value={meetingTitle(meeting)}
+            variant="title"
+          />
         </h1>
         <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
       </div>
