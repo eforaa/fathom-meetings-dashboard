@@ -1,12 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './custom-cell.module.css';
 
 //one editable custom-column cell in a meeting row
 //how it looks depends on the column type
 export default function CustomCell({ meetingId, column, value }) {
+    //tags column has its own multi-select editor (its own hooks)
+    if (column.type === 'multiselect') {
+        return <MultiCell meetingId={meetingId} column={column} value={value} />;
+    }
+
+    return <SingleCell meetingId={meetingId} column={column} value={value} />;
+}
+
+//text / number / select / checkbox — one value per cell
+function SingleCell({ meetingId, column, value }) {
     const router = useRouter();
     const [current, setCurrent] = useState(value ?? '');
     const [editing, setEditing] = useState(false);
@@ -91,5 +101,107 @@ export default function CustomCell({ meetingId, column, value }) {
                 current
             )}
         </button>
+    );
+}
+
+//tags column: pick several allowed values into one cell
+function MultiCell({ meetingId, column, value }) {
+    const router = useRouter();
+    const [selected, setSelected] = useState(Array.isArray(value) ? value : []);
+    const [open, setOpen] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const boxRef = useRef(null);
+
+    //close the panel on outside click or Escape
+    useEffect(() => {
+        if (!open) return undefined;
+
+        const handleClick = (event) => {
+            if (boxRef.current && !boxRef.current.contains(event.target)) setOpen(false);
+        };
+        const handleKey = (event) => {
+            if (event.key === 'Escape') setOpen(false);
+        };
+
+        document.addEventListener('mousedown', handleClick);
+        document.addEventListener('keydown', handleKey);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClick);
+            document.removeEventListener('keydown', handleKey);
+        };
+    }, [open]);
+
+    async function toggle(option) {
+        if (busy) return;
+
+        const on = selected.includes(option);
+        const next = on ? selected.filter((item) => item !== option) : [...selected, option];
+        const previous = selected;
+
+        setSelected(next);
+        setBusy(true);
+
+        try {
+            await fetch(`/api/meetings/${meetingId}/fields`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ columnId: column.id, value: next }),
+            });
+            router.refresh();
+        } catch {
+            //put the old set back if the request failed
+            setSelected(previous);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    const options = column.options ?? [];
+
+    return (
+        <div className={styles.multi} ref={boxRef}>
+            <button type="button" onClick={() => setOpen(!open)} className={styles.multiTrigger}>
+                {selected.length ? (
+                    <span className={styles.tags}>
+                        {selected.map((tag) => (
+                            <span key={tag} className={styles.tag}>
+                                {tag}
+                            </span>
+                        ))}
+                    </span>
+                ) : (
+                    <span className={styles.empty}>—</span>
+                )}
+            </button>
+
+            {open && (
+                <div className={styles.multiPanel}>
+                    {options.length === 0 ? (
+                        <p className={styles.multiHint}>Нет вариантов</p>
+                    ) : (
+                        options.map((option) => {
+                            const on = selected.includes(option);
+
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => toggle(option)}
+                                    disabled={busy}
+                                    data-active={on}
+                                    className={styles.multiOption}
+                                >
+                                    <span className={styles.multiBox} data-on={on}>
+                                        {on && '✓'}
+                                    </span>
+                                    {option}
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
+            )}
+        </div>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { COLUMN_TYPES, COLUMN_TYPE_LABELS } from '@/lib/column-types';
+import { COLUMN_TYPES, COLUMN_TYPE_LABELS, OPTION_TYPES } from '@/lib/column-types';
 import styles from './column-manager.module.css';
 
 //the "+ column" control and its small add form
@@ -26,8 +26,8 @@ export default function ColumnManager() {
                 body: JSON.stringify({
                     name,
                     type,
-                    //choice values are typed one per comma
-                    options: type === 'select' ? options.split(',') : undefined,
+                    //choice / tags values are typed one per comma
+                    options: OPTION_TYPES.includes(type) ? options.split(',') : undefined,
                 }),
             });
             const data = await response.json().catch(() => ({}));
@@ -77,7 +77,7 @@ export default function ColumnManager() {
                 ))}
             </select>
 
-            {type === 'select' && (
+            {OPTION_TYPES.includes(type) && (
                 <input
                     value={options}
                     onChange={(event) => setOptions(event.target.value)}

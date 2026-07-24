@@ -28,14 +28,15 @@ export const dynamic = 'force-dynamic';
 const COLUMNS = ['Meeting', 'Types', 'Duration', 'People', 'Date', 'Priority'];
 
 //the six built-in tracks; custom columns are appended after them
-const BUILTIN_GRID = 'minmax(230px, 2fr) 96px 132px 108px 108px 128px';
+const BUILTIN_GRID = 'minmax(170px, 1.5fr) 84px 118px 96px 100px 108px';
 
 //track width by custom column type
 function trackWidth(type) {
-  if (type === 'checkbox') return '70px';
-  if (type === 'number') return '100px';
-  if (type === 'select') return '140px';
-  return '150px';
+  if (type === 'checkbox') return '58px';
+  if (type === 'number') return '84px';
+  if (type === 'select') return '118px';
+  if (type === 'multiselect') return '158px';
+  return '128px';
 }
 
 const VISIBLE_AVATARS = 3;
@@ -263,7 +264,11 @@ function MeetingCard({ meeting, participants, columns }) {
             {filled.map((column) => (
               <span key={column.id} className={styles.cardField}>
                 {column.name}:{' '}
-                {fields[column.id] === true ? '✓' : String(fields[column.id])}
+                {fields[column.id] === true
+                  ? '✓'
+                  : Array.isArray(fields[column.id])
+                    ? fields[column.id].join(', ')
+                    : String(fields[column.id])}
               </span>
             ))}
           </span>
