@@ -75,6 +75,6 @@ export async function middleware(request) {
 // (images, fonts, favicon, and Next.js internal assets), since those don't need authentication
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2|js|css|ico)$).*)',
   ],
 };

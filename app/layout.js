@@ -1,4 +1,4 @@
-import Script from 'next/script';
+import { cookies } from 'next/headers';
 import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -15,13 +15,6 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-const applyStoredTheme = `
-try {
-  var t = localStorage.getItem('theme');
-  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-} catch (e) {}
-`;
-
 export const metadata = {
   title: 'Meetings',
   description: 'Searchable archive of recorded meetings',
@@ -36,15 +29,19 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  //the theme is stored in a cookie, so the server can set it here directly
+  //no flash, no inline script, nothing for React to warn about
+  const stored = (await cookies()).get('theme')?.value;
+  const theme = stored === 'light' || stored === 'dark' ? stored : undefined;
+
   return (
-    <html lang="en" className={`${ui.variable} ${mono.variable}`} suppressHydrationWarning>
-      <head>
-        {/* runs before hydration so the stored theme applies with no flash */}
-        <Script id="apply-theme" strategy="beforeInteractive">
-          {applyStoredTheme}
-        </Script>
-      </head>
+    <html
+      lang="en"
+      data-theme={theme}
+      className={`${ui.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <body>{children}</body>
     </html>
   );

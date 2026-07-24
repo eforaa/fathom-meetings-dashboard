@@ -13,26 +13,32 @@ const LABELS = {
   dark: 'Theme: dark. Click to follow the system.',
 };
 
+// The theme lives in a cookie so the server can render it with no flash.
+function readTheme() {
+  const match = document.cookie.match(/(?:^|; )theme=(light|dark)/);
+  return match ? match[1] : 'system';
+}
+
 export default function ThemeToggle() {
   const [theme, setTheme] = useState('system');
 
-  // The inline script in layout.js has already applied the stored theme by
-  // now; this only syncs the button so it shows the right icon.
+  // The server has already set data-theme from the cookie; this only syncs
+  // the button so it shows the right icon.
   useEffect(() => {
-    const stored = window.localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') setTheme(stored);
+    setTheme(readTheme());
   }, []);
 
   function cycle() {
     const next = ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length];
     setTheme(next);
 
-    // Removing the attribute hands control back to prefers-color-scheme.
+    // The cookie is read by the server on the next load; setting the
+    // attribute here makes the change show at once, without a reload.
     if (next === 'system') {
-      window.localStorage.removeItem('theme');
+      document.cookie = 'theme=; path=/; max-age=0; SameSite=Lax';
       delete document.documentElement.dataset.theme;
     } else {
-      window.localStorage.setItem('theme', next);
+      document.cookie = `theme=${next}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.dataset.theme = next;
     }
   }
