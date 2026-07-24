@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { COLUMN_TYPES, COLUMN_TYPE_LABELS } from '@/lib/columns';
+import { COLUMN_TYPES, COLUMN_TYPE_LABELS } from '@/lib/column-types';
 import styles from './column-manager.module.css';
 
 //the "+ column" control and its small add form
