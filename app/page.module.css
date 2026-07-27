@@ -146,39 +146,6 @@
 }
 
 /* the + column control sits above the table, on the right */
-/* heads-up banner for meetings that still need a name */
-.namelessBanner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  padding: 10px 14px;
-  background: var(--amber-wash, #f6efe1);
-  border: 1px solid var(--amber, #b0873e);
-  border-radius: var(--radius);
-  font-size: 13px;
-  color: var(--ink);
-  text-decoration: none;
-  transition: background 0.12s ease;
-}
-
-.namelessBanner:hover {
-  background: #f0e6d2;
-}
-
-.namelessDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--amber, #b0873e);
-  flex-shrink: 0;
-}
-
-.namelessArrow {
-  margin-left: auto;
-  color: var(--amber, #b0873e);
-}
-
 .tableTools {
   display: flex;
   justify-content: flex-end;
