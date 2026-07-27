@@ -1,5 +1,13 @@
-/* a column header that sorts on click; inherits the mono/uppercase look of the
-   header row, so it reads like a label but reacts to clicks */
+/* one header cell: sort label + optional filter dropdown */
+.cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* the column label; sorts on click, inherits the mono/uppercase header look */
 .colHead {
   display: inline-flex;
   align-items: center;
@@ -13,12 +21,12 @@
   text-transform: inherit;
   color: inherit;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.colHead:hover {
-  color: var(--ink);
-}
-
+.colHead:hover,
 .colHead[data-active='true'] {
   color: var(--ink);
 }
@@ -26,4 +34,125 @@
 .arrow {
   font-size: 10px;
   min-width: 8px;
+}
+
+/* the ▾ that opens the filter */
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--ink-25);
+}
+
+.filterBtn:hover,
+.filterBtn[data-active='true'] {
+  color: var(--sage);
+}
+
+.badge {
+  margin-left: 2px;
+  padding: 0 4px;
+  background: var(--sage);
+  border-radius: 999px;
+  font-size: 9px;
+  color: #fff;
+}
+
+/* dropdown of values with checkboxes */
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink);
+}
+
+.option:hover {
+  background: var(--wash);
+}
+
+.optionLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--ink-25);
+  border-radius: 3px;
+  font-size: 9px;
+  color: #fff;
+}
+
+.box[data-on='true'] {
+  background: var(--sage);
+  border-color: transparent;
+}
+
+.count {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ink-25);
+}
+
+.clear {
+  margin-top: 2px;
+  padding: 6px 7px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 12px;
+  text-align: left;
+  color: var(--ink-25);
+}
+
+.clear:hover {
+  color: var(--ink);
+}
+
+.hint {
+  margin: 0;
+  padding: 6px 7px;
+  font-size: 12px;
+  color: var(--ink-25);
 }

@@ -9,7 +9,7 @@ import {
   meetingTypes,
   meetingTitle,
 } from '@/lib/format';
-import { applySlots, collectFacets, readView, groupMeetings } from '@/lib/tags';
+import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { listColumns } from '@/lib/columns';
 import Group from './grouped';
@@ -69,7 +69,17 @@ export default async function MeetingsPage({ searchParams }) {
     slot.tag ? collectFacets(all, participantsByMeeting, slot.tag) : [],
   );
 
-  const meetings = applySlots(all, participantsByMeeting, slots);
+  //per-column filters from the table header (multi-value, AND across columns)
+  const FILTERABLE = ['type', 'people', 'importance'];
+  const columnFilters = Object.fromEntries(
+    FILTERABLE.map((tag) => [tag, String(sp[`c_${tag}`] ?? '').split('~').filter(Boolean)]),
+  );
+  const facetsByTag = Object.fromEntries(
+    FILTERABLE.map((tag) => [tag, collectFacets(all, participantsByMeeting, tag)]),
+  );
+
+  const filtered = applyColumnFilters(all, participantsByMeeting, columnFilters);
+  const meetings = applySlots(filtered, participantsByMeeting, slots);
 
   //the longest meeting on screen sets the scale of the duration bars
   const longest = meetings.reduce(
@@ -145,7 +155,7 @@ export default async function MeetingsPage({ searchParams }) {
                 <div className={styles.tableScroll}>
                   <div className={styles.table} style={gridStyle}>
                     <div className={styles.tableHead}>
-                      <SortableHeader />
+                      <SortableHeader facetsByTag={facetsByTag} columnFilters={columnFilters} />
                       {columns.map((column) => (
                         <span key={column.id}>
                           <ColumnHeader column={column} />
