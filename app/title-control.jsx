@@ -43,9 +43,11 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
       ? { icon: '✍️', label: 'Ваше название' }
       : source === 'ai_title'
         ? { icon: '🤖', label: 'Сгенерировано Клодом' }
-        : source === 'none'
-          ? { icon: '•', label: 'Без названия' }
-          : { icon: '📅', label: 'Оригинал из Fathom' };
+        : source === 'title'
+          ? { icon: '📅', label: 'Оригинал из Fathom' }
+          : source === 'fathom_title'
+            ? { icon: '📌', label: 'Цель встречи (Fathom, авто) — стоит переименовать' }
+            : { icon: '•', label: 'Без названия' };
 
   //what a "revert to original" would reveal — only offer it when it changes something
   //offer each of the three names that exists and isn't the one already showing.
