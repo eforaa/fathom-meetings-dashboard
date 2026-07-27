@@ -118,6 +118,9 @@ export default async function MeetingsPage({ searchParams }) {
         </div>
 
         <div className={styles.headerActions}>
+          <Link href="/records" className={styles.settingsLink}>
+            Records
+          </Link>
           <Link href="/settings" className={styles.settingsLink}>
             Settings
           </Link>
