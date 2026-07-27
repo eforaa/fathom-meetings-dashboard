@@ -81,9 +81,14 @@ export default async function MeetingsPage({ searchParams }) {
   const filtered = applyColumnFilters(all, participantsByMeeting, columnFilters);
   const meetings = applySlots(filtered, participantsByMeeting, slots);
 
-  //the longest meeting on screen sets the scale of the duration bars
+  //the longest meeting on screen sets the scale of the duration bars.
+  //ignore absurd values (a broken multi-day span would flatten every real bar)
+  const SANE_MAX_MINUTES = 24 * 60;
   const longest = meetings.reduce(
-    (max, meeting) => Math.max(max, meeting.duration_minutes ?? 0),
+    (max, meeting) => {
+      const m = meeting.duration_minutes ?? 0;
+      return m > SANE_MAX_MINUTES ? max : Math.max(max, m);
+    },
     0,
   );
 
