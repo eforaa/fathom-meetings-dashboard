@@ -22,7 +22,12 @@ import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
+import NamelessFilter from './nameless-filter';
 import styles from './page.module.css';
+
+//a meeting "needs a name" when all it shows is a placeholder — the raw Fathom
+//purpose line or nothing at all
+const NEEDS_NAME = new Set(['fathom_title', 'none']);
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +84,14 @@ export default async function MeetingsPage({ searchParams }) {
   );
 
   const filtered = applyColumnFilters(all, participantsByMeeting, columnFilters);
-  const meetings = applySlots(filtered, participantsByMeeting, slots);
+  const sorted = applySlots(filtered, participantsByMeeting, slots);
+
+  //optional "needs a name" view (?nameless=1) plus its live count for the badge
+  const namelessCount = all.filter((m) => NEEDS_NAME.has(meetingTitleSource(m))).length;
+  const onlyNameless = sp.nameless === '1';
+  const meetings = onlyNameless
+    ? sorted.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)))
+    : sorted;
 
   //the longest meeting on screen sets the scale of the duration bars.
   //ignore absurd values (a broken multi-day span would flatten every real bar)
@@ -157,6 +169,7 @@ export default async function MeetingsPage({ searchParams }) {
             ) : (
               <>
                 <div className={styles.tableTools}>
+                  <NamelessFilter count={namelessCount} />
                   <ColumnManager />
                 </div>
 
