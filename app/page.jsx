@@ -171,6 +171,20 @@ export default async function MeetingsPage({ searchParams }) {
               <NoResults />
             ) : (
               <>
+                {/* a gentle heads-up when calls arrived without a usable name;
+                    the nightly sync auto-names what it can, the rest land here */}
+                {namelessCount > 0 && !onlyNameless && (
+                  <Link href="/?nameless=1" className={styles.namelessBanner}>
+                    <span className={styles.namelessDot} />
+                    <span>
+                      <b>{namelessCount}</b>{' '}
+                      {namelessCount === 1 ? 'встреча без названия' : 'встреч(и) без названия'} —
+                      разобрать
+                    </span>
+                    <span className={styles.namelessArrow}>→</span>
+                  </Link>
+                )}
+
                 <div className={styles.tableTools}>
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />
