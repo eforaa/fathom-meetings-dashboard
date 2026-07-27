@@ -7,6 +7,7 @@ import {
   formatDuration,
   meetingTypes,
   meetingTitle,
+  meetingTitleSource,
 } from '@/lib/format';
 import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
@@ -213,6 +214,7 @@ function MeetingRow({ meeting, participants, longest, columns }) {
       <EditableTitle
         meetingId={meeting.id}
         value={meetingTitle(meeting)}
+        source={meetingTitleSource(meeting)}
         href={`/meetings/${meeting.id}`}
         variant="row"
       />

@@ -25,12 +25,23 @@ export async function POST(request, context) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const title = String(body?.title ?? '').trim().slice(0, MAX_LENGTH);
 
-    //an empty title clears the custom name and falls back to the others
+    //three actions the title picker can ask for:
+    //- revert: drop both the hand name and the ai name, show the original
+    //- useAi: drop only the hand name, so the ai suggestion shows again
+    //- otherwise: set the hand name (empty string also just clears it)
+    let patch;
+    if (body?.revert) {
+        patch = { custom_title: null, ai_title: null };
+    } else if (body?.useAi) {
+        patch = { custom_title: null };
+    } else {
+        patch = { custom_title: String(body?.title ?? '').trim().slice(0, MAX_LENGTH) || null };
+    }
+
     const { error } = await db
         .from('meetings')
-        .update({ custom_title: title || null })
+        .update(patch)
         .eq('id', id)
         .eq('owner_email', user.email);
 
@@ -39,5 +50,5 @@ export async function POST(request, context) {
         return NextResponse.json({ error: 'Could not save' }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, title: title || null });
+    return NextResponse.json({ ok: true });
 }

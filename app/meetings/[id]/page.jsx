@@ -11,11 +11,14 @@ import {
   initials,
   meetingTypes,
   meetingTitle,
+  meetingTitleSource,
+  meetingOriginalTitle,
   meetingSummary,
 } from '@/lib/format';
 import Stars from '../../stars';
 import TypePicker from '../../type-picker';
-import MeetingEditor from '../../meeting-editor';
+import TitleControl from '../../title-control';
+import EditableSummary from '../../editable-summary';
 import styles from './meeting.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -52,11 +55,12 @@ export default async function MeetingPage({ params }) {
 
       <div className={styles.titleRow}>
         <div className={styles.editorWrap}>
-          <MeetingEditor
+          <TitleControl
             meetingId={meeting.id}
-            title={meetingTitle(meeting)}
-            originalTitle={meeting.title}
-            summary={meetingSummary(meeting)}
+            shown={meetingTitle(meeting)}
+            source={meetingTitleSource(meeting)}
+            original={meetingOriginalTitle(meeting)}
+            aiTitle={meeting.ai_title}
           />
         </div>
         <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
@@ -93,6 +97,12 @@ export default async function MeetingPage({ params }) {
 
       <div className={styles.columns}>
         <div className={styles.main}>
+          {/* the meeting's own summary — hand-edited wins over the ai one */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Summary</h2>
+            <EditableSummary meetingId={meeting.id} value={meetingSummary(meeting)} />
+          </section>
+
           {/* fathom writes its own notes for every meeting, shown as they are */}
           {meeting.fathom_summary && (
             <section className={styles.section}>

@@ -8,7 +8,14 @@ import styles from './editable-title.module.css';
 //an editable meeting title
 //variant "row": a link with a pencil that appears on hover
 //variant "title": a big heading, click the pencil to rename
-export default function EditableTitle({ meetingId, value, href, variant = 'row' }) {
+export default function EditableTitle({ meetingId, value, href, variant = 'row', source }) {
+    //a small marker so a generated name is recognisable at a glance
+    const mark =
+        source === 'ai_title' ? (
+            <span className={styles.mark} title="Сгенерировано Клодом">
+                🤖
+            </span>
+        ) : null;
     const router = useRouter();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
@@ -88,6 +95,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row' 
     if (variant === 'title') {
         return (
             <span className={styles.titleWrap}>
+                {mark}
                 <span className={styles.heading}>{value || 'Untitled'}</span>
                 {pencil}
             </span>
@@ -96,6 +104,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row' 
 
     return (
         <span className={styles.rowWrap}>
+            {mark}
             <Link href={href} className={styles.link}>
                 {value || 'Untitled'}
             </Link>
