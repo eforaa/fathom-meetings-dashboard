@@ -14,7 +14,8 @@ import styles from './title-control.module.css';
 //  source       — where it came from: custom_title | ai_title | title | fathom_title | none
 //  original     — the original recorded name, or null for nameless calls
 //  aiTitle      — Claude's generated suggestion, if any
-export default function TitleControl({ meetingId, shown, source, original, aiTitle }) {
+//  customTitle  — the user's manual name, if any
+export default function TitleControl({ meetingId, shown, source, original, aiTitle, customTitle }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(shown === 'No name' ? '' : shown);
@@ -47,9 +48,13 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
           : { icon: '📅', label: 'Оригинал из Fathom' };
 
   //what a "revert to original" would reveal — only offer it when it changes something
-  const canRevert = source === 'custom_title' || source === 'ai_title';
-  //Claude's suggestion is worth offering only when it isn't already the one shown
+  //offer each of the three names that exists and isn't the one already showing.
+  //switching only pins the choice — no name is ever deleted, so any of them
+  //can be brought back later.
+  const showingOriginal = source === 'title' || source === 'fathom_title';
+  const canUseOriginal = original && !showingOriginal;
   const canUseAi = aiTitle && source !== 'ai_title';
+  const canUseCustom = customTitle && source !== 'custom_title';
 
   if (editing) {
     return (
@@ -89,14 +94,33 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
       </div>
 
       <div className={styles.controls}>
-        <button type="button" onClick={() => setEditing(true)} className={styles.btn}>
+        <button
+          type="button"
+          onClick={() => {
+            setText(shown === 'No name' ? '' : shown);
+            setEditing(true);
+          }}
+          className={styles.btn}
+        >
           ✎ Своё название
         </button>
+
+        {canUseCustom && (
+          <button
+            type="button"
+            onClick={() => send({ choice: 'custom' })}
+            disabled={busy}
+            className={styles.btn}
+            title={customTitle}
+          >
+            ✍️ Моё название
+          </button>
+        )}
 
         {canUseAi && (
           <button
             type="button"
-            onClick={() => send({ useAi: true })}
+            onClick={() => send({ choice: 'ai' })}
             disabled={busy}
             className={styles.btn}
             title={aiTitle}
@@ -105,21 +129,21 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
           </button>
         )}
 
-        {canRevert && original && (
+        {canUseOriginal && (
           <button
             type="button"
-            onClick={() => send({ revert: true })}
+            onClick={() => send({ choice: 'original' })}
             disabled={busy}
             className={styles.btn}
             title={original}
           >
-            📅 Вернуть оригинал
+            📅 Оригинал
           </button>
         )}
       </div>
 
       {/* the original is always shown for reference, so nothing feels lost */}
-      {original && source !== 'title' && source !== 'fathom_title' && (
+      {original && !showingOriginal && (
         <p className={styles.original}>Записано в Fathom как «{original}»</p>
       )}
     </div>

@@ -26,17 +26,33 @@ export async function POST(request, context) {
 
     const body = await request.json().catch(() => ({}));
 
-    //three actions the title picker can ask for:
-    //- revert: drop both the hand name and the ai name, show the original
-    //- useAi: drop only the hand name, so the ai suggestion shows again
-    //- otherwise: set the hand name (empty string also just clears it)
-    let patch;
-    if (body?.revert) {
-        patch = { custom_title: null, ai_title: null };
-    } else if (body?.useAi) {
-        patch = { custom_title: null };
+    //the picker pins WHICH of the three names to show, without deleting any:
+    //   choice: 'original' | 'ai' | 'custom'
+    //setting your own name writes custom_title and pins 'custom'.
+    //the pin lives in custom_fields[__title_choice] (no schema change).
+    const CHOICE_KEY = '__title_choice';
+
+    //read the current custom_fields so the pin merges instead of replacing
+    const { data: current } = await db
+        .from('meetings')
+        .select('custom_fields')
+        .eq('id', id)
+        .eq('owner_email', user.email)
+        .single();
+
+    const fields = { ...(current?.custom_fields ?? {}) };
+    const patch = {};
+
+    if (body?.choice === 'original' || body?.choice === 'ai' || body?.choice === 'custom') {
+        fields[CHOICE_KEY] = body.choice;
+        patch.custom_fields = fields;
     } else {
-        patch = { custom_title: String(body?.title ?? '').trim().slice(0, MAX_LENGTH) || null };
+        //setting (or clearing) a manual name; pin to it so it shows over the rest
+        const title = String(body?.title ?? '').trim().slice(0, MAX_LENGTH);
+        patch.custom_title = title || null;
+        if (title) fields[CHOICE_KEY] = 'custom';
+        else delete fields[CHOICE_KEY];
+        patch.custom_fields = fields;
     }
 
     const { error } = await db

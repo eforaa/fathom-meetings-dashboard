@@ -61,6 +61,7 @@ export default async function MeetingPage({ params }) {
             source={meetingTitleSource(meeting)}
             original={meetingOriginalTitle(meeting)}
             aiTitle={meeting.ai_title}
+            customTitle={meeting.custom_title}
           />
         </div>
         <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
