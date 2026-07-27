@@ -15,6 +15,13 @@ export async function middleware(request) {
   if (pathname.startsWith('/api/cron') || pathname.startsWith('/api/mcp'))
     return NextResponse.next();
 
+  //MCP OAuth discovery + dynamic-registration probes. Redirecting these to
+  ///login makes Claude think the connector needs OAuth, so its "Connect" fails
+  //with "Couldn't register with sign-in service". Return 404 so Claude skips
+  //OAuth and just uses the token already in the connector URL.
+  if (pathname.startsWith('/.well-known/') || pathname === '/register')
+    return new NextResponse(null, { status: 404 });
+
   //creating default response 
   let response = NextResponse.next({ request });
 
