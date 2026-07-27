@@ -1,0 +1,29 @@
+/* a column header that sorts on click; inherits the mono/uppercase look of the
+   header row, so it reads like a label but reacts to clicks */
+.colHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.colHead:hover {
+  color: var(--ink);
+}
+
+.colHead[data-active='true'] {
+  color: var(--ink);
+}
+
+.arrow {
+  font-size: 10px;
+  min-width: 8px;
+}

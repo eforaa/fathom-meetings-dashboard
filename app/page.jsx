@@ -21,11 +21,10 @@ import ColumnManager, { ColumnHeader } from './column-manager';
 import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
+import SortableHeader from './sortable-header';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
-
-const COLUMNS = ['Meeting', 'Types', 'Duration', 'People', 'Date', 'Priority'];
 
 //the six built-in tracks; custom columns are appended after them
 const BUILTIN_GRID = 'minmax(170px, 1.5fr) 84px 118px 96px 100px 108px';
@@ -146,9 +145,7 @@ export default async function MeetingsPage({ searchParams }) {
                 <div className={styles.tableScroll}>
                   <div className={styles.table} style={gridStyle}>
                     <div className={styles.tableHead}>
-                      {COLUMNS.map((column) => (
-                        <span key={column}>{column}</span>
-                      ))}
+                      <SortableHeader />
                       {columns.map((column) => (
                         <span key={column.id}>
                           <ColumnHeader column={column} />
