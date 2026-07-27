@@ -246,7 +246,28 @@
   color: var(--ink-45);
 }
 
-/* people */
+/* people — names written out, a few per row */
+
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.personName {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink-70);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.morePeople {
+  font-size: 11px;
+  color: var(--ink-25);
+}
 
 .avatars {
   display: flex;
@@ -384,6 +405,15 @@
 .cardSep {
   margin: 0 6px;
   color: var(--ink-25);
+}
+
+/* participant names under a card */
+.cardPeople {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-70);
 }
 
 /* custom field values under a card */

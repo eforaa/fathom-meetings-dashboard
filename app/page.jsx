@@ -5,7 +5,6 @@ import {
   formatDayMonth,
   formatTime,
   formatDuration,
-  initials,
   meetingTypes,
   meetingTitle,
 } from '@/lib/format';
@@ -27,7 +26,7 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 //the six built-in tracks; custom columns are appended after them
-const BUILTIN_GRID = 'minmax(170px, 1.5fr) 84px 118px 96px 100px 108px';
+const BUILTIN_GRID = 'minmax(170px, 1.5fr) 84px 118px minmax(150px, 1fr) 100px 108px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -266,6 +265,12 @@ function MeetingCard({ meeting, participants, columns }) {
           {participants.length} people
         </span>
 
+        {participants.length > 0 && (
+          <span className={styles.cardPeople}>
+            {participants.map((person) => person.name || person.email).join(', ')}
+          </span>
+        )}
+
         {filled.length > 0 && (
           <span className={styles.cardFields}>
             {filled.map((column) => (
@@ -291,7 +296,7 @@ function MeetingCard({ meeting, participants, columns }) {
   );
 }
 
-//displays participants initials
+//participants written out by name, a few per row with a "+N" tail
 function AvatarStack({ participants }) {
   if (participants.length === 0) {
     return <span className={styles.dash}>—</span>;
@@ -302,13 +307,13 @@ function AvatarStack({ participants }) {
   const names = participants.map((person) => person.name || person.email).join(', ');
 
   return (
-    <span className={styles.avatars} title={names}>
+    <span className={styles.people} title={names}>
       {shown.map((person) => (
-        <span key={person.id} className={styles.avatar}>
-          {initials(person.name || person.email)}
+        <span key={person.id} className={styles.personName}>
+          {person.name || person.email}
         </span>
       ))}
-      {hidden > 0 && <span className={styles.avatarMore}>+{hidden}</span>}
+      {hidden > 0 && <span className={styles.morePeople}>+{hidden} more</span>}
     </span>
   );
 }
