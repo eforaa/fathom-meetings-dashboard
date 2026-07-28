@@ -80,11 +80,20 @@
   margin-bottom: 22px;
 }
 
+/* heading on the left, stats pushed to the right, on one line */
+.pageHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin-bottom: 22px;
+}
+
 .pageHead {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 22px;
 }
 
 .title {

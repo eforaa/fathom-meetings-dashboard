@@ -206,14 +206,16 @@ export default async function MeetingsPage({ searchParams }) {
       </header>
 
       <main className={styles.body}>
-        <div className={styles.pageHead}>
-          <h1 className={styles.title}>My meetings</h1>
-          <span className={styles.count}>
-            {meetings.length} of {all.length}
-          </span>
-        </div>
+        <div className={styles.pageHeadRow}>
+          <div className={styles.pageHead}>
+            <h1 className={styles.title}>My meetings</h1>
+            <span className={styles.count}>
+              {meetings.length} of {all.length}
+            </span>
+          </div>
 
-        {all.length > 0 && <Stats {...computeStats(all)} />}
+          {all.length > 0 && <Stats {...computeStats(all)} />}
+        </div>
 
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
