@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { IBM_Plex_Sans, IBM_Plex_Mono, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 
 const ui = IBM_Plex_Sans({
@@ -14,6 +14,13 @@ const mono = IBM_Plex_Mono({
   variable: '--font-mono',
   display: 'swap',
 });
+//serif display face for headings — the editorial redesign
+const display = Source_Serif_4({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '600'],
+  variable: '--font-display',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Meetings',
@@ -24,7 +31,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fcfcfb' },
+    { media: '(prefers-color-scheme: light)', color: '#faf9f7' },
     { media: '(prefers-color-scheme: dark)', color: '#14171b' },
   ],
 };
@@ -39,7 +46,7 @@ export default async function RootLayout({ children }) {
     <html
       lang="en"
       data-theme={theme}
-      className={`${ui.variable} ${mono.variable}`}
+      className={`${ui.variable} ${mono.variable} ${display.variable}`}
       suppressHydrationWarning
     >
       <body>{children}</body>

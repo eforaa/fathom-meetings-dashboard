@@ -7,11 +7,19 @@
     min-width: 0;
 }
 
-/* the 🤖 marker on generated titles */
-.mark {
+/* the AI badge on generated titles */
+.aiBadge {
     flex-shrink: 0;
-    font-size: 11px;
-    line-height: 1;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--type-other-tint);
+    color: var(--type-other-ink);
+    font-family: var(--font-mono), monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.4;
 }
 
 .link {

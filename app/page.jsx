@@ -8,6 +8,7 @@ import {
   meetingTypes,
   meetingTitle,
   meetingTitleSource,
+  meetingSummary,
   typeLabel,
   MEETING_TYPES,
 } from '@/lib/format';
@@ -87,7 +88,7 @@ const NEEDS_NAME = new Set(['fathom_title', 'none']);
 export const dynamic = 'force-dynamic';
 
 //the six built-in tracks; custom columns are appended after them
-const BUILTIN_GRID = 'minmax(170px, 1.5fr) 84px 118px minmax(150px, 1fr) 100px 108px';
+const BUILTIN_GRID = 'minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 96px 84px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -191,6 +192,9 @@ export default async function MeetingsPage({ searchParams }) {
         </div>
 
         <div className={styles.headerActions}>
+          <Link href="/connect" className={styles.settingsLink}>
+            Connect
+          </Link>
           <Link href="/people" className={styles.settingsLink}>
             People
           </Link>
@@ -288,16 +292,22 @@ function MeetingRow({ meeting, participants, longest, columns }) {
   const barWidth =
     longest > 0 && minutes ? Math.max(4, Math.round((minutes / longest) * 100)) : 0;
   const fields = meeting.custom_fields ?? {};
+  const source = meetingTitleSource(meeting);
+  const unnamed = NEEDS_NAME.has(source);
+  const summary = meetingSummary(meeting);
 
   return (
-    <div className={styles.row}>
-      <EditableTitle
-        meetingId={meeting.id}
-        value={meetingTitle(meeting)}
-        source={meetingTitleSource(meeting)}
-        href={`/meetings/${meeting.id}`}
-        variant="row"
-      />
+    <div className={styles.row} data-unnamed={unnamed || undefined}>
+      <span className={styles.titleCell}>
+        <EditableTitle
+          meetingId={meeting.id}
+          value={meetingTitle(meeting)}
+          source={source}
+          href={`/meetings/${meeting.id}`}
+          variant="row"
+        />
+        {summary && <span className={styles.rowSummary}>{summary}</span>}
+      </span>
 
       <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
 
@@ -403,19 +413,38 @@ function AvatarStack({ participants }) {
   );
 }
 
-//nothing connected yet
+//nothing connected yet — walk a new person through the two setup steps
 function EmptyState() {
   return (
     <div className={styles.empty}>
       <div className={styles.emptyMark} />
-      <h2 className={styles.emptyTitle}>No meetings yet</h2>
+      <h2 className={styles.emptyTitle}>Здесь пока пусто — давайте настроим</h2>
       <p className={styles.emptyText}>
-        Once you connect Fathom, your calls appear here on their own — with notes,
-        action items and transcripts.
+        Два коротких шага, и встречи появятся здесь сами.
       </p>
-      <Link href="/settings" className={styles.emptyAction}>
-        Connect Fathom
-      </Link>
+
+      <ol className={styles.onboard}>
+        <li className={styles.onboardStep}>
+          <span className={styles.onboardNum}>1</span>
+          <span className={styles.onboardBody}>
+            <b>Подключите Fathom</b> — ваши созвоны начнут подтягиваться сюда автоматически,
+            с заметками и транскриптами.
+            <Link href="/settings" className={styles.onboardLink}>
+              Подключить Fathom →
+            </Link>
+          </span>
+        </li>
+        <li className={styles.onboardStep}>
+          <span className={styles.onboardNum}>2</span>
+          <span className={styles.onboardBody}>
+            <b>Подключите Claude</b> — чтобы искать, называть и разбирать встречи прямо из
+            чата.
+            <Link href="/connect" className={styles.onboardLink}>
+              Подключить Claude →
+            </Link>
+          </span>
+        </li>
+      </ol>
     </div>
   );
 }
@@ -424,8 +453,11 @@ function EmptyState() {
 function NoResults() {
   return (
     <div className={styles.noResults}>
-      <p className={styles.noResultsTitle}>Nothing found</p>
-      <p className={styles.noResultsHint}>Loosen the filters in the panel above</p>
+      <p className={styles.noResultsTitle}>Ничего не найдено</p>
+      <p className={styles.noResultsHint}>Смягчите фильтры или</p>
+      <Link href="/" className={styles.noResultsReset}>
+        сбросить всё
+      </Link>
     </div>
   );
 }

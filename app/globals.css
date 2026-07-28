@@ -1,66 +1,80 @@
+/* app/globals.css — Editorial redesign tokens.
+   Drop-in replacement. Same variable names as before, new values,
+   so every existing CSS module picks the redesign up automatically. */
 
 :root {
   color-scheme: light dark;
 
-  --ink: light-dark(#16191d, #eef1f3);
-  --ink-70: light-dark(#4a4f56, #b7bec5);
-  --ink-45: light-dark(#7c8188, #838a92);
-  --ink-25: light-dark(#a9adb2, #565c63);
+  /* ink — warm neutrals instead of the old blue-grey */
+  --ink: light-dark(#1a1a18, #e8ecee);
+  --ink-70: light-dark(#56534c, #b7bec5);
+  --ink-45: light-dark(#8c887f, #8b959c);
+  --ink-25: light-dark(#a8a49b, #5b656c);
 
-  --rule: light-dark(#e5e9eb, #2b3036);
-  --rule-soft: light-dark(#f0f3f4, #23282e);
+  --rule: light-dark(#e8e5e0, #232a2e);
+  --rule-soft: light-dark(#f2efeb, #1b2125);
 
-  --paper: light-dark(#fcfcfb, #14171b);
-  --paper-raised: light-dark(#ffffff, #1b1f24);
-  --wash: light-dark(#f6f7f7, #202529);
+  --paper: light-dark(#faf9f7, #0e1113);
+  --paper-raised: light-dark(#ffffff, #14181b);
+  --wash: light-dark(#f5f3f0, #171c20);
 
-  --sage: light-dark(#4f7376, #82b0b3);
-  --sage-soft: light-dark(#eaf0f0, #22383a);
+  /* accent — deeper, less grey teal */
+  --sage: light-dark(#3f6b6e, #8fc6b8);
+  --sage-soft: light-dark(#e3ebe9, #1a2a26);
+  --sage-hover: light-dark(#35595c, #a3d3c6);
 
-  --type-internal: light-dark(#4a6fa5, #86a6d3);
-  --type-client: light-dark(#8250c8, #b892e8);
-  --type-automation: light-dark(#0d7f8c, #4fb8c2);
-  --type-onboarding: light-dark(#bd6224, #e28c4c);
-  --type-other: light-dark(#6b7684, #98a3ae);
+  /* meeting types — muted, equal chroma; each has a tint for chips */
+  --type-internal: light-dark(#6d7fa0, #86a6d3);
+  --type-internal-tint: light-dark(#eef1f6, #1a2230);
+  --type-internal-ink: light-dark(#45566f, #86a6d3);
 
-  --warn: light-dark(#a35a09, #e0a92f);
+  --type-client: light-dark(#8f7aa3, #b892e8);
+  --type-client-tint: light-dark(#f4eef9, #291f36);
+  --type-client-ink: light-dark(#63478a, #b892e8);
+
+  --type-automation: light-dark(#3f6b6e, #4fb8c2);
+  --type-automation-tint: light-dark(#e6f1f2, #14282a);
+  --type-automation-ink: light-dark(#2f5457, #7fc0c7);
+
+  --type-onboarding: light-dark(#b08c4a, #d3a765);
+  --type-onboarding-tint: light-dark(#f8efe3, #2e2415);
+  --type-onboarding-ink: light-dark(#8a5c26, #d3a765);
+
+  --type-other: light-dark(#8c887f, #98a3ae);
+  --type-other-tint: light-dark(#f0ede8, #1e2529);
+  --type-other-ink: light-dark(#56534c, #98a3ae);
+
+  /* "needs a name" state */
+  --warn: light-dark(#8a5c26, #e0a92f);
+  --warn-tint: light-dark(#f3e6d6, #33260f);
+  --warn-row: light-dark(#fdfaf5, #191712);
   --warn-dot: #e0a92f;
+
   --error: light-dark(#b8332a, #f0837a);
 
-  --shadow-panel: 0 14px 28px -10px light-dark(rgb(22 25 29 / 0.16), rgb(0 0 0 / 0.5)),
-    0 2px 6px -2px light-dark(rgb(22 25 29 / 0.08), rgb(0 0 0 / 0.4));
+  /* one soft card shadow + a hairline ring, used instead of 1px borders */
+  --ring: inset 0 0 0 1px light-dark(#e8e5e0, #1f262a);
+  --shadow-card: 0 1px 2px light-dark(rgb(26 26 24 / 0.04), rgb(0 0 0 / 0.3));
+  --shadow-panel: 0 14px 28px -10px light-dark(rgb(26 26 24 / 0.14), rgb(0 0 0 / 0.5)),
+    0 2px 6px -2px light-dark(rgb(26 26 24 / 0.07), rgb(0 0 0 / 0.4));
 
-  --radius: 6px;
-  --radius-lg: 10px;
+  --radius: 7px;
+  --radius-lg: 12px;
 
-  /* Tinted chip backgrounds need more opacity on a dark surface to stay
-     visible. Not a colour, so light-dark() cannot help here. */
   --tint: 11%;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --tint: 18%;
-  }
+  :root:not([data-theme='light']) { --tint: 18%; }
 }
+:root[data-theme='light'] { color-scheme: light; --tint: 11%; }
+:root[data-theme='dark'] { color-scheme: dark; --tint: 18%; }
 
-/* An explicit choice overrides the system preference. */
-:root[data-theme='light'] {
-  color-scheme: light;
-  --tint: 11%;
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --tint: 18%;
-}
-
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html {
-  font-size: 14px;
+  /* was 14px — the redesign sets sizes explicitly, so keep the base honest */
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -69,12 +83,12 @@ body {
   margin: 0;
   background: var(--paper);
   font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 14px;
   color: var(--ink);
 }
 
-a {
-  color: inherit;
-}
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--sage); }
 
 :focus-visible {
   outline: 2px solid var(--sage);
@@ -82,35 +96,20 @@ a {
   border-radius: 4px;
 }
 
-::selection {
-  background: var(--sage-soft);
-}
+::selection { background: var(--sage-soft); }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 6px;
   background: var(--ink-25);
   background-clip: content-box;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-45);
-  background-clip: content-box;
-}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-45); background-clip: content-box; }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

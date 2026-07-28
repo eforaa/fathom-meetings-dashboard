@@ -9,11 +9,11 @@ import styles from './editable-title.module.css';
 //variant "row": a link with a pencil that appears on hover
 //variant "title": a big heading, click the pencil to rename
 export default function EditableTitle({ meetingId, value, href, variant = 'row', source }) {
-    //a small marker so a generated name is recognisable at a glance
+    //a small text badge so a generated name is recognisable at a glance
     const mark =
         source === 'ai_title' ? (
-            <span className={styles.mark} title="Сгенерировано Клодом">
-                🤖
+            <span className={styles.aiBadge} title="Сгенерировано Клодом">
+                AI
             </span>
         ) : null;
     const router = useRouter();
