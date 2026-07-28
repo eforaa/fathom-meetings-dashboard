@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { cookies } from 'next/headers';
-import { getMeeting } from '@/lib/queries';
+import { getMeeting, getMeetings } from '@/lib/queries';
 import { createClientForServer } from '@/lib/supabase-auth';
 import {
   formatDate,
+  formatDayMonth,
   formatTimeRange,
   formatDuration,
   initials,
@@ -19,6 +20,7 @@ import Stars from '../../stars';
 import TypePicker from '../../type-picker';
 import TitleControl from '../../title-control';
 import EditableSummary from '../../editable-summary';
+import MeetingActions from './meeting-actions';
 import styles from './meeting.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +48,22 @@ export default async function MeetingPage({ params }) {
     : [];
 
   const timeRange = formatTimeRange(meeting.start_time, meeting.end_time);
+
+  //other meetings of the same recurring series (same displayed name)
+  const seriesName = meetingTitle(meeting);
+  const { meetings: ownerMeetings } = await getMeetings({ ownerEmail: user?.email });
+  const related =
+    seriesName && seriesName !== 'No name'
+      ? ownerMeetings
+          .filter((m) => m.id !== meeting.id && meetingTitle(m) === seriesName)
+          .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0))
+          .slice(0, 8)
+      : [];
+
+  //a plain task list for the copy/export digest (ours first, else Fathom's)
+  const exportTasks = tasks.length
+    ? tasks.map((t) => ({ text: t.task, who: t.assignee || null }))
+    : fathomTasks.map((t) => ({ text: t.description, who: t.assignee?.name || null }));
 
   return (
     <main className={styles.page}>
@@ -95,6 +113,14 @@ export default async function MeetingPage({ params }) {
           </a>
         )}
       </div>
+
+      <MeetingActions
+        title={seriesName}
+        date={formatDate(meeting.date)}
+        summary={meetingSummary(meeting) || meeting.fathom_summary || ''}
+        topics={topics}
+        tasks={exportTasks}
+      />
 
       <div className={styles.columns}>
         <div className={styles.main}>
@@ -186,26 +212,49 @@ export default async function MeetingPage({ params }) {
           )}
         </div>
 
-        {participants.length > 0 && (
+        {(participants.length > 0 || related.length > 0) && (
           <aside className={styles.aside}>
-            <h2 className={styles.sectionTitle}>People</h2>
-            <ul className={styles.people}>
-              {participants.map((person) => (
-                <li key={person.id} className={styles.person}>
-                  <span className={styles.avatar}>
-                    {initials(person.name || person.email)}
-                  </span>
-                  <span className={styles.personBody}>
-                    <span className={styles.personName}>
-                      {person.name || person.email}
-                    </span>
-                    {person.email_domain && (
-                      <span className={styles.personRole}>{person.email_domain}</span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {participants.length > 0 && (
+              <>
+                <h2 className={styles.sectionTitle}>People</h2>
+                <ul className={styles.people}>
+                  {participants.map((person) => (
+                    <li key={person.id} className={styles.person}>
+                      <span className={styles.avatar}>
+                        {initials(person.name || person.email)}
+                      </span>
+                      <span className={styles.personBody}>
+                        <span className={styles.personName}>
+                          {person.name || person.email}
+                        </span>
+                        {person.email_domain && (
+                          <span className={styles.personRole}>{person.email_domain}</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {/* other meetings of the same recurring series — see the dynamics */}
+            {related.length > 0 && (
+              <>
+                <h2 className={styles.sectionTitle}>Серия · {related.length + 1}</h2>
+                <ul className={styles.series}>
+                  {related.map((m) => (
+                    <li key={m.id}>
+                      <Link href={`/meetings/${m.id}`} className={styles.seriesRow}>
+                        <span className={styles.seriesDate}>{formatDayMonth(m.date)}</span>
+                        <span className={styles.seriesDur}>
+                          {formatDuration(m.duration_minutes)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </aside>
         )}
       </div>

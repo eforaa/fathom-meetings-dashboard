@@ -108,6 +108,61 @@
   color: var(--ink-45);
 }
 
+/* copy / export buttons under the facts line */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+
+.actionBtn {
+  padding: 6px 12px;
+  background: var(--paper-raised);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--ring);
+  cursor: pointer;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 12.5px;
+  color: var(--ink-70);
+  transition: box-shadow 0.12s ease, color 0.12s ease;
+}
+.actionBtn:hover {
+  box-shadow: inset 0 0 0 1px var(--sage);
+  color: var(--ink);
+}
+
+/* series siblings list in the aside */
+.series {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.seriesRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid var(--rule-soft);
+  text-decoration: none;
+}
+.seriesRow:hover .seriesDate {
+  color: var(--sage);
+}
+
+.seriesDate {
+  font-size: 13px;
+  color: var(--ink-70);
+}
+
+.seriesDur {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-45);
+}
+
 .summary {
   margin: 0;
   font-size: 15px;

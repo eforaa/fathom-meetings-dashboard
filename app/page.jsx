@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { getMeetings } from '@/lib/queries';
+import { getMeetings, searchMeetingIds } from '@/lib/queries';
 import {
   formatDayMonth,
   formatTime,
@@ -26,6 +26,7 @@ import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
+import SearchBox from './search-box';
 import Stats from './stats';
 import styles from './page.module.css';
 
@@ -139,7 +140,12 @@ export default async function MeetingsPage({ searchParams }) {
     FILTERABLE.map((tag) => [tag, collectFacets(all, participantsByMeeting, tag)]),
   );
 
-  const filtered = applyColumnFilters(all, participantsByMeeting, columnFilters);
+  //global search (?q=) over titles, summaries, transcripts and participants
+  const query = String(sp.q ?? '').trim();
+  const searchIds = query.length >= 2 ? await searchMeetingIds(user?.email, query) : null;
+  const searched = searchIds ? all.filter((m) => searchIds.has(m.id)) : all;
+
+  const filtered = applyColumnFilters(searched, participantsByMeeting, columnFilters);
   const sorted = applySlots(filtered, participantsByMeeting, slots);
 
   //optional "needs a name" view (?nameless=1) plus its live count for the badge
@@ -235,6 +241,7 @@ export default async function MeetingsPage({ searchParams }) {
             ) : (
               <>
                 <div className={styles.tableTools}>
+                  <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />
                 </div>

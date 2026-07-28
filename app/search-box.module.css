@@ -1,0 +1,22 @@
+.input {
+  flex: 1;
+  min-width: 180px;
+  max-width: 420px;
+  padding: 7px 12px;
+  background: var(--paper-raised);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--ring);
+  font-family: var(--font-ui), sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.input::placeholder {
+  color: var(--ink-25);
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--sage);
+}
