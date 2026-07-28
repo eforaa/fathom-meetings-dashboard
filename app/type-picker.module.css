@@ -52,12 +52,30 @@
     color: var(--ink-45);
 }
 
-/* compact mode for the list: type dots on one line */
+/* compact mode for the list: labelled chips on one line */
 .dots {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
+
+.chipSmall {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-family: var(--font-ui), sans-serif;
+    font-size: 11.5px;
+    white-space: nowrap;
+}
+
+.chipSmall[data-type='internal_planning'] { background: var(--type-internal-tint); color: var(--type-internal-ink); }
+.chipSmall[data-type='client_meeting']    { background: var(--type-client-tint);   color: var(--type-client-ink); }
+.chipSmall[data-type='automation']        { background: var(--type-automation-tint);color: var(--type-automation-ink); }
+.chipSmall[data-type='onboarding']        { background: var(--type-onboarding-tint);color: var(--type-onboarding-ink); }
+.chipSmall[data-type='other']             { background: var(--type-other-tint);     color: var(--type-other-ink); }
 
 .dot {
     width: 9px;

@@ -71,17 +71,19 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                 className={styles.trigger}
             >
                 {variant === 'compact' ? (
-                    //list: coloured dots on one line, or a faint hint when empty
+                    //list: labelled chips (first two + a +N), or a faint hint when empty
                     types.length ? (
                         <span className={styles.dots}>
-                            {types.map((type) => (
-                                <span
-                                    key={type}
-                                    title={typeLabel(type)}
-                                    className={styles.dot}
-                                    style={{ background: `var(--type-${type.split('_')[0]})` }}
-                                />
+                            {types.slice(0, 2).map((type) => (
+                                <span key={type} data-type={type} className={styles.chipSmall}>
+                                    {typeLabel(type)}
+                                </span>
                             ))}
+                            {types.length > 2 && (
+                                <span data-type="other" className={styles.chipSmall}>
+                                    +{types.length - 2}
+                                </span>
+                            )}
                         </span>
                     ) : (
                         <span className={styles.addCompact}>+ type</span>

@@ -4,9 +4,9 @@
   align-items: center;
   gap: 18px 24px;
   padding: 12px 16px;
-  background: var(--paper-raised, var(--wash));
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  background: var(--paper-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card), var(--ring);
 }
 
 /* number tiles */
@@ -84,10 +84,10 @@
   border-radius: 50%;
 }
 
-/* one calm accent scale, tuned for light and dark */
-.seg[data-tone='0'], .dot[data-tone='0'] { background: var(--sage); }
-.seg[data-tone='1'], .dot[data-tone='1'] { background: #5a7896; }
-.seg[data-tone='2'], .dot[data-tone='2'] { background: #b0873e; }
-.seg[data-tone='3'], .dot[data-tone='3'] { background: #8a6d9c; }
-.seg[data-tone='4'], .dot[data-tone='4'] { background: #6e746e; }
-.seg[data-tone='5'], .dot[data-tone='5'] { background: var(--rule); }
+/* segment/dot colour comes from the per-type tokens */
+.seg[data-type='internal_planning'], .dot[data-type='internal_planning'] { background: var(--type-internal); }
+.seg[data-type='client_meeting'],    .dot[data-type='client_meeting']    { background: var(--type-client); }
+.seg[data-type='automation'],        .dot[data-type='automation']        { background: var(--type-automation); }
+.seg[data-type='onboarding'],        .dot[data-type='onboarding']        { background: var(--type-onboarding); }
+.seg[data-type='other'],             .dot[data-type='other']             { background: var(--type-other); }
+.seg[data-type='__untyped'],         .dot[data-type='__untyped']         { background: var(--rule); }

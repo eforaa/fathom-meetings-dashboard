@@ -1,9 +1,10 @@
 /* the sorting side panel */
 
 .panel {
-  border: 1px solid var(--rule);
+  border: none;
   border-radius: var(--radius-lg);
   background: var(--paper-raised);
+  box-shadow: var(--shadow-card), var(--ring);
   overflow: hidden;
 }
 
@@ -243,6 +244,7 @@
 .value[data-active='true'] {
   background: var(--sage-soft);
   border-color: var(--sage);
+  color: var(--type-automation-ink);
 }
 
 .box {
@@ -339,5 +341,5 @@
 .pill[data-active='true'] {
   background: var(--sage-soft);
   border-color: var(--sage);
-  color: var(--sage);
+  color: var(--type-automation-ink);
 }

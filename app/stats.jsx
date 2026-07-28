@@ -31,7 +31,7 @@ export default function Stats({ total, hours, week, month, avg, types }) {
               <span
                 key={t.key}
                 className={styles.seg}
-                data-tone={t.key === '__untyped' ? 5 : i % 4}
+                data-type={t.key}
                 style={{ width: `${(t.count / typeTotal) * 100}%` }}
                 title={`${t.label}: ${t.count}`}
               />
@@ -40,7 +40,7 @@ export default function Stats({ total, hours, week, month, avg, types }) {
           <div className={styles.legend}>
             {types.map((t, i) => (
               <span key={t.key} className={styles.legendItem}>
-                <span className={styles.dot} data-tone={t.key === '__untyped' ? 5 : i % 4} />
+                <span className={styles.dot} data-type={t.key} />
                 {t.label}
                 <span className={styles.legendCount}>{t.count}</span>
               </span>
