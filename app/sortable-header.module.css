@@ -82,6 +82,26 @@
   letter-spacing: normal;
 }
 
+/* search box for long value lists (e.g. People), stays put while scrolling */
+.search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-bottom: 4px;
+  padding: 7px 9px;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.search:focus {
+  outline: none;
+  border-color: var(--sage);
+}
+
 .option {
   display: flex;
   align-items: center;

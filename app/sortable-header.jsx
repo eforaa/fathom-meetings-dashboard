@@ -22,7 +22,11 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   const router = useRouter();
   const searchParams = useSearchParams();
   const [openTag, setOpenTag] = useState(null);
+  const [query, setQuery] = useState('');
   const boxRef = useRef(null);
+
+  //fresh search box every time a filter opens
+  useEffect(() => setQuery(''), [openTag]);
 
   const activeTag = searchParams.get('tag') || 'date';
   const direction = searchParams.get('dir') || 'desc';
@@ -115,24 +119,53 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
                   <p className={styles.hint}>Нет значений</p>
                 ) : (
                   <>
-                    {facets.map((facet) => {
-                      const on = chosen.includes(facet.value);
-                      return (
-                        <button
-                          key={facet.value}
-                          type="button"
-                          onClick={() => toggleValue(tag, facet.value)}
-                          data-active={on}
-                          className={styles.option}
-                        >
-                          <span className={styles.box} data-on={on}>
-                            {on && '✓'}
-                          </span>
-                          <span className={styles.optionLabel}>{facet.value}</span>
-                          <span className={styles.count}>{facet.count}</span>
-                        </button>
+                    {facets.length > 6 && (
+                      <input
+                        type="search"
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Поиск…"
+                        className={styles.search}
+                        autoFocus
+                      />
+                    )}
+
+                    {(() => {
+                      const q = query.trim().toLowerCase();
+                      //keep chosen values always visible, filter the rest by query
+                      const list = facets.filter(
+                        (f) => chosen.includes(f.value) || !q || f.value.toLowerCase().includes(q),
                       );
-                    })}
+                      //chosen first, so what you picked never gets lost in the list
+                      list.sort(
+                        (a, b) =>
+                          (chosen.includes(b.value) ? 1 : 0) - (chosen.includes(a.value) ? 1 : 0),
+                      );
+
+                      if (list.length === 0) {
+                        return <p className={styles.hint}>Ничего не найдено</p>;
+                      }
+
+                      return list.map((facet) => {
+                        const on = chosen.includes(facet.value);
+                        return (
+                          <button
+                            key={facet.value}
+                            type="button"
+                            onClick={() => toggleValue(tag, facet.value)}
+                            data-active={on}
+                            className={styles.option}
+                          >
+                            <span className={styles.box} data-on={on}>
+                              {on && '✓'}
+                            </span>
+                            <span className={styles.optionLabel}>{facet.value}</span>
+                            <span className={styles.count}>{facet.count}</span>
+                          </button>
+                        );
+                      });
+                    })()}
+
                     {chosen.length > 0 && (
                       <button type="button" onClick={() => clearFilter(tag)} className={styles.clear}>
                         Сбросить
