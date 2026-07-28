@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './sortable-header.module.css';
 
@@ -23,10 +23,20 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   const searchParams = useSearchParams();
   const [openTag, setOpenTag] = useState(null);
   const [query, setQuery] = useState('');
+  const [, startTransition] = useTransition();
+  //optimistic copy of the filters so a checkbox flips instantly, before the
+  //server round-trip (which reloads the whole list) catches up
+  const [optimistic, setOptimistic] = useState({});
   const boxRef = useRef(null);
 
   //fresh search box every time a filter opens
   useEffect(() => setQuery(''), [openTag]);
+
+  //once the server reflects the change, drop the optimistic override
+  const filtersKey = JSON.stringify(columnFilters);
+  useEffect(() => setOptimistic({}), [filtersKey]);
+
+  const chosenFor = (tag) => optimistic[tag] ?? columnFilters[tag] ?? [];
 
   const activeTag = searchParams.get('tag') || 'date';
   const direction = searchParams.get('dir') || 'desc';
@@ -50,7 +60,9 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   }, [openTag]);
 
   function push(next) {
-    router.push(next.toString() ? `/?${next.toString()}` : '/');
+    startTransition(() => {
+      router.push(next.toString() ? `/?${next.toString()}` : '/');
+    });
   }
 
   function sortBy(tag) {
@@ -64,10 +76,13 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   }
 
   function toggleValue(tag, value) {
-    const current = columnFilters[tag] ?? [];
+    const current = chosenFor(tag);
     const nextValues = current.includes(value)
       ? current.filter((item) => item !== value)
       : [...current, value];
+
+    //flip the checkbox now, sync the URL in the background
+    setOptimistic((state) => ({ ...state, [tag]: nextValues }));
 
     const next = new URLSearchParams(searchParams.toString());
     if (nextValues.length) next.set(`c_${tag}`, nextValues.join('~'));
@@ -76,6 +91,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   }
 
   function clearFilter(tag) {
+    setOptimistic((state) => ({ ...state, [tag]: [] }));
     const next = new URLSearchParams(searchParams.toString());
     next.delete(`c_${tag}`);
     push(next);
@@ -85,7 +101,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
     <>
       {COLUMN_TAGS.map(({ label, tag, filterable }) => {
         const active = activeTag === tag;
-        const chosen = columnFilters[tag] ?? [];
+        const chosen = chosenFor(tag);
         const facets = facetsByTag[tag] ?? [];
 
         return (
