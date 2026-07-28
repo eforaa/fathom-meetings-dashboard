@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { db } from '@/lib/supabase';
-import { MEETING_TYPES } from '@/lib/ai';
-import { MAX_TYPES } from '@/lib/format';
+import { MEETING_TYPES, MAX_TYPES } from '@/lib/format';
 
 //always run, never cache
 export const dynamic = 'force-dynamic';
