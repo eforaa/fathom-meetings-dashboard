@@ -8,6 +8,8 @@ import {
   meetingTypes,
   meetingTitle,
   meetingTitleSource,
+  typeLabel,
+  MEETING_TYPES,
 } from '@/lib/format';
 import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetings } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
@@ -23,7 +25,60 @@ import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
+import Stats from './stats';
 import styles from './page.module.css';
+
+//a meeting longer than a day is broken data, not a real call — leave it out of
+//the totals so one bad row can't skew the hours
+const SANE_MINUTES = 24 * 60;
+
+//key numbers for the stats band, computed over the whole account
+function computeStats(meetings) {
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(now.getDate() - 7);
+
+  let totalMinutes = 0;
+  let counted = 0;
+  let week = 0;
+  let month = 0;
+
+  for (const meeting of meetings) {
+    const minutes = meeting.duration_minutes;
+    if (minutes && minutes <= SANE_MINUTES) {
+      totalMinutes += minutes;
+      counted += 1;
+    }
+    if (meeting.date) {
+      const d = new Date(meeting.date);
+      if (d >= weekAgo && d <= now) week += 1;
+      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) month += 1;
+    }
+  }
+
+  const typeCount = new Map();
+  let untyped = 0;
+  for (const meeting of meetings) {
+    const ts = meetingTypes(meeting);
+    if (ts.length === 0) untyped += 1;
+    for (const t of ts) typeCount.set(t, (typeCount.get(t) ?? 0) + 1);
+  }
+  const types = MEETING_TYPES
+    .map((key) => ({ key, label: typeLabel(key), count: typeCount.get(key) ?? 0 }))
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count);
+  //most calls have no type yet — show it, so the gap is visible
+  if (untyped > 0) types.push({ key: '__untyped', label: 'Без типа', count: untyped });
+
+  return {
+    total: meetings.length,
+    hours: Math.round(totalMinutes / 60),
+    week,
+    month,
+    avg: counted ? Math.round(totalMinutes / counted) : 0,
+    types,
+  };
+}
 
 //a meeting "needs a name" when all it shows is a placeholder — the raw Fathom
 //purpose line or nothing at all
@@ -157,6 +212,8 @@ export default async function MeetingsPage({ searchParams }) {
             {meetings.length} of {all.length}
           </span>
         </div>
+
+        {all.length > 0 && <Stats {...computeStats(all)} />}
 
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}

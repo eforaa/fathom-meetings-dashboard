@@ -1,0 +1,94 @@
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  background: var(--paper-raised, var(--wash));
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+/* number tiles */
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 62px;
+}
+
+.value {
+  font-family: var(--font-mono), monospace;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-45);
+}
+
+/* type breakdown */
+.types {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 220px;
+  margin-left: auto;
+}
+
+.bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--wash);
+}
+
+.seg {
+  height: 100%;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-45);
+}
+
+.legendCount {
+  font-family: var(--font-mono), monospace;
+  color: var(--ink-70);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* one calm accent scale, tuned for light and dark */
+.seg[data-tone='0'], .dot[data-tone='0'] { background: var(--sage); }
+.seg[data-tone='1'], .dot[data-tone='1'] { background: #5a7896; }
+.seg[data-tone='2'], .dot[data-tone='2'] { background: #b0873e; }
+.seg[data-tone='3'], .dot[data-tone='3'] { background: #8a6d9c; }
+.seg[data-tone='4'], .dot[data-tone='4'] { background: #6e746e; }
+.seg[data-tone='5'], .dot[data-tone='5'] { background: var(--rule); }
