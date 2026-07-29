@@ -51,13 +51,12 @@
   min-width: 0;
 }
 
-/* a collapsed group shows a single summary line instead of its rows */
-.summary {
+/* a group header line: gutter (with the +/- toggle) + label + count */
+.header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px 10px 0;
-  border-top: 1px solid var(--rule-soft);
+  padding: 9px 20px 5px 0;
 }
 
 .label {

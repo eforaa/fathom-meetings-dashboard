@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import styles from './outline.module.css';
 
-//Google-Sheets-style outline grouping: a left gutter with one column per
-//grouping level; each group starts with a +/− in its column and a bracket line
-//down its rows. Collapsing a level hides its rows and leaves a summary line.
+//spreadsheet-style outline grouping. each group that has more than one meeting
+//gets a thin header line — a +/- toggle sitting in its gutter column plus the
+//group's label and count — and its rows are drawn with bracket lines in the
+//gutter. collapsing a group hides its rows, leaving just the header.
 const CELL = 22; //px width of one gutter column
 
 export default function Outline({ meta, children }) {
@@ -22,16 +23,58 @@ export default function Outline({ meta, children }) {
     });
   }
 
+  //the gutter for a data row: a bracket line under every real (multi) group
+  function bracketGutter(path) {
+    const cells = [];
+    for (let l = 0; l < levels; l += 1) {
+      const seg = path[l];
+      cells.push(
+        <span key={l} className={styles.cell}>
+          {seg && seg.count > 1 && <span className={styles.line} />}
+        </span>,
+      );
+    }
+    return cells;
+  }
+
+  //the gutter for a header line: bracket lines for parent levels, a toggle at
+  //this level's column, empty after
+  function headerGutter(path, level, isCollapsed) {
+    const cells = [];
+    for (let l = 0; l < levels; l += 1) {
+      if (l === level) {
+        cells.push(
+          <span key={l} className={styles.cell}>
+            <button
+              type="button"
+              onClick={() => toggle(path[level].key)}
+              className={styles.toggle}
+              data-open={!isCollapsed}
+            >
+              {isCollapsed ? '+' : '−'}
+            </button>
+          </span>,
+        );
+      } else {
+        const seg = path[l];
+        cells.push(
+          <span key={l} className={styles.cell}>
+            {l < level && seg && seg.count > 1 && <span className={styles.line} />}
+          </span>,
+        );
+      }
+    }
+    return cells;
+  }
+
   const out = [];
-  const summarised = new Set();
 
   for (let i = 0; i < meta.length; i += 1) {
     const entry = meta[i];
     const prev = meta[i - 1];
-    //first row of a new group at each level
     const firstAt = entry.path.map((seg, l) => !prev || prev.path[l]?.key !== seg.key);
 
-    //shallowest collapsed ancestor, if any
+    //shallowest collapsed ancestor hides everything deeper
     let hiddenBy = -1;
     for (let l = 0; l < entry.path.length; l += 1) {
       if (collapsed.has(entry.path[l].key)) {
@@ -39,64 +82,35 @@ export default function Outline({ meta, children }) {
         break;
       }
     }
+    const maxLevel = hiddenBy >= 0 ? hiddenBy : entry.path.length - 1;
 
-    if (hiddenBy >= 0) {
-      const seg = entry.path[hiddenBy];
-      //one summary line per collapsed group, at its first row
-      if (firstAt[hiddenBy] && !summarised.has(seg.key)) {
-        summarised.add(seg.key);
-        out.push(
-          <div key={`s-${seg.key}`} className={styles.summary} style={{ paddingLeft: hiddenBy * CELL }}>
-            <button type="button" onClick={() => toggle(seg.key)} className={styles.toggle} data-open="false">
-              +
-            </button>
-            <span className={styles.label}>{seg.label}</span>
-            <span className={styles.count}>{seg.count}</span>
-          </div>,
-        );
-      }
-      continue;
-    }
-
-    //visible row: gutter cells + the row itself.
-    //only real groups (more than one meeting) get a toggle + bracket; a group
-    //of one leaves its column empty so the gutter stays clean.
-    const gutter = [];
-    for (let l = 0; l < levels; l += 1) {
+    //group headers that start at this row (down to the collapsed one, if any)
+    for (let l = 0; l <= maxLevel; l += 1) {
       const seg = entry.path[l];
-      if (!seg || seg.count <= 1) {
-        gutter.push(<span key={l} className={styles.cell} />);
-      } else if (firstAt[l]) {
-        gutter.push(
-          <span key={l} className={styles.cell}>
-            <button
-              type="button"
-              onClick={() => toggle(seg.key)}
-              className={styles.toggle}
-              data-open="true"
-              title={`${seg.label} · ${seg.count}`}
-            >
-              −
-            </button>
-          </span>,
-        );
-      } else {
-        gutter.push(
-          <span key={l} className={styles.cell}>
-            <span className={styles.line} />
-          </span>,
-        );
-      }
+      if (!firstAt[l] || seg.count <= 1) continue;
+      const isCollapsed = collapsed.has(seg.key);
+      out.push(
+        <div key={`h-${seg.key}`} className={styles.header}>
+          <span className={styles.gutter} style={{ width: levels * CELL }}>
+            {headerGutter(entry.path, l, isCollapsed)}
+          </span>
+          <span className={styles.label}>{seg.label}</span>
+          <span className={styles.count}>{seg.count}</span>
+        </div>,
+      );
     }
 
-    out.push(
-      <div key={entry.id} className={styles.rowWrap}>
-        <span className={styles.gutter} style={{ width: levels * CELL }}>
-          {gutter}
-        </span>
-        <span className={styles.rowSlot}>{rows[i]}</span>
-      </div>,
-    );
+    //the meeting row itself — only when nothing above it is collapsed
+    if (hiddenBy < 0) {
+      out.push(
+        <div key={entry.id} className={styles.rowWrap}>
+          <span className={styles.gutter} style={{ width: levels * CELL }}>
+            {bracketGutter(entry.path)}
+          </span>
+          <span className={styles.rowSlot}>{rows[i]}</span>
+        </div>,
+      );
+    }
   }
 
   return <div>{out}</div>;
