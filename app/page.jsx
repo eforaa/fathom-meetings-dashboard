@@ -12,10 +12,17 @@ import {
   typeLabel,
   MEETING_TYPES,
 } from '@/lib/format';
-import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetingsTree } from '@/lib/tags';
+import {
+  applySlots,
+  applyColumnFilters,
+  collectFacets,
+  readView,
+  groupMeetingsTree,
+  flattenTree,
+} from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { listColumns } from '@/lib/columns';
-import Group from './grouped';
+import Outline from './outline';
 import Stars from './stars';
 import EditableTitle from './editable-title';
 import TypePicker from './type-picker';
@@ -102,21 +109,6 @@ function trackWidth(type) {
 
 const VISIBLE_AVATARS = 3;
 
-//render a (possibly nested) group tree: inner nodes hold `children`, leaf nodes
-//hold `items` which are mapped to rows/cards via `render`. depth drives indent.
-function renderTree(nodes, render, depth = 0, prefix = '') {
-  return nodes.map((node, i) => {
-    const key = `${prefix}${i}`;
-    return (
-      <Group key={key} label={node.label} count={node.count} depth={depth}>
-        {node.items
-          ? node.items.map(render)
-          : renderTree(node.children, render, depth + 1, `${key}-`)}
-      </Group>
-    );
-  });
-}
-
 //main meeting page
 //reading the view from the url, loading meetings, applying it
 export default async function MeetingsPage({ searchParams }) {
@@ -182,10 +174,15 @@ export default async function MeetingsPage({ searchParams }) {
   );
 
   //groups are built on the already sorted list, so their order follows the sort.
-  //a nested tree when several grouping levels are chosen (Alexander's 3 columns)
+  //a nested tree when several grouping levels are chosen (Alexander's 3 columns);
+  //flattened into rows + a per-row group path that drives the outline gutter
   const tree = groupTags.length
     ? groupMeetingsTree(meetings, participantsByMeeting, groupTags)
     : null;
+  const flat = tree ? flattenTree(tree) : null;
+  const outlineMeta = flat ? flat.map((entry) => ({ id: entry.meeting.id, path: entry.path })) : null;
+  //the gutter takes one 22px column per grouping level; the head shifts to match
+  const gutterPad = groupTags.length ? groupTags.length * 22 : 0;
 
   //one row, rendered the same way inside a group and without one
   const row = (meeting) => (
@@ -266,7 +263,10 @@ export default async function MeetingsPage({ searchParams }) {
 
                 <div className={styles.tableScroll}>
                   <div className={styles.table} style={gridStyle}>
-                    <div className={styles.tableHead}>
+                    <div
+                      className={styles.tableHead}
+                      style={gutterPad ? { paddingLeft: 20 + gutterPad } : undefined}
+                    >
                       <SortableHeader facetsByTag={facetsByTag} columnFilters={columnFilters} />
                       {columns.map((column) => (
                         <span key={column.id}>
@@ -275,12 +275,16 @@ export default async function MeetingsPage({ searchParams }) {
                       ))}
                     </div>
 
-                    {tree ? renderTree(tree, row) : meetings.map(row)}
+                    {flat ? (
+                      <Outline meta={outlineMeta}>{flat.map((entry) => row(entry.meeting))}</Outline>
+                    ) : (
+                      meetings.map(row)
+                    )}
                   </div>
                 </div>
 
                 <div className={styles.cards}>
-                  {tree ? renderTree(tree, card) : meetings.map(card)}
+                  {flat ? flat.map((entry) => card(entry.meeting)) : meetings.map(card)}
                 </div>
               </>
             )}

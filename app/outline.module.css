@@ -1,0 +1,73 @@
+/* one meeting row prefixed with its outline gutter */
+.rowWrap {
+  display: flex;
+  align-items: stretch;
+}
+
+.gutter {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+}
+
+/* the vertical bracket line for rows inside a group */
+.line {
+  width: 1px;
+  height: 100%;
+  background: var(--rule);
+}
+
+/* +/− toggle at the top of a group */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-45);
+}
+.toggle:hover {
+  border-color: var(--sage);
+  color: var(--ink);
+}
+
+.rowSlot {
+  flex: 1;
+  min-width: 0;
+}
+
+/* a collapsed group shows a single summary line instead of its rows */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 10px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.label {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.count {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-45);
+}
