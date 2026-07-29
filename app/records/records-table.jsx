@@ -1,75 +1,80 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import styles from './records.module.css';
+import { MindSheet } from '@aivocado/mindsheet';
 
-//the raw fields shown as columns, in the order the naming rule reads them
-const FIELDS = ['custom_title', 'ai_title', 'title', 'fathom_title'];
+// Same portable UI as the AI-Researcher app — "one code → two bases".
+// Here it renders Fathom meeting records; there it renders the product catalog.
+const COLUMNS = [
+  { key: 'date', label: 'Дата', type: 'text', sortable: true },
+  { key: 'shown', label: 'Показывается', type: 'text', sortable: true },
+  { key: 'source', label: 'Источник', type: 'select', sortable: true, filterable: true },
+  { key: 'title', label: 'title', type: 'text' },
+  { key: 'custom_title', label: 'custom_title', type: 'text' },
+  { key: 'ai_title', label: 'ai_title', type: 'text' },
+  { key: 'fathom_title', label: 'fathom_title', type: 'text' },
+];
 
-//a client-side search over the raw records; server already scoped them to the
-//signed-in owner, so this only narrows what is already on screen
+function hasValue(v) {
+  return v !== null && v !== undefined && v !== '';
+}
+
+function compare(a, b, dir) {
+  const factor = dir === 'asc' ? 1 : -1;
+  if (!hasValue(a) && !hasValue(b)) return 0;
+  if (!hasValue(a)) return 1;
+  if (!hasValue(b)) return -1;
+  return String(a).localeCompare(String(b), 'ru') * factor;
+}
+
 export default function RecordsTable({ rows }) {
-  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState();
+  const [filter, setFilter] = useState();
+  const [search, setSearch] = useState('');
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((row) =>
-      [row.shown, row.title, row.custom_title, row.ai_title, row.fathom_title]
-        .join(' ')
-        .toLowerCase()
-        .includes(q),
+  // filter options come from the full set so a chosen value never hides the rest
+  const facets = useMemo(() => {
+    const out = {};
+    for (const col of COLUMNS) {
+      if (!col.filterable) continue;
+      const set = new Set();
+      for (const r of rows) if (hasValue(r[col.key])) set.add(String(r[col.key]));
+      out[col.key] = [...set].sort((a, b) => a.localeCompare(b, 'ru'));
+    }
+    return out;
+  }, [rows]);
+
+  const displayed = useMemo(() => {
+    let out = [...rows];
+    const q = search.trim().toLowerCase();
+    if (q) {
+      out = out.filter((r) =>
+        Object.values(r).filter((v) => typeof v === 'string').join(' ').toLowerCase().includes(q),
+      );
+    }
+    if (filter) out = out.filter((r) => String(r[filter.key] ?? '') === filter.value);
+    if (sort) out.sort((a, b) => compare(a[sort.key], b[sort.key], sort.dir));
+    return out;
+  }, [rows, search, filter, sort]);
+
+  const onSortChange = (key) =>
+    setSort((prev) =>
+      prev?.key === key
+        ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+        : { key, dir: 'asc' },
     );
-  }, [rows, query]);
 
   return (
-    <>
-      <div className={styles.toolbar}>
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Поиск по названиям…"
-          className={styles.search}
-        />
-        <span className={styles.count}>
-          {filtered.length} of {rows.length}
-        </span>
-      </div>
-
-      <div className={styles.tableScroll}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.thDate}>Date</th>
-              <th className={styles.thShown}>Shown</th>
-              {FIELDS.map((field) => (
-                <th key={field}>
-                  <code>{field}</code>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row) => (
-              <tr key={row.id}>
-                <td className={styles.date}>{row.date}</td>
-                <td className={styles.shown}>{row.shown}</td>
-                {FIELDS.map((field) => (
-                  <td
-                    key={field}
-                    className={row.source === field ? styles.active : styles.muted}
-                  >
-                    {row[field] || <span className={styles.empty}>—</span>}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {filtered.length === 0 && <p className={styles.none}>Ничего не найдено</p>}
-      </div>
-    </>
+    <MindSheet
+      columns={COLUMNS}
+      records={displayed}
+      sort={sort}
+      filter={filter}
+      filterOptions={facets}
+      search={search}
+      onSortChange={onSortChange}
+      onFilterChange={setFilter}
+      onSearchChange={setSearch}
+    />
   );
 }
