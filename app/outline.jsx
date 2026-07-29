@@ -58,11 +58,13 @@ export default function Outline({ meta, children }) {
       continue;
     }
 
-    //visible row: gutter cells + the row itself
+    //visible row: gutter cells + the row itself.
+    //only real groups (more than one meeting) get a toggle + bracket; a group
+    //of one leaves its column empty so the gutter stays clean.
     const gutter = [];
     for (let l = 0; l < levels; l += 1) {
       const seg = entry.path[l];
-      if (!seg) {
+      if (!seg || seg.count <= 1) {
         gutter.push(<span key={l} className={styles.cell} />);
       } else if (firstAt[l]) {
         gutter.push(
