@@ -12,7 +12,7 @@ import {
   typeLabel,
   MEETING_TYPES,
 } from '@/lib/format';
-import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetings } from '@/lib/tags';
+import { applySlots, applyColumnFilters, collectFacets, readView, groupMeetingsTree } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { listColumns } from '@/lib/columns';
 import Group from './grouped';
@@ -102,11 +102,26 @@ function trackWidth(type) {
 
 const VISIBLE_AVATARS = 3;
 
+//render a (possibly nested) group tree: inner nodes hold `children`, leaf nodes
+//hold `items` which are mapped to rows/cards via `render`. depth drives indent.
+function renderTree(nodes, render, depth = 0, prefix = '') {
+  return nodes.map((node, i) => {
+    const key = `${prefix}${i}`;
+    return (
+      <Group key={key} label={node.label} count={node.count} depth={depth}>
+        {node.items
+          ? node.items.map(render)
+          : renderTree(node.children, render, depth + 1, `${key}-`)}
+      </Group>
+    );
+  });
+}
+
 //main meeting page
 //reading the view from the url, loading meetings, applying it
 export default async function MeetingsPage({ searchParams }) {
   const sp = await searchParams;
-  const { slots, group } = readView(sp);
+  const { slots, groups: groupTags } = readView(sp);
 
   //who is signed in
   const supabase = createClientForServer(await cookies());
@@ -166,8 +181,11 @@ export default async function MeetingsPage({ searchParams }) {
     0,
   );
 
-  //groups are built on the already sorted list, so their order follows the sort
-  const groups = group ? groupMeetings(meetings, participantsByMeeting, group) : null;
+  //groups are built on the already sorted list, so their order follows the sort.
+  //a nested tree when several grouping levels are chosen (Alexander's 3 columns)
+  const tree = groupTags.length
+    ? groupMeetingsTree(meetings, participantsByMeeting, groupTags)
+    : null;
 
   //one row, rendered the same way inside a group and without one
   const row = (meeting) => (
@@ -230,7 +248,7 @@ export default async function MeetingsPage({ searchParams }) {
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
-            <Slot slots={slots} facetsBySlot={facetsBySlot} group={group} />
+            <Slot slots={slots} facetsBySlot={facetsBySlot} groups={groupTags} />
           </aside>
 
           <div className={styles.content}>
@@ -257,32 +275,12 @@ export default async function MeetingsPage({ searchParams }) {
                       ))}
                     </div>
 
-                    {groups
-                      ? groups.map((section) => (
-                          <Group
-                            key={section.label}
-                            label={section.label}
-                            count={section.items.length}
-                          >
-                            {section.items.map(row)}
-                          </Group>
-                        ))
-                      : meetings.map(row)}
+                    {tree ? renderTree(tree, row) : meetings.map(row)}
                   </div>
                 </div>
 
                 <div className={styles.cards}>
-                  {groups
-                    ? groups.map((section) => (
-                        <Group
-                          key={section.label}
-                          label={section.label}
-                          count={section.items.length}
-                        >
-                          {section.items.map(card)}
-                        </Group>
-                      ))
-                    : meetings.map(card)}
+                  {tree ? renderTree(tree, card) : meetings.map(card)}
                 </div>
               </>
             )}

@@ -13,7 +13,10 @@ const TYPE_COLOR = Object.fromEntries(
 );
 
 //sorting levels, their filters and the grouping, all in one panel
-export default function Slot({ slots, facetsBySlot, group }) {
+//url keys for the three nested grouping levels (the "3 columns")
+const GROUP_KEYS = ['group', 'group2', 'group3'];
+
+export default function Slot({ slots, facetsBySlot, groups = [] }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -74,7 +77,7 @@ export default function Slot({ slots, facetsBySlot, group }) {
                     ▶
                 </span>
                 Sorting
-                {!panelOpen && <span className={styles.panelSummary}>{summarize(levels, group)}</span>}
+                {!panelOpen && <span className={styles.panelSummary}>{summarize(levels, groups)}</span>}
             </button>
 
             {panelOpen && (
@@ -101,31 +104,54 @@ export default function Slot({ slots, facetsBySlot, group }) {
                         </button>
                     )}
 
-                    <div className={styles.groupRow}>
-                        <span className={styles.groupTitle}>Group by</span>
+                    {/* nested grouping: up to three levels form a tree */}
+                    {GROUP_KEYS.map((key, level) => {
+                        //a deeper level only appears once the one above is set
+                        if (level > 0 && !groups[level - 1]) return null;
 
-                        <div className={styles.pills}>
-                            <button
-                                type="button"
-                                onClick={() => apply({ group: null })}
-                                data-active={!group}
-                                className={styles.pill}
-                            >
-                                none
-                            </button>
-                            {TAG_OPTIONS.map((option) => (
-                                <button
-                                    key={option.id}
-                                    type="button"
-                                    onClick={() => apply({ group: option.id })}
-                                    data-active={option.id === group}
-                                    className={styles.pill}
-                                >
-                                    {option.label.toLowerCase()}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                        const current = groups[level] ?? '';
+                        //tags already used on other levels can't be picked again
+                        const used = groups.filter((_, i) => i !== level);
+
+                        //"none" on a level clears it and every deeper level
+                        const clearFrom = () => {
+                            const changes = {};
+                            for (let i = level; i < GROUP_KEYS.length; i += 1) changes[GROUP_KEYS[i]] = null;
+                            return changes;
+                        };
+
+                        return (
+                            <div key={key} className={styles.groupRow}>
+                                <span className={styles.groupTitle}>
+                                    {level === 0 ? 'Group by' : 'then by'}
+                                </span>
+
+                                <div className={styles.pills}>
+                                    <button
+                                        type="button"
+                                        onClick={() => apply(clearFrom())}
+                                        data-active={!current}
+                                        className={styles.pill}
+                                    >
+                                        none
+                                    </button>
+                                    {TAG_OPTIONS.filter((option) => !used.includes(option.id)).map(
+                                        (option) => (
+                                            <button
+                                                key={option.id}
+                                                type="button"
+                                                onClick={() => apply({ [key]: option.id })}
+                                                data-active={option.id === current}
+                                                className={styles.pill}
+                                            >
+                                                {option.label.toLowerCase()}
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </section>
@@ -288,11 +314,13 @@ function Level({ slot, position, facets, apply, onRemove, canRemove, open, onTog
 }
 
 //one line describing the whole panel while it is folded away
-function summarize(levels, group) {
+function summarize(levels, groups) {
     const order = levels
         .map((slot) => `${TAGS[slot.tag].label} ${slot.direction === 'asc' ? '↑' : '↓'}`)
         .join(' → ');
 
-    const grouped = group ? `, grouped by ${TAGS[group].label.toLowerCase()}` : '';
+    const grouped = groups.length
+        ? `, grouped by ${groups.map((id) => TAGS[id].label.toLowerCase()).join(' › ')}`
+        : '';
     return `${order}${grouped}`;
 }
