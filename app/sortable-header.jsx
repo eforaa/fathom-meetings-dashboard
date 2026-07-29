@@ -7,11 +7,11 @@ import styles from './sortable-header.module.css';
 //built-in columns, the sort tag each maps to (lib/tags.js), and whether a
 //multi-value filter makes sense (title/date/duration are one value per row)
 const COLUMN_TAGS = [
+  { label: 'Date', tag: 'date', filterable: false },
   { label: 'Meeting', tag: 'title', filterable: false },
   { label: 'Types', tag: 'type', filterable: true },
   { label: 'Duration', tag: 'duration', filterable: false },
   { label: 'People', tag: 'people', filterable: true },
-  { label: 'Date', tag: 'date', filterable: false },
   { label: 'Priority', tag: 'importance', filterable: true },
 ];
 

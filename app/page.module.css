@@ -355,8 +355,6 @@
 /* date */
 
 .date {
-  justify-self: end;
-  text-align: right;
   font-family: var(--font-mono), monospace;
   font-size: 11.5px;
   line-height: 1.35;

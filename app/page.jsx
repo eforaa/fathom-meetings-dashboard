@@ -96,7 +96,8 @@ const NEEDS_NAME = new Set(['fathom_title', 'none']);
 export const dynamic = 'force-dynamic';
 
 //the six built-in tracks; custom columns are appended after them
-const BUILTIN_GRID = 'minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 96px 84px';
+//Date first (Alexander's ask), then Meeting, Types, Duration, People, Priority
+const BUILTIN_GRID = '104px minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 84px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -307,6 +308,11 @@ function MeetingRow({ meeting, participants, longest, columns }) {
 
   return (
     <div className={styles.row} data-unnamed={unnamed || undefined}>
+      <span className={styles.date}>
+        {formatDayMonth(meeting.date)}
+        <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date)}</span>
+      </span>
+
       <span className={styles.titleCell}>
         <EditableTitle
           meetingId={meeting.id}
@@ -328,11 +334,6 @@ function MeetingRow({ meeting, participants, longest, columns }) {
       </span>
 
       <AvatarStack participants={participants} />
-
-      <span className={styles.date}>
-        {formatDayMonth(meeting.date)}
-        <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date)}</span>
-      </span>
 
       <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
 
