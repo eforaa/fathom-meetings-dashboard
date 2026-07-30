@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@aivocado/mindsheet": "file:../../ai-researcher/packages/mindsheet",
+    "@aivocado/mindsheet": "github:svedenieva/mindsheet",
     "@anthropic-ai/claude-agent-sdk": "^0.3.207",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
