@@ -29,6 +29,8 @@ function compare(a, b, dir) {
 
 export default function RecordsTable({ rows }) {
   const [sort, setSort] = useState();
+  // дополнительные уровни сортировки/группировки (Shift + клик), до 2 сверх первого
+  const [extraLevels, setExtraLevels] = useState([]);
   const [filter, setFilter] = useState();
   const [search, setSearch] = useState('');
 
@@ -57,24 +59,53 @@ export default function RecordsTable({ rows }) {
     return out;
   }, [rows, search, filter, sort]);
 
-  const onSortChange = (key) =>
+  const onSortChange = (key) => {
     setSort((prev) =>
       prev?.key === key
         ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
         : { key, dir: 'asc' },
     );
+    setExtraLevels([]);
+  };
+
+  // Shift/Ctrl + клик добавляет колонку следующим уровнем группировки (всего до 3)
+  const onSortsChange = (key, additive) => {
+    if (!additive) {
+      onSortChange(key);
+      return;
+    }
+    setExtraLevels((prev) => {
+      if (sort?.key === key) return prev;
+      const i = prev.findIndex((l) => l.key === key);
+      if (i >= 0) {
+        const next = [...prev];
+        next[i] = { key, dir: next[i].dir === 'asc' ? 'desc' : 'asc' };
+        return next;
+      }
+      return prev.length >= 2 ? prev : [...prev, { key, dir: 'asc' }];
+    });
+  };
+
+  const onSortReset = () => {
+    setSort(undefined);
+    setExtraLevels([]);
+  };
 
   return (
     <MindSheet
       columns={COLUMNS}
       records={displayed}
       sort={sort}
+      sorts={sort ? [sort, ...extraLevels] : extraLevels}
       filter={filter}
       filterOptions={facets}
       search={search}
       onSortChange={onSortChange}
+      onSortsChange={onSortsChange}
+      onSortReset={onSortReset}
       onFilterChange={setFilter}
       onSearchChange={setSearch}
+      autoGroup
     />
   );
 }
