@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './nameless-filter.module.css';
 
 //a quick toggle that narrows the list to meetings that still need a name —
@@ -9,6 +10,7 @@ import styles from './nameless-filter.module.css';
 export default function NamelessFilter({ count = 0 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const T = useT();
   const on = searchParams.get('nameless') === '1';
 
   function toggle() {
@@ -20,7 +22,7 @@ export default function NamelessFilter({ count = 0 }) {
 
   return (
     <button type="button" onClick={toggle} data-active={on} className={styles.btn}>
-      Без названия
+      {T('nameless.button')}
       {count > 0 && <span className={styles.count}>{count}</span>}
     </button>
   );

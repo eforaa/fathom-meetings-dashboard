@@ -1,20 +1,23 @@
+import { t } from '@/lib/i18n';
 import styles from './stats.module.css';
 
 //a compact band of key numbers above the table — a quick "state of meetings"
 //read for a non-technical owner. all values are pre-computed on the server.
-export default function Stats({ total, hours, week, month, avg, types }) {
+//a server component: the language arrives as a prop from the page, so no
+//context is needed and nothing extra ships to the browser
+export default function Stats({ total, hours, week, month, avg, types, lang }) {
   const tiles = [
-    { label: 'Встреч', value: total },
-    { label: 'Часов всего', value: hours },
-    { label: 'За неделю', value: week },
-    { label: 'За месяц', value: month },
-    { label: 'Средняя', value: avg ? `${avg} мин` : '—' },
+    { label: t(lang, 'stats.meetings'), value: total },
+    { label: t(lang, 'stats.hours'), value: hours },
+    { label: t(lang, 'stats.week'), value: week },
+    { label: t(lang, 'stats.month'), value: month },
+    { label: t(lang, 'stats.average'), value: avg ? t(lang, 'duration.min', { n: avg }) : '—' },
   ];
 
   const typeTotal = types.reduce((sum, t) => sum + t.count, 0);
 
   return (
-    <section className={styles.wrap} aria-label="Статистика встреч">
+    <section className={styles.wrap} aria-label={t(lang, 'stats.aria')}>
       <div className={styles.tiles}>
         {tiles.map((t) => (
           <div key={t.label} className={styles.tile}>

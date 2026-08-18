@@ -2,17 +2,21 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { buildTags } from '@/lib/tags';
+import { useLang, useT } from './lang-context';
 import styles from './sortable-header.module.css';
 
-//built-in columns, the sort tag each maps to (lib/tags.js), and whether a
-//multi-value filter makes sense (title/date/duration are one value per row)
-const COLUMN_TAGS = [
-  { label: 'Date', tag: 'date', filterable: false },
-  { label: 'Meeting', tag: 'title', filterable: false },
-  { label: 'Types', tag: 'type', filterable: true },
-  { label: 'Duration', tag: 'duration', filterable: false },
-  { label: 'People', tag: 'people', filterable: true },
-  { label: 'Priority', tag: 'importance', filterable: true },
+//built-in columns in the order they appear, the sort tag each maps to
+//(lib/tags.js), and whether a multi-value filter makes sense (title/date/
+//duration are one value per row). The headings themselves come from the tag
+//registry, so a column is named the same here and in the sorting panel.
+const COLUMNS = [
+  { tag: 'date', filterable: false },
+  { tag: 'title', filterable: false },
+  { tag: 'type', filterable: true },
+  { tag: 'duration', filterable: false },
+  { tag: 'people', filterable: true },
+  { tag: 'importance', filterable: true },
 ];
 
 //clickable, filterable column headers (Excel/Sheets style):
@@ -21,6 +25,9 @@ const COLUMN_TAGS = [
 export default function SortableHeader({ facetsByTag = {}, columnFilters = {} }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const lang = useLang();
+  const T = useT();
+  const tags = buildTags(lang);
   const [openTag, setOpenTag] = useState(null);
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
@@ -99,7 +106,8 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
 
   return (
     <>
-      {COLUMN_TAGS.map(({ label, tag, filterable }) => {
+      {COLUMNS.map(({ tag, filterable }) => {
+        const label = tags[tag].label;
         const active = activeTag === tag;
         const chosen = chosenFor(tag);
         const facets = facetsByTag[tag] ?? [];
@@ -111,7 +119,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
               onClick={() => sortBy(tag)}
               data-active={active}
               className={styles.colHead}
-              title={`Sort by ${label}`}
+              title={T('header.sortBy', { label })}
             >
               {label}
               <span className={styles.arrow}>{active ? (direction === 'asc' ? '↑' : '↓') : ''}</span>
@@ -123,7 +131,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
                 onClick={() => setOpenTag(openTag === tag ? null : tag)}
                 data-active={chosen.length > 0}
                 className={styles.filterBtn}
-                title={`Filter ${label}`}
+                title={T('header.filterBy', { label })}
               >
                 ▾{chosen.length > 0 && <span className={styles.badge}>{chosen.length}</span>}
               </button>
@@ -132,7 +140,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
             {openTag === tag && (
               <div className={styles.panel}>
                 {facets.length === 0 ? (
-                  <p className={styles.hint}>Нет значений</p>
+                  <p className={styles.hint}>{T('header.noValues')}</p>
                 ) : (
                   <>
                     {facets.length > 6 && (
@@ -140,7 +148,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
                         type="search"
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
-                        placeholder="Поиск…"
+                        placeholder={T('header.search')}
                         className={styles.search}
                         autoFocus
                       />
@@ -159,7 +167,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
                       );
 
                       if (list.length === 0) {
-                        return <p className={styles.hint}>Ничего не найдено</p>;
+                        return <p className={styles.hint}>{T('header.nothingFound')}</p>;
                       }
 
                       return list.map((facet) => {
@@ -184,7 +192,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
 
                     {chosen.length > 0 && (
                       <button type="button" onClick={() => clearFilter(tag)} className={styles.clear}>
-                        Сбросить
+                        {T('header.reset')}
                       </button>
                     )}
                   </>

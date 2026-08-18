@@ -21,6 +21,9 @@ import {
   flattenTree,
 } from '@/lib/tags';
 import { createClientForServer } from '@/lib/supabase-auth';
+import { getLang } from '@/lib/i18n/server';
+import { t, plural } from '@/lib/i18n';
+import LangSwitch from './lang-switch';
 import { listColumns } from '@/lib/columns';
 import Outline from './outline';
 import Stars from './stars';
@@ -42,7 +45,7 @@ import styles from './page.module.css';
 const SANE_MINUTES = 24 * 60;
 
 //key numbers for the stats band, computed over the whole account
-function computeStats(meetings) {
+function computeStats(meetings, lang) {
   const now = new Date();
   const weekAgo = new Date(now);
   weekAgo.setDate(now.getDate() - 7);
@@ -73,11 +76,11 @@ function computeStats(meetings) {
     for (const t of ts) typeCount.set(t, (typeCount.get(t) ?? 0) + 1);
   }
   const types = MEETING_TYPES
-    .map((key) => ({ key, label: typeLabel(key), count: typeCount.get(key) ?? 0 }))
+    .map((key) => ({ key, label: typeLabel(key, lang), count: typeCount.get(key) ?? 0 }))
     .filter((t) => t.count > 0)
     .sort((a, b) => b.count - a.count);
   //most calls have no type yet — show it, so the gap is visible
-  if (untyped > 0) types.push({ key: '__untyped', label: 'Без типа', count: untyped });
+  if (untyped > 0) types.push({ key: '__untyped', label: t(lang, 'group.noType'), count: untyped });
 
   return {
     total: meetings.length,
@@ -115,6 +118,7 @@ const VISIBLE_AVATARS = 3;
 export default async function MeetingsPage({ searchParams }) {
   const sp = await searchParams;
   const { slots, groups: groupTags } = readView(sp);
+  const lang = await getLang();
 
   //who is signed in
   const supabase = createClientForServer(await cookies());
@@ -136,7 +140,7 @@ export default async function MeetingsPage({ searchParams }) {
   //values for the filter chips are collected before filtering,
   //otherwise choosing one value would hide all the others
   const facetsBySlot = slots.map((slot) =>
-    slot.tag ? collectFacets(all, participantsByMeeting, slot.tag) : [],
+    slot.tag ? collectFacets(all, participantsByMeeting, slot.tag, lang) : [],
   );
 
   //per-column filters from the table header (multi-value, AND across columns)
@@ -145,7 +149,7 @@ export default async function MeetingsPage({ searchParams }) {
     FILTERABLE.map((tag) => [tag, String(sp[`c_${tag}`] ?? '').split('~').filter(Boolean)]),
   );
   const facetsByTag = Object.fromEntries(
-    FILTERABLE.map((tag) => [tag, collectFacets(all, participantsByMeeting, tag)]),
+    FILTERABLE.map((tag) => [tag, collectFacets(all, participantsByMeeting, tag, lang)]),
   );
 
   //global search (?q=) over titles, summaries, transcripts and participants
@@ -153,8 +157,8 @@ export default async function MeetingsPage({ searchParams }) {
   const searchIds = query.length >= 2 ? await searchMeetingIds(user?.email, query) : null;
   const searched = searchIds ? all.filter((m) => searchIds.has(m.id)) : all;
 
-  const filtered = applyColumnFilters(searched, participantsByMeeting, columnFilters);
-  const sorted = applySlots(filtered, participantsByMeeting, slots);
+  const filtered = applyColumnFilters(searched, participantsByMeeting, columnFilters, lang);
+  const sorted = applySlots(filtered, participantsByMeeting, slots, lang);
 
   //optional "needs a name" view (?nameless=1) plus its live count for the badge
   const namelessCount = all.filter((m) => NEEDS_NAME.has(meetingTitleSource(m))).length;
@@ -178,7 +182,7 @@ export default async function MeetingsPage({ searchParams }) {
   //a nested tree when several grouping levels are chosen (Alexander's 3 columns);
   //flattened into rows + a per-row group path that drives the outline gutter
   const tree = groupTags.length
-    ? groupMeetingsTree(meetings, participantsByMeeting, groupTags)
+    ? groupMeetingsTree(meetings, participantsByMeeting, groupTags, lang)
     : null;
   const flat = tree ? flattenTree(tree) : null;
   const outlineMeta = flat ? flat.map((entry) => ({ id: entry.meeting.id, path: entry.path })) : null;
@@ -193,6 +197,7 @@ export default async function MeetingsPage({ searchParams }) {
       participants={participantsByMeeting.get(meeting.id) ?? []}
       longest={longest}
       columns={columns}
+      lang={lang}
     />
   );
 
@@ -202,6 +207,7 @@ export default async function MeetingsPage({ searchParams }) {
       meeting={meeting}
       participants={participantsByMeeting.get(meeting.id) ?? []}
       columns={columns}
+      lang={lang}
     />
   );
 
@@ -210,23 +216,24 @@ export default async function MeetingsPage({ searchParams }) {
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.brandName}>Fathom</span>
-          <span className={styles.brandKicker}>meetings&nbsp;explorer</span>
+          <span className={styles.brandKicker}>{t(lang, 'brand.kicker')}</span>
         </div>
 
         <div className={styles.headerActions}>
           <Link href="/connect" className={styles.settingsLink}>
-            Connect
+            {t(lang, 'nav.connect')}
           </Link>
           <Link href="/people" className={styles.settingsLink}>
-            People
+            {t(lang, 'nav.people')}
           </Link>
           <Link href="/records" className={styles.settingsLink}>
-            Records
+            {t(lang, 'nav.records')}
           </Link>
           <Link href="/settings" className={styles.settingsLink}>
-            Settings
+            {t(lang, 'nav.settings')}
           </Link>
           <SignOut email={user?.email} />
+          <LangSwitch />
           <ThemeToggle />
         </div>
       </header>
@@ -234,13 +241,13 @@ export default async function MeetingsPage({ searchParams }) {
       <main className={styles.body}>
         <div className={styles.pageHeadRow}>
           <div className={styles.pageHead}>
-            <h1 className={styles.title}>My meetings</h1>
+            <h1 className={styles.title}>{t(lang, 'home.title')}</h1>
             <span className={styles.count}>
-              {meetings.length} of {all.length}
+              {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
             </span>
           </div>
 
-          {all.length > 0 && <Stats {...computeStats(all)} />}
+          {all.length > 0 && <Stats {...computeStats(all, lang)} lang={lang} />}
         </div>
 
         <div className={styles.layout}>
@@ -251,9 +258,9 @@ export default async function MeetingsPage({ searchParams }) {
 
           <div className={styles.content}>
             {all.length === 0 ? (
-              <EmptyState />
+              <EmptyState lang={lang} />
             ) : meetings.length === 0 ? (
-              <NoResults />
+              <NoResults lang={lang} />
             ) : (
               <>
                 <div className={styles.tableTools}>
@@ -297,7 +304,7 @@ export default async function MeetingsPage({ searchParams }) {
 }
 
 //one meeting as a row of the grid
-function MeetingRow({ meeting, participants, longest, columns }) {
+function MeetingRow({ meeting, participants, longest, columns, lang }) {
   const minutes = meeting.duration_minutes;
   const barWidth =
     longest > 0 && minutes ? Math.max(4, Math.round((minutes / longest) * 100)) : 0;
@@ -309,14 +316,14 @@ function MeetingRow({ meeting, participants, longest, columns }) {
   return (
     <div className={styles.row} data-unnamed={unnamed || undefined}>
       <span className={styles.date}>
-        {formatDayMonth(meeting.date)}
-        <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date)}</span>
+        {formatDayMonth(meeting.date, lang)}
+        <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date, lang)}</span>
       </span>
 
       <span className={styles.titleCell}>
         <EditableTitle
           meetingId={meeting.id}
-          value={meetingTitle(meeting)}
+          value={meetingTitle(meeting, lang)}
           source={source}
           href={`/meetings/${meeting.id}`}
           variant="row"
@@ -333,7 +340,7 @@ function MeetingRow({ meeting, participants, longest, columns }) {
         <span className={styles.durationValue}>{formatDuration(minutes)}</span>
       </span>
 
-      <AvatarStack participants={participants} />
+      <AvatarStack participants={participants} lang={lang} />
 
       <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
 
@@ -350,7 +357,7 @@ function MeetingRow({ meeting, participants, longest, columns }) {
 }
 
 //the same meeting on a narrow screen
-function MeetingCard({ meeting, participants, columns }) {
+function MeetingCard({ meeting, participants, columns, lang }) {
   const fields = meeting.custom_fields ?? {};
   const filled = columns.filter((column) => {
     const value = fields[column.id];
@@ -360,14 +367,14 @@ function MeetingCard({ meeting, participants, columns }) {
   return (
     <div className={styles.card}>
       <Link href={`/meetings/${meeting.id}`} className={styles.cardBody}>
-        <span className={styles.cardTitle}>{meetingTitle(meeting)}</span>
+        <span className={styles.cardTitle}>{meetingTitle(meeting, lang)}</span>
 
         <span className={styles.cardMeta}>
-          {formatDayMonth(meeting.date)}
+          {formatDayMonth(meeting.date, lang)}
           <span className={styles.cardSep}>·</span>
-          {formatDuration(meeting.duration_minutes)}
+          {formatDuration(meeting.duration_minutes, lang)}
           <span className={styles.cardSep}>·</span>
-          {participants.length} people
+          {t(lang, 'row.people', { n: participants.length })}
         </span>
 
         {participants.length > 0 && (
@@ -402,7 +409,7 @@ function MeetingCard({ meeting, participants, columns }) {
 }
 
 //participants written out by name, a few per row with a "+N" tail
-function AvatarStack({ participants }) {
+function AvatarStack({ participants, lang }) {
   if (participants.length === 0) {
     return <span className={styles.dash}>—</span>;
   }
@@ -418,39 +425,37 @@ function AvatarStack({ participants }) {
           {person.name || person.email}
         </span>
       ))}
-      {hidden > 0 && <span className={styles.morePeople}>+{hidden} more</span>}
+      {hidden > 0 && <span className={styles.morePeople}>{t(lang, 'row.more', { n: hidden })}</span>}
     </span>
   );
 }
 
 //nothing connected yet — walk a new person through the two setup steps
-function EmptyState() {
+function EmptyState({ lang }) {
   return (
     <div className={styles.empty}>
       <div className={styles.emptyMark} />
-      <h2 className={styles.emptyTitle}>Здесь пока пусто — давайте настроим</h2>
-      <p className={styles.emptyText}>
-        Два коротких шага, и встречи появятся здесь сами.
-      </p>
+      <h2 className={styles.emptyTitle}>{t(lang, 'empty.title')}</h2>
+      <p className={styles.emptyText}>{t(lang, 'empty.text')}</p>
 
       <ol className={styles.onboard}>
         <li className={styles.onboardStep}>
           <span className={styles.onboardNum}>1</span>
           <span className={styles.onboardBody}>
-            <b>Подключите Fathom</b> — ваши созвоны начнут подтягиваться сюда автоматически,
-            с заметками и транскриптами.
+            <b>{t(lang, 'empty.step1Strong')}</b>
+            {t(lang, 'empty.step1Text')}
             <Link href="/settings" className={styles.onboardLink}>
-              Подключить Fathom →
+              {t(lang, 'empty.step1Link')}
             </Link>
           </span>
         </li>
         <li className={styles.onboardStep}>
           <span className={styles.onboardNum}>2</span>
           <span className={styles.onboardBody}>
-            <b>Подключите Claude</b> — чтобы искать, называть и разбирать встречи прямо из
-            чата.
+            <b>{t(lang, 'empty.step2Strong')}</b>
+            {t(lang, 'empty.step2Text')}
             <Link href="/connect" className={styles.onboardLink}>
-              Подключить Claude →
+              {t(lang, 'empty.step2Link')}
             </Link>
           </span>
         </li>
@@ -460,13 +465,13 @@ function EmptyState() {
 }
 
 //the filter hid everything
-function NoResults() {
+function NoResults({ lang }) {
   return (
     <div className={styles.noResults}>
-      <p className={styles.noResultsTitle}>Ничего не найдено</p>
-      <p className={styles.noResultsHint}>Смягчите фильтры или</p>
+      <p className={styles.noResultsTitle}>{t(lang, 'noResults.title')}</p>
+      <p className={styles.noResultsHint}>{t(lang, 'noResults.hint')}</p>
       <Link href="/" className={styles.noResultsReset}>
-        сбросить всё
+        {t(lang, 'noResults.reset')}
       </Link>
     </div>
   );

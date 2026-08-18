@@ -1,0 +1,32 @@
+/* the three-language switcher, sized to match the theme toggle beside it */
+
+.group {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.button {
+  padding: 4px 7px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-45);
+}
+
+.button + .button {
+  border-left: 1px solid var(--rule);
+}
+
+.button:hover {
+  color: var(--ink-70);
+}
+
+.button[data-active='true'] {
+  background: var(--sage-soft);
+  color: var(--sage);
+}

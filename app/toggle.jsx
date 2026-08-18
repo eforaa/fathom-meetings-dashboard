@@ -1,17 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useT } from './lang-context';
 import styles from './toggle.module.css';
 
 // Cycling through three states keeps "follow the system" reachable.
 // A plain light/dark switch would lose it after the first click.
 const ORDER = ['system', 'light', 'dark'];
 
-const LABELS = {
-  system: 'Theme: system. Click for light.',
-  light: 'Theme: light. Click for dark.',
-  dark: 'Theme: dark. Click to follow the system.',
-};
+//the three states, named in the dictionaries under theme.*
 
 // The theme lives in a cookie so the server can render it with no flash.
 function readTheme() {
@@ -20,6 +17,7 @@ function readTheme() {
 }
 
 export default function ThemeToggle() {
+  const T = useT();
   const [theme, setTheme] = useState('system');
 
   // The server has already set data-theme from the cookie; this only syncs
@@ -48,8 +46,8 @@ export default function ThemeToggle() {
       type="button"
       onClick={cycle}
       className={styles.button}
-      title={LABELS[theme]}
-      aria-label={LABELS[theme]}
+      title={T(`theme.${theme}`)}
+      aria-label={T(`theme.${theme}`)}
     >
       {theme === 'system' && <SystemIcon />}
       {theme === 'light' && <SunIcon />}

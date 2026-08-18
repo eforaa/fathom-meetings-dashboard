@@ -1,9 +1,11 @@
 'use client';
 
 import { createClientForBrowser } from '@/lib/supabase-auth';
+import { useT } from './lang-context';
 import styles from './signout.module.css';
 
 export default function SignOut({ email }) {
+  const T = useT();
   async function signOut() {
     const supabase = createClientForBrowser();
     await supabase.auth.signOut();
@@ -12,7 +14,7 @@ export default function SignOut({ email }) {
 
   return (
     <button type="button" onClick={signOut} className={styles.button} title={email}>
-      Sign out
+      {T('nav.signOut')}
     </button>
   );
 }

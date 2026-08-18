@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './editable-title.module.css';
 
 //an editable meeting title
 //variant "row": a link with a pencil that appears on hover
 //variant "title": a big heading, click the pencil to rename
 export default function EditableTitle({ meetingId, value, href, variant = 'row', source }) {
+    const T = useT();
     //a small text badge so a generated name is recognisable at a glance
     const mark =
         source === 'ai_title' ? (
@@ -85,8 +87,8 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
                 setEditing(true);
             }}
             className={styles.pencil}
-            title="Rename"
-            aria-label="Rename"
+            title={T('row.rename')}
+            aria-label={T('row.rename')}
         >
             ✎
         </button>
@@ -106,7 +108,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
         <span className={styles.rowWrap}>
             {mark}
             <Link href={href} className={styles.link}>
-                {value || 'Untitled'}
+                {value || T('row.untitled')}
             </Link>
             {pencil}
         </span>

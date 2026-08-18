@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { COLUMN_TYPES, COLUMN_TYPE_LABELS, OPTION_TYPES } from '@/lib/column-types';
+import { COLUMN_TYPES, OPTION_TYPES } from '@/lib/column-types';
+import { useT } from './lang-context';
 import styles from './column-manager.module.css';
 
 //the "+ column" control and its small add form
 export default function ColumnManager() {
+    const T = useT();
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
@@ -60,7 +62,7 @@ export default function ColumnManager() {
             <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Column name"
+                placeholder={T('column.namePlaceholder')}
                 className={styles.name}
                 autoFocus
             />
@@ -72,7 +74,7 @@ export default function ColumnManager() {
             >
                 {COLUMN_TYPES.map((option) => (
                     <option key={option} value={option}>
-                        {COLUMN_TYPE_LABELS[option]}
+                        {T(`columnType.${option}`)}
                     </option>
                 ))}
             </select>
@@ -81,7 +83,7 @@ export default function ColumnManager() {
                 <input
                     value={options}
                     onChange={(event) => setOptions(event.target.value)}
-                    placeholder="Values, comma separated"
+                    placeholder={T('column.valuesPlaceholder')}
                     className={styles.options}
                 />
             )}
@@ -105,6 +107,7 @@ export default function ColumnManager() {
 
 //a column header with a remove button, one per custom column
 export function ColumnHeader({ column }) {
+    const T = useT();
     const router = useRouter();
     const [busy, setBusy] = useState(false);
 
@@ -126,7 +129,7 @@ export function ColumnHeader({ column }) {
                 onClick={remove}
                 disabled={busy}
                 className={styles.remove}
-                title="Remove column"
+                title={T('column.remove')}
             >
                 ×
             </button>

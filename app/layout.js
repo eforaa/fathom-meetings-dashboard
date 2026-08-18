@@ -1,4 +1,7 @@
 import { cookies } from 'next/headers';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
+import { LangProvider } from './lang-context';
 import { IBM_Plex_Sans, IBM_Plex_Mono, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 
@@ -22,10 +25,15 @@ const display = Source_Serif_4({
   display: 'swap',
 });
 
-export const metadata = {
-  title: 'Meetings',
-  description: 'Searchable archive of recorded meetings',
-};
+//the tab title follows the chosen language too
+export async function generateMetadata() {
+  const lang = await getLang();
+
+  return {
+    title: t(lang, 'meta.title'),
+    description: t(lang, 'meta.description'),
+  };
+}
 
 export const viewport = {
   width: 'device-width',
@@ -42,14 +50,20 @@ export default async function RootLayout({ children }) {
   const stored = (await cookies()).get('theme')?.value;
   const theme = stored === 'light' || stored === 'dark' ? stored : undefined;
 
+  //the language comes from its own cookie, the same way — decided once here and
+  //handed down, so server and client render the same words
+  const lang = await getLang();
+
   return (
     <html
-      lang="en"
+      lang={lang}
       data-theme={theme}
       className={`${ui.variable} ${mono.variable} ${display.variable}`}
       suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body>
+        <LangProvider lang={lang}>{children}</LangProvider>
+      </body>
     </html>
   );
 }

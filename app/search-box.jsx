@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './search-box.module.css';
 
 //global search over titles, summaries, transcripts and participants.
@@ -9,6 +10,7 @@ import styles from './search-box.module.css';
 export default function SearchBox() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const T = useT();
   const [value, setValue] = useState(searchParams.get('q') ?? '');
 
   function submit(next) {
@@ -31,7 +33,7 @@ export default function SearchBox() {
           submit('');
         }
       }}
-      placeholder="Поиск по названиям, конспектам, транскриптам…"
+      placeholder={T('search.placeholder')}
       className={styles.input}
     />
   );
