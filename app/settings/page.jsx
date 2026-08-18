@@ -4,12 +4,16 @@ import { redirect } from 'next/navigation';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { getAccount } from '@/lib/accounts';
 import SettingsForm from './settings-form';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
+import LangSwitch from '../lang-switch';
 import styles from './settings.module.css';
 
 export const dynamic = 'force-dynamic';
 
 //settings page
 export default async function SettingsPage() {
+  const lang = await getLang();
     const supabase = createClientForServer(await cookies());
     const {
         data: { user },
@@ -24,13 +28,16 @@ export default async function SettingsPage() {
 
     return (
         <main className={styles.page}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <Link href="/" className={styles.back}>
                 <BackIcon />
-                All meetings
+                {t(lang, 'settings.allMeetings')}
             </Link>
+              <LangSwitch />
+            </div>
 
             <header className={styles.head}>
-                <h1 className={styles.title}>Settings</h1>
+                <h1 className={styles.title}>{t(lang, 'settings.title')}</h1>
                 <p className={styles.subtitle}>Signed in as {user.email}</p>
             </header>
 

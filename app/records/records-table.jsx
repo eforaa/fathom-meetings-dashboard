@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import { MindSheet } from '@aivocado/mindsheet';
+import { useT } from '../lang-context';
 
 // Same portable UI as the AI-Researcher app — "one code → two bases".
 // Here it renders Fathom meeting records; there it renders the product catalog.
-const COLUMNS = [
-  { key: 'date', label: 'Дата', type: 'text', sortable: true },
-  { key: 'shown', label: 'Показывается', type: 'text', sortable: true },
-  { key: 'source', label: 'Источник', type: 'select', sortable: true, filterable: true },
+//the first three carry real words, the rest are raw column names from the
+//database and stay as they are in every language
+const columnsFor = (T) => [
+  { key: 'date', label: T('records.colDate'), type: 'text', sortable: true },
+  { key: 'shown', label: T('records.colShown'), type: 'text', sortable: true },
+  { key: 'source', label: T('records.colSource'), type: 'select', sortable: true, filterable: true },
   { key: 'title', label: 'title', type: 'text' },
   { key: 'custom_title', label: 'custom_title', type: 'text' },
   { key: 'ai_title', label: 'ai_title', type: 'text' },
@@ -28,6 +31,9 @@ function compare(a, b, dir) {
 }
 
 export default function RecordsTable({ rows }) {
+  const T = useT();
+  //rebuilt only when the language changes, so the memos below keep a stable dep
+  const COLUMNS = useMemo(() => columnsFor(T), [T]);
   const [sort, setSort] = useState();
   // дополнительные уровни сортировки/группировки (Shift + клик), до 2 сверх первого
   const [extraLevels, setExtraLevels] = useState([]);
@@ -44,7 +50,7 @@ export default function RecordsTable({ rows }) {
       out[col.key] = [...set].sort((a, b) => a.localeCompare(b, 'ru'));
     }
     return out;
-  }, [rows]);
+  }, [rows, COLUMNS]);
 
   const displayed = useMemo(() => {
     let out = [...rows];

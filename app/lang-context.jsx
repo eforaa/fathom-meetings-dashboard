@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useCallback, useContext } from 'react';
 import { DEFAULT_LANG, t as translate } from '@/lib/i18n';
 
 //The language is decided once, on the server, from the cookie. Client
@@ -21,5 +21,7 @@ export function useLang() {
 //repeating the language on every call
 export function useT() {
     const lang = useContext(LangContext);
-    return (key, vars) => translate(lang, key, vars);
+    //stable while the language holds: components memoise on T, and a fresh
+    //function every render would defeat that
+    return useCallback((key, vars) => translate(lang, key, vars), [lang]);
 }

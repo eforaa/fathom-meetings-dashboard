@@ -21,12 +21,15 @@ import TypePicker from '../../type-picker';
 import TitleControl from '../../title-control';
 import EditableSummary from '../../editable-summary';
 import MeetingActions from './meeting-actions';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
 import styles from './meeting.module.css';
 
 export const dynamic = 'force-dynamic';
 
 //meeting id is taken from url
 export default async function MeetingPage({ params }) {
+  const lang = await getLang();
   const { id } = await params;
 
   const supabase = createClientForServer(await cookies());
@@ -47,15 +50,15 @@ export default async function MeetingPage({ params }) {
     ? meeting.fathom_action_items
     : [];
 
-  const timeRange = formatTimeRange(meeting.start_time, meeting.end_time);
+  const timeRange = formatTimeRange(meeting.start_time, meeting.end_time, lang);
 
   //other meetings of the same recurring series (same displayed name)
-  const seriesName = meetingTitle(meeting);
+  const seriesName = meetingTitle(meeting, lang);
   const { meetings: ownerMeetings } = await getMeetings({ ownerEmail: user?.email });
   const related =
     seriesName && seriesName !== 'No name'
       ? ownerMeetings
-          .filter((m) => m.id !== meeting.id && meetingTitle(m) === seriesName)
+          .filter((m) => m.id !== meeting.id && meetingTitle(m, lang) === seriesName)
           .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0))
           .slice(0, 8)
       : [];
@@ -75,7 +78,7 @@ export default async function MeetingPage({ params }) {
         <div className={styles.editorWrap}>
           <TitleControl
             meetingId={meeting.id}
-            shown={meetingTitle(meeting)}
+            shown={meetingTitle(meeting, lang)}
             source={meetingTitleSource(meeting)}
             original={meetingOriginalTitle(meeting)}
             aiTitle={meeting.ai_title}
@@ -90,7 +93,7 @@ export default async function MeetingPage({ params }) {
       </div>
 
       <div className={styles.facts}>
-        <span>{formatDate(meeting.date)}</span>
+        <span>{formatDate(meeting.date, lang)}</span>
         {timeRange && (
           <>
             <span className={styles.factSep}>·</span>
@@ -98,7 +101,7 @@ export default async function MeetingPage({ params }) {
           </>
         )}
         <span className={styles.factSep}>·</span>
-        <span>{formatDuration(meeting.duration_minutes)}</span>
+        <span>{formatDuration(meeting.duration_minutes, lang)}</span>
         <span className={styles.factSep}>·</span>
         <span>{participants.length} people</span>
 
@@ -109,14 +112,14 @@ export default async function MeetingPage({ params }) {
             rel="noreferrer"
             className={styles.recordingLink}
           >
-            open in Fathom ↗
+            {t(lang, 'meeting.openInFathom')}
           </a>
         )}
       </div>
 
       <MeetingActions
         title={seriesName}
-        date={formatDate(meeting.date)}
+        date={formatDate(meeting.date, lang)}
         summary={meetingSummary(meeting) || meeting.fathom_summary || ''}
         topics={topics}
         tasks={exportTasks}
@@ -126,14 +129,14 @@ export default async function MeetingPage({ params }) {
         <div className={styles.main}>
           {/* the meeting's own summary — hand-edited wins over the ai one */}
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Summary</h2>
+            <h2 className={styles.sectionTitle}>{t(lang, 'meeting.summary')}</h2>
             <EditableSummary meetingId={meeting.id} value={meetingSummary(meeting)} />
           </section>
 
           {/* fathom writes its own notes for every meeting, shown as they are */}
           {meeting.fathom_summary && (
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Fathom notes</h2>
+              <h2 className={styles.sectionTitle}>{t(lang, 'meeting.fathomNotes')}</h2>
               <div className={styles.notes}>
                 <ReactMarkdown
                   components={{
@@ -149,7 +152,7 @@ export default async function MeetingPage({ params }) {
 
           {topics.length > 0 && (
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Key topics</h2>
+              <h2 className={styles.sectionTitle}>{t(lang, 'meeting.keyTopics')}</h2>
               <ul className={styles.topics}>
                 {topics.map((topic) => (
                   <li key={topic} className={styles.topic}>
@@ -162,7 +165,7 @@ export default async function MeetingPage({ params }) {
 
           {tasks.length > 0 && (
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Action items</h2>
+              <h2 className={styles.sectionTitle}>{t(lang, 'meeting.actionItems')}</h2>
               <ul className={styles.tasks}>
                 {tasks.map((task, index) => (
                   <li key={index} className={styles.task}>
@@ -182,7 +185,7 @@ export default async function MeetingPage({ params }) {
           {/* fathom's action items step in while our own analysis is not there yet */}
           {tasks.length === 0 && fathomTasks.length > 0 && (
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Action items</h2>
+              <h2 className={styles.sectionTitle}>{t(lang, 'meeting.actionItems')}</h2>
               <ul className={styles.tasks}>
                 {fathomTasks.map((task, index) => (
                   <li key={index} className={styles.task}>
@@ -216,7 +219,7 @@ export default async function MeetingPage({ params }) {
           <aside className={styles.aside}>
             {participants.length > 0 && (
               <>
-                <h2 className={styles.sectionTitle}>People</h2>
+                <h2 className={styles.sectionTitle}>{t(lang, 'meeting.people')}</h2>
                 <ul className={styles.people}>
                   {participants.map((person) => (
                     <li key={person.id} className={styles.person}>
@@ -245,9 +248,9 @@ export default async function MeetingPage({ params }) {
                   {related.map((m) => (
                     <li key={m.id}>
                       <Link href={`/meetings/${m.id}`} className={styles.seriesRow}>
-                        <span className={styles.seriesDate}>{formatDayMonth(m.date)}</span>
+                        <span className={styles.seriesDate}>{formatDayMonth(m.date, lang)}</span>
                         <span className={styles.seriesDur}>
-                          {formatDuration(m.duration_minutes)}
+                          {formatDuration(m.duration_minutes, lang)}
                         </span>
                       </Link>
                     </li>

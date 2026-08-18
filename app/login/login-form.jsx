@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClientForBrowser } from '@/lib/supabase-auth';
+import { useT } from '../lang-context';
+import LangSwitch from '../lang-switch';
 import styles from './login.module.css';
 
 const MESSAGES = {
@@ -13,6 +15,7 @@ const MESSAGES = {
 };
 
 export default function LoginPage() {
+    const T = useT();
     //reading URL parameters
     const searchParams = useSearchParams();
     //react state
@@ -46,17 +49,18 @@ export default function LoginPage() {
     return (
         <main className={styles.page}>
             <div className={styles.card}>
-                <p className={styles.eyebrow}>Fathom Meetings</p>
-                <h1 className={styles.title}>Sign in to continue</h1>
-                <p className={styles.subtitle}>
-                    Access is limited to people on the list. Use your work Google account.
-                </p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                    <LangSwitch />
+                </div>
+                <p className={styles.eyebrow}>{T('login.eyebrow')}</p>
+                <h1 className={styles.title}>{T('login.title')}</h1>
+                <p className={styles.subtitle}>{T('login.subtitle')}</p>
 
-                {error && <p className={styles.error}>{MESSAGES[error] ?? 'Something went wrong.'}</p>}
+                {error && <p className={styles.error}>{MESSAGES[error] ?? T('login.failed')}</p>}
 
                 <button type="button" onClick={signIn} disabled={busy} className={styles.button}>
                     <GoogleMark />
-                    {busy ? 'Redirecting…' : 'Continue with Google'}
+                    {busy ? T('login.redirecting') : T('login.button')}
                 </button>
             </div>
         </main>

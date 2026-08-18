@@ -3,6 +3,9 @@ import { cookies, headers } from 'next/headers';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { tokenForOwner } from '@/lib/mcp-server';
 import ConnectPanel from './connect-panel';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
+import LangSwitch from '../lang-switch';
 import styles from './connect.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +14,7 @@ export const dynamic = 'force-dynamic';
 //ready link (token already inside) and pastes it into Claude — no juggling a
 //separate key. replaces the manual token dance.
 export default async function ConnectPage() {
+  const lang = await getLang();
   const supabase = createClientForServer(await cookies());
   const {
     data: { user },
@@ -27,11 +31,14 @@ export default async function ConnectPage() {
 
   return (
     <main className={styles.page}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <Link href="/" className={styles.back}>
         ← dashboard
       </Link>
+        <LangSwitch />
+      </div>
 
-      <h1 className={styles.title}>Подключить Claude к встречам</h1>
+      <h1 className={styles.title}>{t(lang, 'connect.title')}</h1>
       <p className={styles.lede}>
         Чтобы Claude мог искать, называть и разбирать ваши встречи прямо из чата —
         подключите коннектор. Это делается один раз.

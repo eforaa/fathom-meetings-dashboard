@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './custom-cell.module.css';
 
 //one editable custom-column cell in a meeting row
@@ -106,6 +107,7 @@ function SingleCell({ meetingId, column, value }) {
 
 //tags column: pick several allowed values into one cell
 function MultiCell({ meetingId, column, value }) {
+    const T = useT();
     const router = useRouter();
     const [selected, setSelected] = useState(Array.isArray(value) ? value : []);
     const [open, setOpen] = useState(false);
@@ -178,7 +180,7 @@ function MultiCell({ meetingId, column, value }) {
             {open && (
                 <div className={styles.multiPanel}>
                     {options.length === 0 ? (
-                        <p className={styles.multiHint}>Нет вариантов</p>
+                        <p className={styles.multiHint}>{T('cell.noOptions')}</p>
                     ) : (
                         options.map((option) => {
                             const on = selected.includes(option);

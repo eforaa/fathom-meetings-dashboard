@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './editable-summary.module.css';
 
 //an editable multi-line summary
 //click the text to edit, Ctrl/Cmd+Enter or blur saves, Escape cancels
 export default function EditableSummary({ meetingId, value }) {
+    const T = useT();
     const router = useRouter();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
@@ -64,15 +66,15 @@ export default function EditableSummary({ meetingId, value }) {
                     rows={5}
                     className={styles.input}
                 />
-                <p className={styles.hint}>Ctrl+Enter to save · Esc to cancel</p>
+                <p className={styles.hint}>{T('summary.hint')}</p>
             </div>
         );
     }
 
     return (
         <button type="button" onClick={() => setEditing(true)} className={styles.text}>
-            {value ? value : <span className={styles.empty}>Add a summary…</span>}
-            <span className={styles.pencil} title="Edit">
+            {value ? value : <span className={styles.empty}>{T('summary.add')}</span>}
+            <span className={styles.pencil} title={T('summary.edit')}>
                 ✎
             </span>
         </button>

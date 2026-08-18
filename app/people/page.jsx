@@ -4,6 +4,9 @@ import { getMeetings } from '@/lib/queries';
 import { groupPeople } from '@/lib/people';
 import { initials } from '@/lib/format';
 import { createClientForServer } from '@/lib/supabase-auth';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
+import LangSwitch from '../lang-switch';
 import styles from './people.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +14,7 @@ export const dynamic = 'force-dynamic';
 //everyone who ever appears in this owner's meetings, merged across their
 //different names/emails, each linking to all of that person's meetings.
 export default async function PeoplePage() {
+  const lang = await getLang();
   const supabase = createClientForServer(await cookies());
   const {
     data: { user },
@@ -21,21 +25,23 @@ export default async function PeoplePage() {
 
   return (
     <main className={styles.page}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <Link href="/" className={styles.back}>
         ← dashboard
       </Link>
+        <LangSwitch />
+      </div>
 
       <div className={styles.head}>
-        <h1 className={styles.title}>People</h1>
+        <h1 className={styles.title}>{t(lang, 'people.title')}</h1>
         <span className={styles.count}>{people.length}</span>
       </div>
       <p className={styles.lede}>
-        Все участники ваших встреч. Разные имена и почты одного человека объединены —
-        нажмите, чтобы увидеть все его встречи сразу.
+        {t(lang, 'people.lede')}
       </p>
 
       {people.length === 0 ? (
-        <p className={styles.empty}>Пока никого нет.</p>
+        <p className={styles.empty}>{t(lang, 'people.empty')}</p>
       ) : (
         <ul className={styles.list}>
           {people.map((person) => (
@@ -45,10 +51,10 @@ export default async function PeoplePage() {
                 <span className={styles.body}>
                   <span className={styles.name}>{person.label}</span>
                   <span className={styles.sub}>
-                    {person.emails[0] ?? 'без почты'}
+                    {person.emails[0] ?? t(lang, 'people.noEmail')}
                     {person.aliases.length + person.emails.length > 1 && (
                       <span className={styles.aliasTag}>
-                        +{person.aliases.length + person.emails.length - 1} алиас(ов)
+                        {t(lang, 'people.aliases', { n: person.aliases.length + person.emails.length - 1 })}
                       </span>
                     )}
                   </span>

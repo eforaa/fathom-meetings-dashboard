@@ -97,7 +97,7 @@ export default function ColumnManager() {
                 {busy ? 'Adding…' : 'Add'}
             </button>
             <button type="button" onClick={() => setOpen(false)} className={styles.cancel}>
-                Cancel
+                {T('common.cancel')}
             </button>
 
             {error && <span className={styles.error}>{error}</span>}

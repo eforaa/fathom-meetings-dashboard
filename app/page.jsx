@@ -337,7 +337,7 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
         <span className={styles.durationTrack}>
           <span className={styles.durationFill} style={{ width: `${barWidth}%` }} />
         </span>
-        <span className={styles.durationValue}>{formatDuration(minutes)}</span>
+        <span className={styles.durationValue}>{formatDuration(minutes, lang)}</span>
       </span>
 
       <AvatarStack participants={participants} lang={lang} />

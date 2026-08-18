@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useT } from './lang-context';
 import styles from './title-control.module.css';
 
 //the meeting title, with the full "which name wins" story visible.
@@ -16,6 +17,7 @@ import styles from './title-control.module.css';
 //  aiTitle      — Claude's generated suggestion, if any
 //  customTitle  — the user's manual name, if any
 export default function TitleControl({ meetingId, shown, source, original, aiTitle, customTitle }) {
+  const T = useT();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(shown === 'No name' ? '' : shown);
@@ -40,14 +42,14 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
 
   const badge =
     source === 'custom_title'
-      ? { icon: '✍️', label: 'Ваше название' }
+      ? { icon: '✍️', label: T('titleCtl.custom') }
       : source === 'ai_title'
-        ? { icon: '🤖', label: 'Сгенерировано Клодом' }
+        ? { icon: '🤖', label: T('titleCtl.ai') }
         : source === 'title'
-          ? { icon: '📅', label: 'Оригинал из Fathom' }
+          ? { icon: '📅', label: T('titleCtl.original') }
           : source === 'fathom_title'
-            ? { icon: '📌', label: 'Цель встречи (Fathom, авто) — стоит переименовать' }
-            : { icon: '•', label: 'Без названия' };
+            ? { icon: '📌', label: T('titleCtl.purpose') }
+            : { icon: '•', label: T('title.noName') };
 
   //what a "revert to original" would reveal — only offer it when it changes something
   //offer each of the three names that exists and isn't the one already showing.
@@ -68,17 +70,17 @@ export default function TitleControl({ meetingId, shown, source, original, aiTit
             if (event.key === 'Enter') send({ title: text }, text);
             if (event.key === 'Escape') setEditing(false);
           }}
-          placeholder="Название встречи"
+          placeholder={T('titleCtl.placeholder')}
           className={styles.input}
           autoFocus
           disabled={busy}
         />
         <div className={styles.actions}>
           <button type="button" onClick={() => send({ title: text }, text)} disabled={busy} className={styles.save}>
-            {busy ? 'Сохранение…' : 'Сохранить'}
+            {busy ? T('common.saving') : T('common.save')}
           </button>
           <button type="button" onClick={() => setEditing(false)} className={styles.cancel}>
-            Отмена
+            {T('common.cancel')}
           </button>
         </div>
       </div>

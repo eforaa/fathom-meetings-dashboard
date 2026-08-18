@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '../lang-context';
 import styles from './connect.module.css';
 
 function CopyField({ label, value }) {
+  const T = useT();
   const [done, setDone] = useState(false);
 
   async function copy() {
@@ -22,7 +24,7 @@ function CopyField({ label, value }) {
       <div className={styles.fieldRow}>
         <code className={styles.value}>{value}</code>
         <button type="button" onClick={copy} className={styles.copy}>
-          {done ? 'Скопировано' : 'Копировать'}
+          {done ? T('connect.copied') : T('connect.copy')}
         </button>
       </div>
     </div>
@@ -30,26 +32,27 @@ function CopyField({ label, value }) {
 }
 
 export default function ConnectPanel({ url, token, base }) {
+  const T = useT();
   const [showManual, setShowManual] = useState(false);
 
   return (
     <div className={styles.wrap}>
       {/* the easy path: one ready link with the key already inside */}
       <div className={styles.card}>
-        <span className={styles.step}>Ваша ссылка для подключения</span>
+        <span className={styles.step}>{T('connect.yourLink')}</span>
         <CopyField value={url} />
-        <p className={styles.hint}>Ключ уже внутри ссылки — вставлять отдельно ничего не нужно.</p>
+        <p className={styles.hint}>{T('connect.linkHint')}</p>
       </div>
 
       <div className={styles.steps}>
-        <h2 className={styles.stepsTitle}>Как подключить (один раз)</h2>
+        <h2 className={styles.stepsTitle}>{T('connect.stepsTitle')}</h2>
         <ol className={styles.list}>
-          <li>Откройте Claude → Settings (Настройки) → Connectors.</li>
-          <li>Нажмите «Add custom connector» (Добавить свой коннектор).</li>
-          <li>Вставьте ссылку сверху и сохраните.</li>
+          <li>{T('connect.step1')}</li>
+          <li>{T('connect.step2')}</li>
+          <li>{T('connect.step3')}</li>
           <li>
-            Готово. В новом чате напишите: <b>«покажи мои встречи»</b> или{' '}
-            <b>«переименуй встречи без названия»</b>.
+            {T('connect.step4a')} <b>{T('connect.step4b')}</b>{' '}
+            <b>{T('connect.step4c')}</b>
           </li>
         </ol>
       </div>
@@ -59,7 +62,7 @@ export default function ConnectPanel({ url, token, base }) {
         onClick={() => setShowManual((v) => !v)}
         className={styles.toggle}
       >
-        {showManual ? 'Скрыть' : 'Если Claude просит URL и ключ отдельно →'}
+        {showManual ? T('connect.hideManual') : T('connect.showManual')}
       </button>
 
       {showManual && (

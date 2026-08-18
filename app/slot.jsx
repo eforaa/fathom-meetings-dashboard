@@ -9,9 +9,11 @@ import styles from './slot.module.css';
 
 //css colour of a type, looked up by its readable label
 //the filter works with labels, the palette is keyed by id
-const TYPE_COLOR = Object.fromEntries(
-    MEETING_TYPES.map((type) => [typeLabel(type), `var(--type-${type.split('_')[0]})`]),
-);
+//colours keyed by the readable label, so the map is rebuilt per language
+const typeColors = (lang) =>
+    Object.fromEntries(
+        MEETING_TYPES.map((type) => [typeLabel(type, lang), `var(--type-${type.split('_')[0]})`]),
+    );
 
 //sorting levels, their filters and the grouping, all in one panel
 //url keys for the three nested grouping levels (the "3 columns")
@@ -183,6 +185,8 @@ function Level({
     tagOptions: options,
     T,
 }) {
+    //type chips get their colour from the label, so the map follows the language
+    const colors = typeColors(useLang());
     const tag = tags[slot.tag];
     //dates and titles hold one value per row, picking from such a list is useless
     const pickable = tag.pickable !== false;
@@ -300,7 +304,7 @@ function Level({
                                 <div className={styles.values}>
                                     {facets.map((facet) => {
                                         const on = slot.filterValues.includes(facet.value);
-                                        const dot = TYPE_COLOR[facet.value];
+                                        const dot = colors[facet.value];
 
                                         return (
                                             <button

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '../../lang-context';
 import styles from './meeting.module.css';
 
 //builds a clean Markdown digest of the meeting from what's already on the page,
@@ -21,6 +22,7 @@ function toMarkdown({ title, date, summary, topics, tasks }) {
 }
 
 export default function MeetingActions(props) {
+  const T = useT();
   const [copied, setCopied] = useState(false);
   const md = toMarkdown(props);
 
@@ -50,10 +52,10 @@ export default function MeetingActions(props) {
   return (
     <div className={styles.actions}>
       <button type="button" onClick={copy} className={styles.actionBtn}>
-        {copied ? 'Скопировано' : 'Копировать конспект'}
+        {copied ? T('meeting.copied') : T('meeting.copySummary')}
       </button>
       <button type="button" onClick={download} className={styles.actionBtn}>
-        Экспорт .md
+        {T('meeting.exportMd')}
       </button>
     </div>
   );

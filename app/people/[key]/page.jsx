@@ -5,12 +5,14 @@ import { getMeetings } from '@/lib/queries';
 import { groupPeople, findPerson } from '@/lib/people';
 import { formatDate, formatDuration, meetingTitle, meetingTitleSource } from '@/lib/format';
 import { createClientForServer } from '@/lib/supabase-auth';
+import { getLang } from '@/lib/i18n/server';
 import styles from '../people.module.css';
 
 export const dynamic = 'force-dynamic';
 
 //one person: every meeting they took part in, across all their identities.
 export default async function PersonPage({ params }) {
+  const lang = await getLang();
   const { key } = await params;
   const decoded = decodeURIComponent(key);
 
@@ -57,13 +59,13 @@ export default async function PersonPage({ params }) {
           <li key={m.id}>
             <Link href={`/meetings/${m.id}`} className={styles.mrow}>
               <span className={styles.mtitle}>
-                {meetingTitle(m)}
+                {meetingTitle(m, lang)}
                 {meetingTitleSource(m) === 'ai_title' && <span className={styles.bot}> 🤖</span>}
               </span>
               <span className={styles.mmeta}>
-                {formatDate(m.date)}
+                {formatDate(m.date, lang)}
                 <span className={styles.msep}>·</span>
-                {formatDuration(m.duration_minutes)}
+                {formatDuration(m.duration_minutes, lang)}
               </span>
             </Link>
           </li>

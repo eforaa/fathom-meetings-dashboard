@@ -4,6 +4,9 @@ import { getMeetings } from '@/lib/queries';
 import { formatDate, meetingTitle, meetingTitleSource } from '@/lib/format';
 import { createClientForServer } from '@/lib/supabase-auth';
 import RecordsTable from './records-table';
+import { getLang } from '@/lib/i18n/server';
+import { t } from '@/lib/i18n';
+import LangSwitch from '../lang-switch';
 import styles from './records.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +16,7 @@ export const dynamic = 'force-dynamic';
 //field is laid out side by side so a person can verify what is really stored
 //and see the naming rule working, without a Supabase account.
 export default async function RecordsPage() {
+  const lang = await getLang();
   const supabase = createClientForServer(await cookies());
   const {
     data: { user },
@@ -24,8 +28,8 @@ export default async function RecordsPage() {
   //question, plus the computed result and its source field
   const rows = meetings.map((meeting) => ({
     id: meeting.id,
-    date: meeting.date ? formatDate(meeting.date) : '—',
-    shown: meetingTitle(meeting),
+    date: meeting.date ? formatDate(meeting.date, lang) : '—',
+    shown: meetingTitle(meeting, lang),
     source: meetingTitleSource(meeting),
     title: meeting.title ?? '',
     custom_title: meeting.custom_title ?? '',
@@ -35,29 +39,29 @@ export default async function RecordsPage() {
 
   return (
     <main className={styles.page}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <Link href="/" className={styles.back}>
         ← dashboard
       </Link>
+        <LangSwitch />
+      </div>
 
-      <h1 className={styles.title}>Records</h1>
+      <h1 className={styles.title}>{t(lang, 'records.title')}</h1>
       <p className={styles.lede}>
-        Сырые записи базы данных, как есть — только чтение. В обычной таблице виден
-        один итоговый заголовок; здесь видно все поля, из которых он собирается,
-        и по какому правилу.
+        {t(lang, 'records.lede')}
       </p>
 
       <div className={styles.rule}>
-        <span className={styles.ruleLabel}>Правило заголовка</span>
+        <span className={styles.ruleLabel}>{t(lang, 'records.ruleLabel')}</span>
         <code className={styles.ruleCode}>
           custom_title → ai_title → title (настоящее имя) → fathom_title → «No name»
         </code>
         <p className={styles.ruleNote}>
-          Подсвеченное поле — то, что реально показывается. <code>custom_title</code> —
-          единственное поле, куда пишет Клод через коннектор.
+          {t(lang, 'records.ruleNote')}
         </p>
       </div>
 
-      <RecordsTable rows={rows} />
+      <RecordsTable rows={rows} lang={lang} />
     </main>
   );
 }

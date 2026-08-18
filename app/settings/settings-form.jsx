@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useT } from '../lang-context';
 import styles from './settings.module.css';
 
 //format date and time into a readable format
@@ -20,6 +21,7 @@ function formatMoment(iso) {
 
 //form for connecting and disconnecting a Fathom account
 export default function SettingsForm({ account }) {
+    const T = useT();
     const router = useRouter();
 
     const [apiKey, setApiKey] = useState('');
@@ -55,11 +57,11 @@ export default function SettingsForm({ account }) {
 
                 done = result.done;
                 saved += result.inserted ?? 0;
-                setProgress(`Loading the archive… ${result.total ?? saved} meetings in the database.`);
+                setProgress(T('settings.archiveProgress', { n: result.total ?? saved }));
             }
 
             setProgress(null);
-            setMessage({ ok: true, text: `Archive loaded. ${saved} new meetings saved.` });
+            setMessage({ ok: true, text: T('settings.archiveDone', { n: saved }) });
             router.refresh();
         } catch (error) {
             //cursor is stored on the server, nothing is lost
@@ -87,7 +89,7 @@ export default function SettingsForm({ account }) {
 
             //field is cleared, the key is never shown again
             setApiKey('');
-            setMessage({ ok: true, text: 'Key saved. Loading your meetings…' });
+            setMessage({ ok: true, text: T('settings.keySaved') });
             router.refresh();
 
             //the archive starts downloading right away
@@ -105,7 +107,7 @@ export default function SettingsForm({ account }) {
 
         try {
             await send('/api/account', { method: 'DELETE' });
-            setMessage({ ok: true, text: 'Key removed. Meetings already downloaded are kept.' });
+            setMessage({ ok: true, text: T('settings.keyRemoved') });
             router.refresh();
         } catch (error) {
             setMessage({ ok: false, text: error.message });
@@ -131,7 +133,7 @@ export default function SettingsForm({ account }) {
             setMessage({
                 ok: false,
                 text: error.message === 'Something went wrong'
-                    ? 'Sync took too long. Part of the meetings loaded, the rest will follow tonight.'
+                    ? T('settings.syncSlow')
                     : error.message,
             });
         } finally {
@@ -141,28 +143,28 @@ export default function SettingsForm({ account }) {
 
     return (
         <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Fathom account</h2>
+            <h2 className={styles.sectionTitle}>{T('settings.account')}</h2>
 
             {account ? (
                 //key is already saved
                 <div className={styles.card}>
                     <dl className={styles.facts}>
                         <div className={styles.fact}>
-                            <dt className={styles.factLabel}>Key</dt>
+                            <dt className={styles.factLabel}>{T('settings.key')}</dt>
                             <dd className={styles.factValue}>••••{account.api_key_hint}</dd>
                         </div>
                         <div className={styles.fact}>
-                            <dt className={styles.factLabel}>Meetings</dt>
+                            <dt className={styles.factLabel}>{T('settings.meetings')}</dt>
                             <dd className={styles.factValue}>{account.meetings_count}</dd>
                         </div>
                         <div className={styles.fact}>
-                            <dt className={styles.factLabel}>Last sync</dt>
+                            <dt className={styles.factLabel}>{T('settings.lastSync')}</dt>
                             <dd className={styles.factValue}>{formatMoment(account.last_synced_at)}</dd>
                         </div>
                     </dl>
 
                     {account.last_sync_status === 'failed' && (
-                        <p className={styles.syncError}>Last sync failed: {account.last_sync_error}</p>
+                        <p className={styles.syncError}>{T('settings.syncFailed', { error: account.last_sync_error })}</p>
                     )}
 
                     <div className={styles.actions}>
@@ -174,7 +176,7 @@ export default function SettingsForm({ account }) {
                                 disabled={busy !== null}
                                 className={styles.primary}
                             >
-                                {busy === 'backfill' ? 'Loading archive…' : 'Load archive'}
+                                {busy === 'backfill' ? T('settings.loadingArchive') : T('settings.loadArchive')}
                             </button>
                         )}
                         <button
@@ -183,7 +185,7 @@ export default function SettingsForm({ account }) {
                             disabled={busy !== null}
                             className={styles.primary}
                         >
-                            {busy === 'sync' ? 'Syncing…' : 'Sync now'}
+                            {busy === 'sync' ? T('settings.syncing') : T('settings.syncNow')}
                         </button>
                         <button
                             type="button"
@@ -191,24 +193,21 @@ export default function SettingsForm({ account }) {
                             disabled={busy !== null}
                             className={styles.danger}
                         >
-                            {busy === 'disconnect' ? 'Removing…' : 'Disconnect'}
+                            {busy === 'disconnect' ? T('settings.removing') : T('settings.disconnect')}
                         </button>
                     </div>
                 </div>
             ) : (
                 //no key yet
                 <div className={styles.card}>
-                    <p className={styles.hint}>
-                        Paste your Fathom API key to pull your own meetings. Find it in Fathom
-                        under settings, in the integrations section.
-                    </p>
+                    <p className={styles.hint}>{T('settings.keyHint')}</p>
 
                     <div className={styles.field}>
                         <input
                             type="password"
                             value={apiKey}
                             onChange={(event) => setApiKey(event.target.value)}
-                            placeholder="Fathom API key"
+                            placeholder={T('settings.keyPlaceholder')}
                             className={styles.input}
                             autoComplete="off"
                         />
@@ -218,14 +217,11 @@ export default function SettingsForm({ account }) {
                             disabled={busy !== null || !apiKey.trim()}
                             className={styles.primary}
                         >
-                            {busy === 'connect' ? 'Checking…' : 'Check and save'}
+                            {busy === 'connect' ? T('settings.checking') : T('settings.checkSave')}
                         </button>
                     </div>
 
-                    <p className={styles.note}>
-                        The key is stored encrypted and never shown again — only its last four
-                        characters.
-                    </p>
+                    <p className={styles.note}>{T('settings.keyNote')}</p>
                 </div>
             )}
 

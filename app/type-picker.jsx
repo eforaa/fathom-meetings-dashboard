@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { typeLabel, MAX_TYPES, MEETING_TYPES } from '@/lib/format';
+import { useLang, useT } from './lang-context';
 import styles from './type-picker.module.css';
 
 //picking up to MAX_TYPES types for one meeting
 //variant "compact" (the list) shows coloured dots; "full" (the meeting page)
 //shows labelled chips
 export default function TypePicker({ meetingId, value = [], variant = 'full' }) {
+    const T = useT();
+    const lang = useLang();
     const router = useRouter();
     const [types, setTypes] = useState(value);
     const [open, setOpen] = useState(false);
@@ -76,7 +79,7 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                         <span className={styles.dots}>
                             {types.slice(0, 2).map((type) => (
                                 <span key={type} data-type={type} className={styles.chipSmall}>
-                                    {typeLabel(type)}
+                                    {typeLabel(type, lang)}
                                 </span>
                             ))}
                             {types.length > 2 && (
@@ -86,7 +89,7 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                             )}
                         </span>
                     ) : (
-                        <span className={styles.addCompact}>+ type</span>
+                        <span className={styles.addCompact}>{T('typePicker.add')}</span>
                     )
                 ) : (
                     //meeting page: labelled chips plus an add pill
@@ -97,10 +100,10 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                                     className={styles.chipDot}
                                     style={{ background: `var(--type-${type.split('_')[0]})` }}
                                 />
-                                {typeLabel(type)}
+                                {typeLabel(type, lang)}
                             </span>
                         ))}
-                        <span className={styles.add}>+ type</span>
+                        <span className={styles.add}>{T('typePicker.add')}</span>
                     </span>
                 )}
             </button>
@@ -122,7 +125,7 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                                 className={styles.option}
                             >
                                 <span className={`${styles.box} ${on ? styles.boxOn : ''}`} />
-                                {typeLabel(type)}
+                                {typeLabel(type, lang)}
                             </button>
                         );
                     })}
