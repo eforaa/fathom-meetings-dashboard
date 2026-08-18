@@ -11,9 +11,9 @@
 .panelHead {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 9px 13px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -53,13 +53,13 @@
 }
 
 .panelBody {
-  padding: 6px 16px 16px;
+  padding: 4px 13px 12px;
   border-top: 1px solid var(--rule-soft);
 }
 
 /* small uppercase label above a block */
 .groupTitle {
-  margin: 14px 0 8px;
+  margin: 9px 0 6px;
   font-family: var(--font-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -70,7 +70,7 @@
 /* one sorting level */
 
 .level {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   border: 1px solid var(--rule-soft);
   border-radius: var(--radius);
   background: var(--paper);
@@ -79,8 +79,8 @@
 .levelHead {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 8px;
+  padding: 6px 10px;
 }
 
 .levelCaret {
@@ -114,33 +114,33 @@
 
 .select {
   appearance: none;
-  padding: 5px 26px 5px 10px;
+  padding: 4px 22px 4px 9px;
   background: var(--wash);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   cursor: pointer;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink);
 }
 
 .selectArrow {
   position: absolute;
-  right: 9px;
+  right: 8px;
   pointer-events: none;
   font-size: 9px;
   color: var(--ink-45);
 }
 
 .direction {
-  width: 34px;
-  height: 30px;
+  width: 30px;
+  height: 26px;
   background: var(--wash);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   cursor: pointer;
   font-family: var(--font-mono), monospace;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-70);
 }
 
@@ -173,15 +173,15 @@
 /* the filter of one level */
 
 .levelBody {
-  padding: 11px 12px 12px 42px;
+  padding: 8px 10px 10px 36px;
   border-top: 1px solid var(--rule-soft);
 }
 
 .modeRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 7px;
 }
 
 .modeRow .groupTitle {
@@ -218,16 +218,16 @@
 .values {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  max-height: 190px;
+  gap: 5px;
+  max-height: 168px;
   overflow-y: auto;
 }
 
 .value {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 4px 11px 4px 8px;
+  gap: 6px;
+  padding: 3px 9px 3px 7px;
   background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 999px;
@@ -286,13 +286,13 @@
 }
 
 .addLevel {
-  padding: 7px 12px;
+  padding: 5px 11px;
   background: transparent;
   border: 1px dashed var(--rule);
   border-radius: var(--radius);
   cursor: pointer;
   font-family: var(--font-mono), monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--ink-45);
 }
 
@@ -307,10 +307,18 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
-  padding-top: 14px;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--rule-soft);
+}
+
+/* "then by" continues the same block: no second and third rule, no gap to
+   match — three ruled-off sections took almost half the panel's height */
+.groupRow + .groupRow {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
 }
 
 .groupRow .groupTitle {
@@ -324,7 +332,7 @@
 }
 
 .pill {
-  padding: 5px 11px;
+  padding: 4px 9px;
   background: transparent;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
