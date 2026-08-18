@@ -29,8 +29,20 @@
 
 .brand {
   display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* the name and the kicker keep their shared baseline; the mark is centred
+   against the pair, not against the whole line box */
+.brandText {
+  display: flex;
   align-items: baseline;
   gap: 10px;
+  /* without this the box keeps the full leading of the 16px name plus the
+     descent of the 11px kicker, and the mark centres against that instead of
+     against the words */
+  line-height: 1;
 }
 
 .brandName {

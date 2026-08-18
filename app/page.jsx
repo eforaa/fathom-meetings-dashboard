@@ -24,6 +24,7 @@ import { createClientForServer } from '@/lib/supabase-auth';
 import { getLang } from '@/lib/i18n/server';
 import { t, plural } from '@/lib/i18n';
 import LangSwitch from './lang-switch';
+import Avocado from './avocado';
 import { listColumns } from '@/lib/columns';
 import Outline from './outline';
 import Stars from './stars';
@@ -215,8 +216,11 @@ export default async function MeetingsPage({ searchParams }) {
     <div className={styles.shell}>
       <header className={styles.header}>
         <div className={styles.brand}>
-          <span className={styles.brandName}>Fathom</span>
-          <span className={styles.brandKicker}>{t(lang, 'brand.kicker')}</span>
+          <Avocado />
+          <span className={styles.brandText}>
+            <span className={styles.brandName}>Fathom</span>
+            <span className={styles.brandKicker}>{t(lang, 'brand.kicker')}</span>
+          </span>
         </div>
 
         <div className={styles.headerActions}>

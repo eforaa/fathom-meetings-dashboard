@@ -17,6 +17,9 @@
 }
 
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin: 0 0 14px;
   font-family: var(--font-mono), monospace;
   font-size: 10px;

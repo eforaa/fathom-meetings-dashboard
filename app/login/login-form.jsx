@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { createClientForBrowser } from '@/lib/supabase-auth';
 import { useT } from '../lang-context';
 import LangSwitch from '../lang-switch';
+import Avocado from '../avocado';
 import styles from './login.module.css';
 
 const MESSAGES = {
@@ -52,7 +53,10 @@ export default function LoginPage() {
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
                     <LangSwitch />
                 </div>
-                <p className={styles.eyebrow}>{T('login.eyebrow')}</p>
+                <p className={styles.eyebrow}>
+                    <Avocado size={14} />
+                    {T('login.eyebrow')}
+                </p>
                 <h1 className={styles.title}>{T('login.title')}</h1>
                 <p className={styles.subtitle}>{T('login.subtitle')}</p>
 
