@@ -250,15 +250,6 @@ export default async function MeetingsPage({ searchParams }) {
       </header>
 
       <main className={styles.body}>
-        <div className={styles.pageHeadRow}>
-          <div className={styles.pageHead}>
-            <span className={styles.count}>
-              {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
-            </span>
-          </div>
-
-        </div>
-
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
@@ -274,6 +265,12 @@ export default async function MeetingsPage({ searchParams }) {
             ) : (
               <>
                 <div className={styles.tableTools}>
+                  {/* the count used to have a line of its own above the table;
+                      it says as much from the left end of this row, and the
+                      table starts a head higher */}
+                  <span className={styles.count}>
+                    {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
+                  </span>
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />

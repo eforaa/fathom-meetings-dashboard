@@ -98,23 +98,9 @@
   margin-bottom: 22px;
 }
 
-/* heading on the left, stats pushed to the right, on one line */
-.pageHeadRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  margin-bottom: 10px;
-}
-
-.pageHead {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* count as a subtle pill next to the title */
+/* count as a subtle pill; it sits at the left end of the table tools row.
+   It used to own a line of its own above the table, which cost the grid a head
+   of height for one short pill. */
 .count {
   padding: 3px 10px;
   border-radius: 999px;
@@ -174,13 +160,18 @@
   margin-bottom: 8px;
 }
 
+/* the count keeps to the left end of that row; everything else stays right */
+.tableTools .count {
+  margin-right: auto;
+}
+
 /* a wide table with many custom columns scrolls sideways on its own;
    it also scrolls vertically inside its own region so the header can stay put */
 /* the table is a card with a hairline ring, and it owns its own scrolling.
    KEEP overflow:auto — Date + Priority are off-canvas below ~1360px */
 .tableScroll {
   overflow: auto;
-  max-height: calc(100vh - 168px);
+  max-height: calc(100vh - 132px);
   border-radius: var(--radius-lg);
   background: var(--paper-raised);
   box-shadow: var(--shadow-card), var(--ring);
