@@ -14,7 +14,7 @@
 }
 
 .button:hover {
-  border-color: var(--ink-25);
+  border-color: var(--ink-45);
   background: var(--wash);
   color: var(--ink-70);
 }

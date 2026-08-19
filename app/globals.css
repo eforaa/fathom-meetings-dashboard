@@ -5,10 +5,24 @@
 :root {
   color-scheme: light dark;
 
-  /* ink — warm neutrals instead of the old blue-grey */
+  /* ink — warm neutrals instead of the old blue-grey.
+     Three of these are TEXT and one is not.
+
+     --ink, --ink-70, --ink-45 carry words, so each has to clear 4.5:1
+     against every surface it can land on (WCAG AA for normal text). The
+     light --ink-45 used to be #8c887f, which measured 3.19:1 on the table's
+     own background — readable on a good screen, tiring on a laptop in
+     daylight, and short of the norm. Raised until it passes.
+
+     --ink-25 is not text. It draws hairlines, hover borders and the unset
+     stars — shapes that never have to be read. It keeps its faint value on
+     purpose: a border at text contrast reads as an error state.
+
+     tests/contrast.mjs measures the first three against every surface here,
+     so this cannot quietly slip back. */
   --ink: light-dark(#1a1a18, #e8ecee);
   --ink-70: light-dark(#56534c, #b7bec5);
-  --ink-45: light-dark(#8c887f, #8b959c);
+  --ink-45: light-dark(#736f67, #8b959c);
   --ink-25: light-dark(#a8a49b, #5b656c);
 
   --rule: light-dark(#e8e5e0, #232a2e);

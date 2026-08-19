@@ -118,7 +118,16 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
         const facets = facetsByTag[tag] ?? [];
 
         return (
-          <span key={tag} className={styles.cell} ref={openTag === tag ? boxRef : null}>
+          <span
+            key={tag}
+            className={styles.cell}
+            ref={openTag === tag ? boxRef : null}
+            //a screen reader reads the table by its roles; without this the
+            //heading is just a word floating above the rows
+            role="columnheader"
+            //and this is how it says "sorted by this column, newest first"
+            aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+          >
             <button
               type="button"
               onClick={() => sortBy(tag)}

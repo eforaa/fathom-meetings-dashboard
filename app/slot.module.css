@@ -103,7 +103,7 @@
   width: 14px;
   font-family: var(--font-mono), monospace;
   font-size: 11px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .selectWrap {
@@ -145,7 +145,7 @@
 }
 
 .direction:hover {
-  border-color: var(--ink-25);
+  border-color: var(--ink-45);
 }
 
 /* how many values this level filters by */
@@ -163,7 +163,7 @@
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .levelRemove:hover {
@@ -238,7 +238,7 @@
 }
 
 .value:hover {
-  border-color: var(--ink-25);
+  border-color: var(--ink-45);
 }
 
 .value[data-active='true'] {
@@ -275,7 +275,7 @@
 .count {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .note {
@@ -297,7 +297,7 @@
 }
 
 .addLevel:hover {
-  border-color: var(--ink-25);
+  border-color: var(--ink-45);
   color: var(--ink-70);
 }
 
@@ -343,7 +343,7 @@
 }
 
 .pill:hover {
-  border-color: var(--ink-25);
+  border-color: var(--ink-45);
 }
 
 .pill[data-active='true'] {

@@ -197,7 +197,7 @@
   font-size: 10px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .tableHead span {
@@ -253,7 +253,7 @@
   overflow: hidden;
   font-size: 12px;
   line-height: 1.35;
-  color: var(--ink-25);
+  color: var(--ink-45);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -323,7 +323,7 @@
 
 .morePeople {
   font-size: 11px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .avatars {
@@ -354,11 +354,11 @@
   margin-left: 4px;
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .dash {
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 /* date */
@@ -372,7 +372,7 @@
 
 .time {
   display: block;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 /* groups */
@@ -415,7 +415,7 @@
 .groupCount {
   font-family: var(--font-mono), monospace;
   font-size: 11px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 /* a hairline filling the rest of the header line */

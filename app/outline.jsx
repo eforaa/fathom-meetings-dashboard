@@ -90,12 +90,14 @@ export default function Outline({ meta, children }) {
       if (!firstAt[l] || seg.count <= 1) continue;
       const isCollapsed = collapsed.has(seg.key);
       out.push(
-        <div key={`h-${seg.key}`} className={styles.header}>
-          <span className={styles.gutter} style={{ width: levels * CELL }}>
+        //a group line is a row of the table with one cell: read aloud it
+        //should say the group and how many meetings are in it
+        <div key={`h-${seg.key}`} className={styles.header} role="row">
+          <span className={styles.gutter} style={{ width: levels * CELL }} role="presentation">
             {headerGutter(entry.path, l, isCollapsed)}
           </span>
-          <span className={styles.label}>{seg.label}</span>
-          <span className={styles.count}>{seg.count}</span>
+          <span className={styles.label} role="cell">{seg.label}</span>
+          <span className={styles.count} role="cell">{seg.count}</span>
         </div>,
       );
     }
@@ -103,15 +105,17 @@ export default function Outline({ meta, children }) {
     //the meeting row itself — only when nothing above it is collapsed
     if (hiddenBy < 0) {
       out.push(
-        <div key={entry.id} className={styles.rowWrap}>
-          <span className={styles.gutter} style={{ width: levels * CELL }}>
+        //these three only draw the gutter brackets; the row inside them is
+        //the real thing, so they step out of the way of the roles
+        <div key={entry.id} className={styles.rowWrap} role="presentation">
+          <span className={styles.gutter} style={{ width: levels * CELL }} role="presentation">
             {bracketGutter(entry.path)}
           </span>
-          <span className={styles.rowSlot}>{rows[i]}</span>
+          <span className={styles.rowSlot} role="presentation">{rows[i]}</span>
         </div>,
       );
     }
   }
 
-  return <div>{out}</div>;
+  return <div role="presentation">{out}</div>;
 }

@@ -72,6 +72,11 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                 type="button"
                 onClick={() => setOpen(!open)}
                 className={styles.trigger}
+                //without this the button is announced by its chips — a list of
+                //type names with no hint that pressing it changes them, and
+                //nothing at all when the meeting has no type yet
+                title={T('row.setType')}
+                aria-label={T('row.setType')}
             >
                 {variant === 'compact' ? (
                     //list: labelled chips (first two + a +N), or a faint hint when empty

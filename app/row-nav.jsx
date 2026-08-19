@@ -109,7 +109,9 @@ export default function RowNav({ children }) {
     //keyboard route is the listener above, and every row still contains a real
     //link, so nothing here is reachable by mouse alone
     return (
-        <div ref={boxRef} onClick={onClick}>
+        //rowgroup: the rows are the table's body, and a screen reader needs to
+        //be told that this wrapper is not something else in between
+        <div ref={boxRef} onClick={onClick} role="rowgroup">
             {children}
         </div>
     );

@@ -13,7 +13,7 @@
 }
 
 .input::placeholder {
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .input:focus {

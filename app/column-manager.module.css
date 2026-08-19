@@ -11,7 +11,7 @@
 }
 
 .add:hover {
-    border-color: var(--ink-25);
+    border-color: var(--ink-45);
     color: var(--ink-70);
 }
 
@@ -101,7 +101,7 @@
     cursor: pointer;
     font-size: 13px;
     line-height: 1;
-    color: var(--ink-25);
+    color: var(--ink-45);
     opacity: 0;
     transition: opacity 0.12s ease;
 }
