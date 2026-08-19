@@ -1,12 +1,16 @@
-/* The meetings summary in the sidebar: a count and the split by type.
+/* The meetings summary in the sidebar: a count and the split by type, as text.
    No card and no shadow — it sits quietly above the sorting panel rather than
-   competing with it. The five tiles that used to run across the top of the
-   page (hours, this week, this month, average) are gone. */
+   competing with it.
+
+   There is no proportional bar: it stretched to whatever width it was given
+   and said almost nothing, since one "no type" segment usually took nearly all
+   of it. The five tiles that used to run across the top of the page (hours,
+   this week, this month, average) are gone too. */
 
 .summary {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   margin-bottom: 12px;
   padding: 0 2px;
 }
@@ -34,26 +38,15 @@
   color: var(--ink-45);
 }
 
-/* the proportional bar */
-.bar {
-  display: flex;
-  height: 6px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--wash);
-}
-
-.seg {
-  height: 100%;
-}
-
-.legend {
+/* the split by type, one wrapping line of counts */
+.split {
   display: flex;
   flex-wrap: wrap;
   gap: 3px 12px;
+  margin: 0;
 }
 
-.legendItem {
+.item {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -61,7 +54,7 @@
   color: var(--ink-45);
 }
 
-.legendCount {
+.count {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
   color: var(--ink-25);
@@ -80,10 +73,3 @@
 .dot[data-type='onboarding'] { background: var(--type-onboarding); }
 .dot[data-type='other'] { background: var(--type-other); }
 .dot[data-type='__untyped'] { background: var(--rule); }
-
-.seg[data-type='internal_planning'] { background: var(--type-internal); }
-.seg[data-type='client_meeting'] { background: var(--type-client); }
-.seg[data-type='automation'] { background: var(--type-automation); }
-.seg[data-type='onboarding'] { background: var(--type-onboarding); }
-.seg[data-type='other'] { background: var(--type-other); }
-.seg[data-type='__untyped'] { background: var(--rule); }

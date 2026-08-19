@@ -2,14 +2,13 @@ import { t } from '@/lib/i18n';
 import styles from './stats.module.css';
 
 //One quiet block in the sidebar: how many meetings there are, and how they
-//split by type. It replaces the wide band that used to sit above the table
-//with five tiles — hours, this week, this month, average. Those numbers were
-//read once and then ignored, and they cost a full row across the page.
-//Deliberately understated: no card, no shadow, small type. The table is what
-//the page is for.
+//split by type.
+//
+//There is no proportional bar any more. It said almost nothing — one grey
+//"no type" segment took 96% of it — while stretching to whatever width it was
+//given, which on a narrow screen meant the full page. The counts carry the
+//same information in a line of text.
 export default function Stats({ total, types, lang }) {
-  const typeTotal = types.reduce((sum, type) => sum + type.count, 0);
-
   return (
     <section className={styles.summary} aria-label={t(lang, 'stats.aria')}>
       <p className={styles.total}>
@@ -18,30 +17,17 @@ export default function Stats({ total, types, lang }) {
       </p>
 
       {types.length > 0 && (
-        <>
-          <div className={styles.bar}>
-            {types.map((type) => (
-              <span
-                key={type.key}
-                className={styles.seg}
-                data-type={type.key}
-                style={{ width: `${(type.count / typeTotal) * 100}%` }}
-                title={`${type.label}: ${type.count}`}
-              />
-            ))}
-          </div>
-
-          <div className={styles.legend}>
-            {types.map((type) => (
-              <span key={type.key} className={styles.legendItem}>
-                <span className={styles.dot} data-type={type.key} />
-                {type.label}
-                <span className={styles.legendCount}>{type.count}</span>
-              </span>
-            ))}
-          </div>
-        </>
+        <p className={styles.split}>
+          {types.map((type) => (
+            <span key={type.key} className={styles.item}>
+              <span className={styles.dot} data-type={type.key} />
+              {type.label}
+              <span className={styles.count}>{type.count}</span>
+            </span>
+          ))}
+        </p>
       )}
+
     </section>
   );
 }
