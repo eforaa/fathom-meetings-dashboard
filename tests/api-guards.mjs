@@ -4,14 +4,8 @@
 // Run: node tests/api-guards.mjs   (no database, no env needed)
 import { readJson, isUuid, text, int, oneOf, listOf, MAX_BODY_BYTES } from '../lib/http.js';
 import { hit, callerKey, _reset } from '../lib/rate-limit.js';
+import { check, done } from './_check.mjs';
 
-let failed = 0;
-const check = (label, got, want) => {
-    const ok = JSON.stringify(got) === JSON.stringify(want);
-    if (!ok) failed += 1;
-    console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
-    if (!ok) console.log(`        got  ${JSON.stringify(got)}\n        want ${JSON.stringify(want)}`);
-};
 
 const post = (body, headers = {}) =>
     new Request('http://test/api', { method: 'POST', body, headers });
@@ -71,5 +65,4 @@ check('the caller is the signed-in person when known',
 check('otherwise the address it came from, client first',
     callerKey(ip, null), 'ip:9.9.9.9');
 
-console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
-process.exit(failed ? 1 : 0);
+done();
