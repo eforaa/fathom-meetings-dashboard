@@ -32,18 +32,23 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
   //optimistic copy of the filters so a checkbox flips instantly, before the
-  //server round-trip (which reloads the whole list) catches up
-  const [optimistic, setOptimistic] = useState({});
+  //server round-trip (which reloads the whole list) catches up. it is stamped
+  //with the server state it was made against: when the server catches up the
+  //stamp no longer matches and the copy is ignored — no effect, no extra
+  //render, and no window where both are applied at once
+  const [optimistic, setOptimistic] = useState({ against: null, values: {} });
   const boxRef = useRef(null);
 
-  //fresh search box every time a filter opens
-  useEffect(() => setQuery(''), [openTag]);
-
-  //once the server reflects the change, drop the optimistic override
   const filtersKey = JSON.stringify(columnFilters);
-  useEffect(() => setOptimistic({}), [filtersKey]);
+  const pending = optimistic.against === filtersKey ? optimistic.values : {};
 
-  const chosenFor = (tag) => optimistic[tag] ?? columnFilters[tag] ?? [];
+  const chosenFor = (tag) => pending[tag] ?? columnFilters[tag] ?? [];
+
+  //a filter panel opens with an empty search box
+  function openFilter(tag) {
+    setQuery('');
+    setOpenTag(tag);
+  }
 
   const activeTag = searchParams.get('tag') || 'date';
   const direction = searchParams.get('dir') || 'desc';
@@ -89,7 +94,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
       : [...current, value];
 
     //flip the checkbox now, sync the URL in the background
-    setOptimistic((state) => ({ ...state, [tag]: nextValues }));
+    setOptimistic({ against: filtersKey, values: { ...pending, [tag]: nextValues } });
 
     const next = new URLSearchParams(searchParams.toString());
     if (nextValues.length) next.set(`c_${tag}`, nextValues.join('~'));
@@ -98,7 +103,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
   }
 
   function clearFilter(tag) {
-    setOptimistic((state) => ({ ...state, [tag]: [] }));
+    setOptimistic({ against: filtersKey, values: { ...pending, [tag]: [] } });
     const next = new URLSearchParams(searchParams.toString());
     next.delete(`c_${tag}`);
     push(next);
@@ -128,7 +133,7 @@ export default function SortableHeader({ facetsByTag = {}, columnFilters = {} })
             {filterable && (
               <button
                 type="button"
-                onClick={() => setOpenTag(openTag === tag ? null : tag)}
+                onClick={() => openFilter(openTag === tag ? null : tag)}
                 data-active={chosen.length > 0}
                 className={styles.filterBtn}
                 title={T('header.filterBy', { label })}
