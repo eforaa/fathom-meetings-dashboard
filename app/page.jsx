@@ -201,14 +201,16 @@ export default async function MeetingsPage({ searchParams }) {
     ? groupMeetingsTree(meetings, peopleOf, groupTags, lang)
     : null;
   const flat = tree ? flattenTree(tree) : null;
-  const outlineMeta = flat ? flat.map((entry) => ({ id: entry.meeting.id, path: entry.path })) : null;
+  const outlineMeta = flat ? flat.map((entry) => ({ id: entry.key, path: entry.path })) : null;
   //the gutter takes one 22px column per grouping level; the head shifts to match
   const gutterPad = groupTags.length ? groupTags.length * 22 : 0;
 
-  //one row, rendered the same way inside a group and without one
-  const row = (meeting) => (
+  //one row, rendered the same way inside a group and without one.
+  //`key` is passed in when grouping, because the same meeting can appear under
+  //several groups and its id alone would collide
+  const row = (meeting, key = meeting.id) => (
     <MeetingRow
-      key={meeting.id}
+      key={key}
       meeting={meeting}
       participants={peopleOf.get(meeting.id) ?? []}
       longest={longest}
@@ -217,9 +219,9 @@ export default async function MeetingsPage({ searchParams }) {
     />
   );
 
-  const card = (meeting) => (
+  const card = (meeting, key = meeting.id) => (
     <MeetingCard
-      key={meeting.id}
+      key={key}
       meeting={meeting}
       participants={peopleOf.get(meeting.id) ?? []}
       columns={columns}
@@ -299,7 +301,7 @@ export default async function MeetingsPage({ searchParams }) {
                     </div>
 
                     {flat ? (
-                      <Outline meta={outlineMeta}>{flat.map((entry) => row(entry.meeting))}</Outline>
+                      <Outline meta={outlineMeta}>{flat.map((entry) => row(entry.meeting, entry.key))}</Outline>
                     ) : (
                       meetings.map(row)
                     )}
@@ -307,7 +309,7 @@ export default async function MeetingsPage({ searchParams }) {
                 </div>
 
                 <div className={styles.cards}>
-                  {flat ? flat.map((entry) => card(entry.meeting)) : meetings.map(card)}
+                  {flat ? flat.map((entry) => card(entry.meeting, entry.key)) : meetings.map((meeting) => card(meeting))}
                 </div>
               </>
             )}

@@ -15,13 +15,17 @@ export default function EditableSummary({ meetingId, value }) {
     const [busy, setBusy] = useState(false);
     const areaRef = useRef(null);
 
-    //fill and focus the textarea when editing starts
+    //focus the textarea once it exists; the draft is filled when editing
+    //starts, so React does not render an empty box first and fill it after
     useEffect(() => {
-        if (editing) {
-            setText(value);
-            areaRef.current?.focus();
-        }
-    }, [editing, value]);
+        if (!editing) return;
+        areaRef.current?.focus();
+    }, [editing]);
+
+    function startEditing() {
+        setText(value ?? '');
+        setEditing(true);
+    }
 
     async function save() {
         const next = text.trim();
@@ -72,7 +76,7 @@ export default function EditableSummary({ meetingId, value }) {
     }
 
     return (
-        <button type="button" onClick={() => setEditing(true)} className={styles.text}>
+        <button type="button" onClick={startEditing} className={styles.text}>
             {value ? value : <span className={styles.empty}>{T('summary.add')}</span>}
             <span className={styles.pencil} title={T('summary.edit')}>
                 ✎

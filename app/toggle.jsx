@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useT } from './lang-context';
 import styles from './toggle.module.css';
 
@@ -16,19 +16,29 @@ function readTheme() {
   return match ? match[1] : 'system';
 }
 
+// The cookie is the source of truth and only this button writes to it, so the
+// "store" is a set of listeners and a nudge.
+//
+// useSyncExternalStore rather than state filled from an effect: the server has
+// no cookie to read, so it renders the neutral icon, and React swaps in the
+// real one after hydration on its own. Doing that with setState inside an
+// effect renders twice and is what the react-hooks rule objects to.
+const listeners = new Set();
+
+function subscribe(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+//what the server renders: it cannot read the browser's cookie
+const serverTheme = () => 'system';
+
 export default function ThemeToggle() {
   const T = useT();
-  const [theme, setTheme] = useState('system');
-
-  // The server has already set data-theme from the cookie; this only syncs
-  // the button so it shows the right icon.
-  useEffect(() => {
-    setTheme(readTheme());
-  }, []);
+  const theme = useSyncExternalStore(subscribe, readTheme, serverTheme);
 
   function cycle() {
     const next = ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length];
-    setTheme(next);
 
     // The cookie is read by the server on the next load; setting the
     // attribute here makes the change show at once, without a reload.
@@ -39,6 +49,9 @@ export default function ThemeToggle() {
       document.cookie = `theme=${next}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.dataset.theme = next;
     }
+
+    //the cookie changed; tell everyone reading it
+    for (const listener of listeners) listener();
   }
 
   return (

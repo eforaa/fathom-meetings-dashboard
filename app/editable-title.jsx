@@ -24,14 +24,19 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
     const [busy, setBusy] = useState(false);
     const inputRef = useRef(null);
 
-    //fill the input and put the cursor in it when editing starts
+    //put the cursor in the input once it exists. the draft itself is filled
+    //when editing starts — setting state from an effect makes React render
+    //twice and, with a stale value in between, flash the old name
     useEffect(() => {
-        if (editing) {
-            setText(value);
-            inputRef.current?.focus();
-            inputRef.current?.select();
-        }
-    }, [editing, value]);
+        if (!editing) return;
+        inputRef.current?.focus();
+        inputRef.current?.select();
+    }, [editing]);
+
+    function startEditing() {
+        setText(value);
+        setEditing(true);
+    }
 
     async function save() {
         const next = text.trim();
@@ -84,7 +89,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
             onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                setEditing(true);
+                startEditing();
             }}
             className={styles.pencil}
             title={T('row.rename')}

@@ -7,14 +7,8 @@
 //
 // Run: node tests/people-dedupe.mjs   (no database, no env needed)
 import { peopleByMeeting } from '../lib/people.js';
+import { check, done } from './_check.mjs';
 
-let failed = 0;
-const check = (label, got, want) => {
-    const ok = JSON.stringify(got) === JSON.stringify(want);
-    if (!ok) failed += 1;
-    console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
-    if (!ok) console.log(`        got  ${JSON.stringify(got)}\n        want ${JSON.stringify(want)}`);
-};
 
 const meetings = [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }];
 const participants = new Map([
@@ -46,5 +40,4 @@ check('different people stay separate', labels('m3'), ['Nastya Pogorelaya', 'ÐÐ
 const ids = (byMeeting.get('m1') ?? []).map((p) => p.id);
 check('each person carries one stable id', ids.length, new Set(ids).size);
 
-console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
-process.exit(failed ? 1 : 0);
+done();
