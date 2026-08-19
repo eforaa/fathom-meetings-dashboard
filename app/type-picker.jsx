@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { typeLabel, MAX_TYPES, MEETING_TYPES } from '@/lib/format';
 import { useLang, useT } from './lang-context';
 import styles from './type-picker.module.css';
+import { useDeferredRefresh } from './refresh';
 
 //picking up to MAX_TYPES types for one meeting
 //variant "compact" (the list) shows coloured dots; "full" (the meeting page)
@@ -12,7 +12,7 @@ import styles from './type-picker.module.css';
 export default function TypePicker({ meetingId, value = [], variant = 'full' }) {
     const T = useT();
     const lang = useLang();
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [types, setTypes] = useState(value);
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -57,7 +57,7 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ types: next }),
             });
-            router.refresh();
+            refreshLater();
         } catch {
             //put the old set back if the request failed
             setTypes(previous);

@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useT } from './lang-context';
 import styles from './editable-summary.module.css';
+import { useDeferredRefresh } from './refresh';
 
 //an editable multi-line summary
 //click the text to edit, Ctrl/Cmd+Enter or blur saves, Escape cancels
 export default function EditableSummary({ meetingId, value }) {
     const T = useT();
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
     const [busy, setBusy] = useState(false);
@@ -41,7 +41,7 @@ export default function EditableSummary({ meetingId, value }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ summary: next }),
             });
-            router.refresh();
+            refreshLater();
         } finally {
             setBusy(false);
         }
