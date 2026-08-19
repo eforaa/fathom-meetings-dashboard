@@ -20,6 +20,7 @@ import {
   groupMeetingsTree,
   flattenTree,
 } from '@/lib/tags';
+import { peopleByMeeting } from '@/lib/people';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { getLang } from '@/lib/i18n/server';
 import { t, plural } from '@/lib/i18n';
@@ -135,6 +136,13 @@ export default async function MeetingsPage({ searchParams }) {
     ownerEmail: user?.email,
   });
 
+  //Fathom records the same human more than once — the calendar knows their
+  //address, the transcript knows their name — so the raw rows show a person
+  //twice in a meeting and count that meeting twice in the People filter.
+  //Everything below works on people, not on raw rows, and uses the same
+  //identity resolution as the /people directory.
+  const peopleOf = peopleByMeeting(all, participantsByMeeting);
+
   //custom columns this person added, shown after the built-in ones
   const columns = await listColumns(user?.email);
   const gridStyle = {
@@ -144,7 +152,7 @@ export default async function MeetingsPage({ searchParams }) {
   //values for the filter chips are collected before filtering,
   //otherwise choosing one value would hide all the others
   const facetsBySlot = slots.map((slot) =>
-    slot.tag ? collectFacets(all, participantsByMeeting, slot.tag, lang) : [],
+    slot.tag ? collectFacets(all, peopleOf, slot.tag, lang) : [],
   );
 
   //per-column filters from the table header (multi-value, AND across columns)
@@ -153,7 +161,7 @@ export default async function MeetingsPage({ searchParams }) {
     FILTERABLE.map((tag) => [tag, String(sp[`c_${tag}`] ?? '').split('~').filter(Boolean)]),
   );
   const facetsByTag = Object.fromEntries(
-    FILTERABLE.map((tag) => [tag, collectFacets(all, participantsByMeeting, tag, lang)]),
+    FILTERABLE.map((tag) => [tag, collectFacets(all, peopleOf, tag, lang)]),
   );
 
   //global search (?q=) over titles, summaries, transcripts and participants
@@ -161,8 +169,8 @@ export default async function MeetingsPage({ searchParams }) {
   const searchIds = query.length >= 2 ? await searchMeetingIds(user?.email, query) : null;
   const searched = searchIds ? all.filter((m) => searchIds.has(m.id)) : all;
 
-  const filtered = applyColumnFilters(searched, participantsByMeeting, columnFilters, lang);
-  const sorted = applySlots(filtered, participantsByMeeting, slots, lang);
+  const filtered = applyColumnFilters(searched, peopleOf, columnFilters, lang);
+  const sorted = applySlots(filtered, peopleOf, slots, lang);
 
   //optional "needs a name" view (?nameless=1) plus its live count for the badge
   const namelessCount = all.filter((m) => NEEDS_NAME.has(meetingTitleSource(m))).length;
@@ -190,7 +198,7 @@ export default async function MeetingsPage({ searchParams }) {
   const stats = all.length ? computeStats(all, lang) : null;
 
   const tree = groupTags.length
-    ? groupMeetingsTree(meetings, participantsByMeeting, groupTags, lang)
+    ? groupMeetingsTree(meetings, peopleOf, groupTags, lang)
     : null;
   const flat = tree ? flattenTree(tree) : null;
   const outlineMeta = flat ? flat.map((entry) => ({ id: entry.meeting.id, path: entry.path })) : null;
@@ -202,7 +210,7 @@ export default async function MeetingsPage({ searchParams }) {
     <MeetingRow
       key={meeting.id}
       meeting={meeting}
-      participants={participantsByMeeting.get(meeting.id) ?? []}
+      participants={peopleOf.get(meeting.id) ?? []}
       longest={longest}
       columns={columns}
       lang={lang}
@@ -213,7 +221,7 @@ export default async function MeetingsPage({ searchParams }) {
     <MeetingCard
       key={meeting.id}
       meeting={meeting}
-      participants={participantsByMeeting.get(meeting.id) ?? []}
+      participants={peopleOf.get(meeting.id) ?? []}
       columns={columns}
       lang={lang}
     />
