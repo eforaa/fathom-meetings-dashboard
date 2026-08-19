@@ -220,15 +220,6 @@ export default async function MeetingsPage({ searchParams }) {
     />
   );
 
-  const card = (meeting, key = meeting.id) => (
-    <MeetingCard
-      key={key}
-      meeting={meeting}
-      participants={peopleOf.get(meeting.id) ?? []}
-      columns={columns}
-      lang={lang}
-    />
-  );
 
   return (
     <div className={styles.shell}>
@@ -313,9 +304,6 @@ export default async function MeetingsPage({ searchParams }) {
                   </div>
                 </div>
 
-                <div className={styles.cards}>
-                  {flat ? flat.map((entry) => card(entry.meeting, entry.key)) : meetings.map((meeting) => card(meeting))}
-                </div>
               </>
             )}
           </div>
@@ -385,57 +373,6 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
   );
 }
 
-//the same meeting on a narrow screen
-function MeetingCard({ meeting, participants, columns, lang }) {
-  const fields = meeting.custom_fields ?? {};
-  const filled = columns.filter((column) => {
-    const value = fields[column.id];
-    return value !== undefined && value !== null && value !== '';
-  });
-
-  return (
-    <div className={styles.card}>
-      <Link href={`/meetings/${meeting.id}`} className={styles.cardBody}>
-        <span className={styles.cardTitle}>{meetingTitle(meeting, lang)}</span>
-
-        <span className={styles.cardMeta}>
-          {formatDayMonth(meeting.date, lang)}
-          <span className={styles.cardSep}>·</span>
-          {formatDuration(meeting.duration_minutes, lang)}
-          <span className={styles.cardSep}>·</span>
-          {t(lang, 'row.people', { n: participants.length })}
-        </span>
-
-        {participants.length > 0 && (
-          <span className={styles.cardPeople}>
-            {participants.map((person) => person.name || person.email).join(', ')}
-          </span>
-        )}
-
-        {filled.length > 0 && (
-          <span className={styles.cardFields}>
-            {filled.map((column) => (
-              <span key={column.id} className={styles.cardField}>
-                {column.name}:{' '}
-                {fields[column.id] === true
-                  ? '✓'
-                  : Array.isArray(fields[column.id])
-                    ? fields[column.id].join(', ')
-                    : String(fields[column.id])}
-              </span>
-            ))}
-          </span>
-        )}
-      </Link>
-
-      <div className={styles.cardSide}>
-        {/* stars and types sit outside the link: a button inside <a> is invalid */}
-        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
-        <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
-      </div>
-    </div>
-  );
-}
 
 //participants written out by name, a few per row with a "+N" tail
 function AvatarStack({ participants, lang }) {
