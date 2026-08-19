@@ -113,7 +113,9 @@ function trackWidth(type) {
   return '128px';
 }
 
-const VISIBLE_AVATARS = 3;
+//two names and a "+N more" tail. three made the people cell four lines tall,
+//and that one cell was what set the height of every row in the table
+const VISIBLE_AVATARS = 2;
 
 //main meeting page
 //reading the view from the url, loading meetings, applying it
@@ -248,15 +250,6 @@ export default async function MeetingsPage({ searchParams }) {
       </header>
 
       <main className={styles.body}>
-        <div className={styles.pageHeadRow}>
-          <div className={styles.pageHead}>
-            <span className={styles.count}>
-              {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
-            </span>
-          </div>
-
-        </div>
-
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
@@ -272,6 +265,12 @@ export default async function MeetingsPage({ searchParams }) {
             ) : (
               <>
                 <div className={styles.tableTools}>
+                  {/* the count used to have a line of its own above the table;
+                      it says as much from the left end of this row, and the
+                      table starts a head higher */}
+                  <span className={styles.count}>
+                    {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
+                  </span>
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />

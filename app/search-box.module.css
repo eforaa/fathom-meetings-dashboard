@@ -2,7 +2,7 @@
   flex: 1;
   min-width: 180px;
   max-width: 420px;
-  padding: 7px 12px;
+  padding: 5px 12px;
   background: var(--paper-raised);
   border: none;
   border-radius: var(--radius);
