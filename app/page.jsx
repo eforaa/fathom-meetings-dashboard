@@ -113,7 +113,9 @@ function trackWidth(type) {
   return '128px';
 }
 
-const VISIBLE_AVATARS = 3;
+//two names and a "+N more" tail. three made the people cell four lines tall,
+//and that one cell was what set the height of every row in the table
+const VISIBLE_AVATARS = 2;
 
 //main meeting page
 //reading the view from the url, loading meetings, applying it

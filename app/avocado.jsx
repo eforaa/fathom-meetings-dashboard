@@ -11,7 +11,7 @@ import styles from './avocado.module.css';
 //from the corners (the glare on the face and the highlights in the eyes are
 //white too, so a blanket "white becomes transparent" would have eaten them)
 //and the margin trimmed away.
-export default function Avocado({ size = 24 }) {
+export default function Avocado({ size = 32 }) {
     return (
         <span className={styles.mark} style={{ width: size, height: size }}>
             <Image
