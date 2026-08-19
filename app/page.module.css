@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  height: 58px;
+  height: 50px;
   padding: 0 32px;
   /* translucent bar with blur, the way Linear / Superhuman feel */
   background: color-mix(in srgb, var(--paper) 80%, transparent);
@@ -86,7 +86,7 @@
 
 .body {
   /* full width, aligned left — no centered column */
-  padding: 12px 32px 32px;
+  padding: 6px 32px 32px;
 }
 
 /* sorting and title share one line, aligned to the left */
@@ -125,7 +125,7 @@
      line up with the table header any more — the column starts where it starts */
   margin-top: 0;
   position: sticky;
-  top: 76px;
+  top: 58px;
 }
 
 .content {
@@ -157,7 +157,7 @@
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 /* the count keeps to the left end of that row; everything else stays right */
@@ -171,7 +171,7 @@
    KEEP overflow:auto — Date + Priority are off-canvas below ~1360px */
 .tableScroll {
   overflow: auto;
-  max-height: calc(100vh - 132px);
+  max-height: calc(100vh - 106px);
   border-radius: var(--radius-lg);
   background: var(--paper-raised);
   box-shadow: var(--shadow-card), var(--ring);
