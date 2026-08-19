@@ -41,14 +41,37 @@ import SearchBox from './search-box';
 import Stats from './stats';
 import styles from './page.module.css';
 
-//how many meetings there are and how they split by type — the two numbers the
-//sidebar summary shows. Hours, this week, this month and the average went with
-//the band that used to carry them.
+//a meeting longer than a day is broken data, not a real call — leave it out of
+//the totals so one bad row cannot skew the hours
+const SANE_MINUTES = 24 * 60;
+
+//the numbers the sidebar summary shows: how many meetings, how much time they
+//took, how many fell in this week and this month, and how they split by type
 function computeStats(meetings, lang) {
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(now.getDate() - 7);
+
+  let totalMinutes = 0;
+  let counted = 0;
+  let week = 0;
+  let month = 0;
   const typeCount = new Map();
   let untyped = 0;
 
   for (const meeting of meetings) {
+    const minutes = meeting.duration_minutes;
+    if (minutes && minutes <= SANE_MINUTES) {
+      totalMinutes += minutes;
+      counted += 1;
+    }
+
+    if (meeting.date) {
+      const d = new Date(meeting.date);
+      if (d >= weekAgo && d <= now) week += 1;
+      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) month += 1;
+    }
+
     const ts = meetingTypes(meeting);
     if (ts.length === 0) untyped += 1;
     for (const type of ts) typeCount.set(type, (typeCount.get(type) ?? 0) + 1);
@@ -61,7 +84,14 @@ function computeStats(meetings, lang) {
   //most calls have no type yet — show it, so the gap is visible
   if (untyped > 0) types.push({ key: '__untyped', label: t(lang, 'group.noType'), count: untyped });
 
-  return { total: meetings.length, types };
+  return {
+    total: meetings.length,
+    hours: Math.round(totalMinutes / 60),
+    week,
+    month,
+    avg: counted ? Math.round(totalMinutes / counted) : 0,
+    types,
+  };
 }
 
 //a meeting "needs a name" when all it shows is a placeholder — the raw Fathom
@@ -230,7 +260,7 @@ export default async function MeetingsPage({ searchParams }) {
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
-            {stats && <Stats total={stats.total} types={stats.types} lang={lang} />}
+            {stats && <Stats {...stats} lang={lang} />}
             <Slot slots={slots} facetsBySlot={facetsBySlot} groups={groupTags} />
           </aside>
 

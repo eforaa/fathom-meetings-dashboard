@@ -38,6 +38,30 @@
   color: var(--ink-45);
 }
 
+/* hours, this week, this month, average — a wrapping line above the split.
+   Value first, then its label, so the eye catches the numbers going down. */
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-45);
+}
+
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.figureValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
 /* the split by type, one wrapping line of counts */
 .split {
   display: flex;
