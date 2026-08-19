@@ -1,59 +1,43 @@
-.wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px 24px;
-  padding: 12px 16px;
-  background: var(--paper-raised);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card), var(--ring);
-}
+/* The meetings summary in the sidebar: a count and the split by type.
+   No card and no shadow — it sits quietly above the sorting panel rather than
+   competing with it. The five tiles that used to run across the top of the
+   page (hours, this week, this month, average) are gone. */
 
-/* number tiles */
-.tiles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 22px;
-}
-
-.tile {
+.summary {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 62px;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 0 2px;
 }
 
-.value {
-  font-family: var(--font-mono), monospace;
-  font-size: 22px;
+.total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+
+.totalValue {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 19px;
   font-weight: 600;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--ink);
 }
 
-.label {
-  font-size: 11px;
-  letter-spacing: 0.02em;
+.totalLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-45);
 }
 
-/* type breakdown */
-/* the type split now stands on its own above the sorting panel, so it takes
-   the full width of the sidebar instead of stretching inside the band */
-.types {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
-  padding: 11px 13px;
-  background: var(--paper-raised);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card), var(--ring);
-}
-
+/* the proportional bar */
 .bar {
   display: flex;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   overflow: hidden;
   background: var(--wash);
@@ -66,32 +50,40 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: 3px 12px;
 }
 
 .legendItem {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 11px;
   color: var(--ink-45);
 }
 
 .legendCount {
   font-family: var(--font-mono), monospace;
-  color: var(--ink-70);
+  font-size: 10px;
+  color: var(--ink-25);
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
   border-radius: 50%;
 }
 
-/* segment/dot colour comes from the per-type tokens */
-.seg[data-type='internal_planning'], .dot[data-type='internal_planning'] { background: var(--type-internal); }
-.seg[data-type='client_meeting'],    .dot[data-type='client_meeting']    { background: var(--type-client); }
-.seg[data-type='automation'],        .dot[data-type='automation']        { background: var(--type-automation); }
-.seg[data-type='onboarding'],        .dot[data-type='onboarding']        { background: var(--type-onboarding); }
-.seg[data-type='other'],             .dot[data-type='other']             { background: var(--type-other); }
-.seg[data-type='__untyped'],         .dot[data-type='__untyped']         { background: var(--rule); }
+.dot[data-type='internal_planning'] { background: var(--type-internal); }
+.dot[data-type='client_meeting'] { background: var(--type-client); }
+.dot[data-type='automation'] { background: var(--type-automation); }
+.dot[data-type='onboarding'] { background: var(--type-onboarding); }
+.dot[data-type='other'] { background: var(--type-other); }
+.dot[data-type='__untyped'] { background: var(--rule); }
+
+.seg[data-type='internal_planning'] { background: var(--type-internal); }
+.seg[data-type='client_meeting'] { background: var(--type-client); }
+.seg[data-type='automation'] { background: var(--type-automation); }
+.seg[data-type='onboarding'] { background: var(--type-onboarding); }
+.seg[data-type='other'] { background: var(--type-other); }
+.seg[data-type='__untyped'] { background: var(--rule); }

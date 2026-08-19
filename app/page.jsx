@@ -38,59 +38,30 @@ import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import SearchBox from './search-box';
-import Stats, { TypesBar } from './stats';
+import Stats from './stats';
 import styles from './page.module.css';
 
-//a meeting longer than a day is broken data, not a real call — leave it out of
-//the totals so one bad row can't skew the hours
-const SANE_MINUTES = 24 * 60;
-
-//key numbers for the stats band, computed over the whole account
+//how many meetings there are and how they split by type — the two numbers the
+//sidebar summary shows. Hours, this week, this month and the average went with
+//the band that used to carry them.
 function computeStats(meetings, lang) {
-  const now = new Date();
-  const weekAgo = new Date(now);
-  weekAgo.setDate(now.getDate() - 7);
-
-  let totalMinutes = 0;
-  let counted = 0;
-  let week = 0;
-  let month = 0;
-
-  for (const meeting of meetings) {
-    const minutes = meeting.duration_minutes;
-    if (minutes && minutes <= SANE_MINUTES) {
-      totalMinutes += minutes;
-      counted += 1;
-    }
-    if (meeting.date) {
-      const d = new Date(meeting.date);
-      if (d >= weekAgo && d <= now) week += 1;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) month += 1;
-    }
-  }
-
   const typeCount = new Map();
   let untyped = 0;
+
   for (const meeting of meetings) {
     const ts = meetingTypes(meeting);
     if (ts.length === 0) untyped += 1;
-    for (const t of ts) typeCount.set(t, (typeCount.get(t) ?? 0) + 1);
+    for (const type of ts) typeCount.set(type, (typeCount.get(type) ?? 0) + 1);
   }
+
   const types = MEETING_TYPES
     .map((key) => ({ key, label: typeLabel(key, lang), count: typeCount.get(key) ?? 0 }))
-    .filter((t) => t.count > 0)
+    .filter((type) => type.count > 0)
     .sort((a, b) => b.count - a.count);
   //most calls have no type yet — show it, so the gap is visible
   if (untyped > 0) types.push({ key: '__untyped', label: t(lang, 'group.noType'), count: untyped });
 
-  return {
-    total: meetings.length,
-    hours: Math.round(totalMinutes / 60),
-    week,
-    month,
-    avg: counted ? Math.round(totalMinutes / counted) : 0,
-    types,
-  };
+  return { total: meetings.length, types };
 }
 
 //a meeting "needs a name" when all it shows is a placeholder — the raw Fathom
@@ -254,13 +225,12 @@ export default async function MeetingsPage({ searchParams }) {
             </span>
           </div>
 
-          {all.length > 0 && <Stats {...stats} lang={lang} />}
         </div>
 
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
-            {all.length > 0 && <TypesBar types={stats.types} lang={lang} />}
+            {stats && <Stats total={stats.total} types={stats.types} lang={lang} />}
             <Slot slots={slots} facetsBySlot={facetsBySlot} groups={groupTags} />
           </aside>
 
