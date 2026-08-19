@@ -425,76 +425,6 @@
   background: var(--rule-soft);
 }
 
-/* cards, narrow screens only */
-
-.cards {
-  display: none;
-}
-
-.card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 2px;
-  border-bottom: 1px solid var(--rule-soft);
-}
-
-.cardBody {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-  flex: 1;
-  text-decoration: none;
-}
-
-.cardTitle {
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--ink);
-}
-
-.cardMeta {
-  font-family: var(--font-mono), monospace;
-  font-size: 11px;
-  color: var(--ink-45);
-}
-
-.cardSep {
-  margin: 0 6px;
-  color: var(--ink-25);
-}
-
-/* participant names under a card */
-.cardPeople {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--ink-70);
-}
-
-/* custom field values under a card */
-.cardFields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-top: 2px;
-}
-
-.cardField {
-  font-family: var(--font-mono), monospace;
-  font-size: 11px;
-  color: var(--ink-70);
-}
-
-.cardSide {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 7px;
-}
-
 /* empty states */
 
 .empty {
@@ -631,7 +561,17 @@
   color: var(--ink-45);
 }
 
-/* narrow screens: the grid gives way to cards */
+/* Narrow screens: the same row, folded.
+   There used to be a second set of markup here — a card per meeting, hidden
+   on desktop while the table was hidden on mobile. Every meeting was rendered
+   twice and one copy was always thrown away: 222 meetings meant ~7000 nodes
+   instead of ~3500, and 1110 star buttons instead of 555. Now the row itself
+   reflows.
+
+   The cells are addressed by position because three of them (the type picker,
+   the stars, a custom cell) come from their own CSS modules and cannot be
+   named from here. The order is the one MeetingRow renders:
+     1 date · 2 title · 3 type · 4 duration · 5 people · 6 stars · 7+ custom */
 
 @media (max-width: 860px) {
   .header {
@@ -642,11 +582,82 @@
     padding: 20px 16px 48px;
   }
 
+  /* the table's own scroll box and its column widths belong to the wide
+     layout; stacked, the page scrolls as one */
+  .tableScroll {
+    max-height: none;
+    overflow: visible;
+  }
+
   .table {
+    min-width: 0;
+  }
+
+  /* column headings have nothing to head once the columns are gone */
+  .tableHead {
     display: none;
   }
 
-  .cards {
-    display: block;
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 12px 14px;
+  }
+
+  .row > * {
+    min-width: 0;
+  }
+
+  /* the title takes its own line, above everything else */
+  .row > *:nth-child(2) {
+    order: 1;
+    flex: 1 1 100%;
+  }
+
+  /* date and time side by side, not stacked as in the column.
+     the cell is a plain span whose .time is a block, so it has to become a
+     flex container here — setting flex-direction alone does nothing to it */
+  .row > *:nth-child(1) {
+    order: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .row > *:nth-child(4) {
+    order: 3;
+  }
+
+  /* the bar compares a meeting to the longest one in a column of them; on its
+     own line it compares to nothing, so only the number stays */
+  .durationTrack {
+    display: none;
+  }
+
+  /* participants read as a line of names rather than a stack */
+  .row > *:nth-child(5) {
+    order: 4;
+    flex: 1 1 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 8px;
+  }
+
+  .row > *:nth-child(3) {
+    order: 5;
+  }
+
+  /* stars sit at the right end of the last line */
+  .row > *:nth-child(6) {
+    order: 6;
+    margin-left: auto;
+  }
+
+  /* custom columns follow, wrapping onto their own line when there are many */
+  .row > *:nth-child(n + 7) {
+    order: 7;
   }
 }
