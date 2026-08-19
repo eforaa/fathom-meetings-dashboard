@@ -5,7 +5,7 @@ import styles from './stats.module.css';
 //read for a non-technical owner. all values are pre-computed on the server.
 //a server component: the language arrives as a prop from the page, so no
 //context is needed and nothing extra ships to the browser
-export default function Stats({ total, hours, week, month, avg, types, lang }) {
+export default function Stats({ total, hours, week, month, avg, lang }) {
   const tiles = [
     { label: t(lang, 'stats.meetings'), value: total },
     { label: t(lang, 'stats.hours'), value: hours },
@@ -14,43 +14,52 @@ export default function Stats({ total, hours, week, month, avg, types, lang }) {
     { label: t(lang, 'stats.average'), value: avg ? t(lang, 'duration.min', { n: avg }) : '—' },
   ];
 
-  const typeTotal = types.reduce((sum, t) => sum + t.count, 0);
-
   return (
     <section className={styles.wrap} aria-label={t(lang, 'stats.aria')}>
       <div className={styles.tiles}>
-        {tiles.map((t) => (
-          <div key={t.label} className={styles.tile}>
-            <span className={styles.value}>{t.value}</span>
-            <span className={styles.label}>{t.label}</span>
+        {tiles.map((tile) => (
+          <div key={tile.label} className={styles.tile}>
+            <span className={styles.value}>{tile.value}</span>
+            <span className={styles.label}>{tile.label}</span>
           </div>
         ))}
       </div>
+    </section>
+  );
+}
 
-      {types.length > 0 && (
-        <div className={styles.types}>
-          <div className={styles.bar}>
-            {types.map((t, i) => (
-              <span
-                key={t.key}
-                className={styles.seg}
-                data-type={t.key}
-                style={{ width: `${(t.count / typeTotal) * 100}%` }}
-                title={`${t.label}: ${t.count}`}
-              />
-            ))}
-          </div>
-          <div className={styles.legend}>
-            {types.map((t, i) => (
-              <span key={t.key} className={styles.legendItem}>
-                <span className={styles.dot} data-type={t.key} />
-                {t.label}
-                <span className={styles.legendCount}>{t.count}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+//The split of meetings by type — a proportional bar and its legend.
+//It used to sit inside the band above the table, where it stretched across the
+//whole width to say very little: one grey segment usually takes almost all of
+//it. In the sidebar it fills space that was empty anyway, and the top of the
+//page gets shorter.
+export function TypesBar({ types, lang }) {
+  if (!types.length) return null;
+
+  const total = types.reduce((sum, type) => sum + type.count, 0);
+
+  return (
+    <section className={styles.types} aria-label={t(lang, 'stats.aria')}>
+      <div className={styles.bar}>
+        {types.map((type) => (
+          <span
+            key={type.key}
+            className={styles.seg}
+            data-type={type.key}
+            style={{ width: `${(type.count / total) * 100}%` }}
+            title={`${type.label}: ${type.count}`}
+          />
+        ))}
+      </div>
+      <div className={styles.legend}>
+        {types.map((type) => (
+          <span key={type.key} className={styles.legendItem}>
+            <span className={styles.dot} data-type={type.key} />
+            {type.label}
+            <span className={styles.legendCount}>{type.count}</span>
+          </span>
+        ))}
+      </div>
     </section>
   );
 }

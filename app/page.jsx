@@ -38,7 +38,7 @@ import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import SearchBox from './search-box';
-import Stats from './stats';
+import Stats, { TypesBar } from './stats';
 import styles from './page.module.css';
 
 //a meeting longer than a day is broken data, not a real call — leave it out of
@@ -182,6 +182,10 @@ export default async function MeetingsPage({ searchParams }) {
   //groups are built on the already sorted list, so their order follows the sort.
   //a nested tree when several grouping levels are chosen (Alexander's 3 columns);
   //flattened into rows + a per-row group path that drives the outline gutter
+  //walked once and shared: the band above the table and the type split in the
+  //sidebar are two views of the same numbers
+  const stats = all.length ? computeStats(all, lang) : null;
+
   const tree = groupTags.length
     ? groupMeetingsTree(meetings, participantsByMeeting, groupTags, lang)
     : null;
@@ -245,18 +249,18 @@ export default async function MeetingsPage({ searchParams }) {
       <main className={styles.body}>
         <div className={styles.pageHeadRow}>
           <div className={styles.pageHead}>
-            <h1 className={styles.title}>{t(lang, 'home.title')}</h1>
             <span className={styles.count}>
               {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
             </span>
           </div>
 
-          {all.length > 0 && <Stats {...computeStats(all, lang)} lang={lang} />}
+          {all.length > 0 && <Stats {...stats} lang={lang} />}
         </div>
 
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
+            {all.length > 0 && <TypesBar types={stats.types} lang={lang} />}
             <Slot slots={slots} facetsBySlot={facetsBySlot} groups={groupTags} />
           </aside>
 

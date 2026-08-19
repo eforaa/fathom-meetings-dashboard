@@ -38,13 +38,17 @@
 }
 
 /* type breakdown */
+/* the type split now stands on its own above the sorting panel, so it takes
+   the full width of the sidebar instead of stretching inside the band */
 .types {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
-  min-width: 220px;
-  margin-left: auto;
+  margin-bottom: 10px;
+  padding: 11px 13px;
+  background: var(--paper-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card), var(--ring);
 }
 
 .bar {

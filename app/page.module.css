@@ -105,21 +105,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px 24px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .pageHead {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
 }
 
 /* count as a subtle pill next to the title */
@@ -143,9 +135,9 @@
 .sidebar {
   width: 280px;
   flex-shrink: 0;
-  /* drop down so "SORTING" lines up with the "MEETING" column header,
-     past the "+ column" tools row above the table */
-  margin-top: 34px;
+  /* the type split now sits at the top of this column, so there is nothing to
+     line up with the table header any more — the column starts where it starts */
+  margin-top: 0;
   position: sticky;
   top: 76px;
 }
