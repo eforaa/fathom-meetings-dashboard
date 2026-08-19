@@ -227,6 +227,20 @@
   background: var(--warn-row);
 }
 
+/* the whole row leads to the meeting, so it says so under the pointer.
+   the title is still a link — this only widens the target. */
+.row {
+  cursor: pointer;
+}
+
+/* the row the keyboard cursor sits on (j / k / arrows). a bar on the left
+   edge rather than only a tint, so it is still obvious on the tinted
+   "needs a name" rows. */
+.row[data-cursor='on'] {
+  background: var(--sage-soft);
+  box-shadow: inset 2px 0 0 var(--sage);
+}
+
 /* first cell: title on top, a one-line summary under it */
 .titleCell {
   display: flex;

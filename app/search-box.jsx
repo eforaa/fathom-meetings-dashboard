@@ -33,7 +33,11 @@ export default function SearchBox() {
           submit('');
         }
       }}
+      //"/" from anywhere on the page puts the cursor here
+      data-search-box=""
       placeholder={T('search.placeholder')}
+      //the shortcuts have to be written down somewhere or nobody finds them
+      title={T('search.hint')}
       className={styles.input}
     />
   );
