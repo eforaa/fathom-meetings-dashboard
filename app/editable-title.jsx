@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useT } from './lang-context';
 import styles from './editable-title.module.css';
+import { useDeferredRefresh } from './refresh';
 
 //an editable meeting title
 //variant "row": a link with a pencil that appears on hover
@@ -18,7 +18,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
                 AI
             </span>
         ) : null;
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [editing, setEditing] = useState(false);
     const [text, setText] = useState(value);
     const [busy, setBusy] = useState(false);
@@ -52,7 +52,7 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title: next }),
             });
-            router.refresh();
+            refreshLater();
         } finally {
             setBusy(false);
         }

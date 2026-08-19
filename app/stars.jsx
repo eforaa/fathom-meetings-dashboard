@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import styles from './stars.module.css';
+import { useDeferredRefresh } from './refresh';
 
 //editable 1..5 star rating
 //clicking a star sets it, clicking the same star again clears the rating
 export default function Stars({ meetingId, value = 0 }) {
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [current, setCurrent] = useState(value);
     const [hover, setHover] = useState(0);
     const [busy, setBusy] = useState(false);
@@ -29,7 +29,7 @@ export default function Stars({ meetingId, value = 0 }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ importance: next }),
             });
-            router.refresh();
+            refreshLater();
         } catch {
             //put the old value back if the request failed
             setCurrent(current);

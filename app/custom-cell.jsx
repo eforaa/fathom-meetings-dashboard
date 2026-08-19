@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useT } from './lang-context';
 import styles from './custom-cell.module.css';
+import { useDeferredRefresh } from './refresh';
 
 //one editable custom-column cell in a meeting row
 //how it looks depends on the column type
@@ -18,7 +18,7 @@ export default function CustomCell({ meetingId, column, value }) {
 
 //text / number / select / checkbox — one value per cell
 function SingleCell({ meetingId, column, value }) {
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [current, setCurrent] = useState(value ?? '');
     const [editing, setEditing] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -31,7 +31,7 @@ function SingleCell({ meetingId, column, value }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ columnId: column.id, value: next }),
             });
-            router.refresh();
+            refreshLater();
         } finally {
             setBusy(false);
             setEditing(false);
@@ -108,7 +108,7 @@ function SingleCell({ meetingId, column, value }) {
 //tags column: pick several allowed values into one cell
 function MultiCell({ meetingId, column, value }) {
     const T = useT();
-    const router = useRouter();
+    const [refreshLater] = useDeferredRefresh();
     const [selected, setSelected] = useState(Array.isArray(value) ? value : []);
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -150,7 +150,7 @@ function MultiCell({ meetingId, column, value }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ columnId: column.id, value: next }),
             });
-            router.refresh();
+            refreshLater();
         } catch {
             //put the old set back if the request failed
             setSelected(previous);
