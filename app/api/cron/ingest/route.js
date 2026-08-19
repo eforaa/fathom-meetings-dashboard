@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { runIngest } from '@/lib/ingest';
+import { rateLimit, GUESSING } from '@/lib/rate-limit';
 
 //always executing the route 
 export const dynamic = 'force-dynamic';
@@ -7,6 +8,11 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function GET(request) {
+  //the secret is guessable one try at a time, so the tries are counted.
+  //Vercel calls this once a day and never comes near the cap.
+  const tooMany = rateLimit(request, { bucket: 'cron', identity: null, ...GUESSING });
+  if (tooMany) return tooMany;
+
   //getting the password 
   const secret = process.env.CRON_SECRET;
 

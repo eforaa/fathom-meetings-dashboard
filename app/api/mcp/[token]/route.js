@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { resolveOwner, handleMcpRequest } from '@/lib/mcp-server';
+import { readJson } from '@/lib/http';
+import { rateLimit, CONNECTOR, GUESSING } from '@/lib/rate-limit';
 
 //always run, never cache
 export const dynamic = 'force-dynamic';
@@ -20,6 +22,14 @@ export async function POST(request, context) {
   const { token } = await context.params;
 
   const ownerEmail = resolveOwner(tokenFrom(request, token));
+
+  //counted before the answer, so a wrong token cannot be tried in a loop.
+  //a known caller gets the connector's own, roomier cap.
+  const tooMany = ownerEmail
+    ? rateLimit(request, { bucket: 'mcp', identity: ownerEmail, ...CONNECTOR })
+    : rateLimit(request, { bucket: 'mcp-guess', identity: null, ...GUESSING });
+  if (tooMany) return tooMany;
+
   //unknown token: no hints about which part was wrong
   if (!ownerEmail) {
     return NextResponse.json(
@@ -28,9 +38,10 @@ export async function POST(request, context) {
     );
   }
 
-  //body must be json
-  const message = await request.json().catch(() => null);
-  if (!message) {
+  //body must be json. 256 KB: an analysis carries a summary and action items,
+  //which is larger than anything the interface sends but still bounded
+  const message = await readJson(request, { maxBytes: 256 * 1024 });
+  if (message instanceof Response || !Object.keys(message).length) {
     return NextResponse.json(
       { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } },
       { status: 400 },

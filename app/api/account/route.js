@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { verifyApiKey, saveApiKey, removeApiKey } from '@/lib/accounts';
+import { readJson, text } from '@/lib/http';
+import { rateLimit, SENSITIVE } from '@/lib/rate-limit';
 
 //always executing the route
 export const dynamic = 'force-dynamic';
@@ -24,8 +26,18 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
     }
 
-    const { apiKey } = await request.json();
-    const trimmed = String(apiKey ?? '').trim();
+    //saving a key calls Fathom to verify it, so this one is held tighter
+    const tooMany = rateLimit(request, { bucket: 'account-key', identity: user.email, ...SENSITIVE });
+    if (tooMany) return tooMany;
+
+    //this used to be a bare request.json(): a malformed body threw, and the
+    //route answered 500 for what is plainly a bad request
+    const body = await readJson(request);
+    if (body instanceof Response) return body;
+
+    //Fathom's keys are far shorter than this; the cap is only here so an
+    //enormous string never reaches their API on our account
+    const trimmed = text(body.apiKey, { max: 500 });
 
     //empty field
     if (!trimmed) {
@@ -51,12 +63,15 @@ export async function POST(request) {
 }
 
 //disconnecting the account
-export async function DELETE() {
+export async function DELETE(request) {
     const user = await currentUser();
     //security check
     if (!user) {
         return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
     }
+
+    const tooMany = rateLimit(request, { bucket: 'account-key', identity: user.email, ...SENSITIVE });
+    if (tooMany) return tooMany;
 
     try {
         await removeApiKey(user.email);
