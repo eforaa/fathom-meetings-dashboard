@@ -279,14 +279,18 @@ export default async function MeetingsPage({ searchParams }) {
                 </div>
 
                 <div className={styles.tableScroll}>
-                  <div className={styles.table} style={gridStyle}>
+                  {/* roles, not markup: the layout is a CSS grid of divs, and
+                      without them a screen reader reads 222 meetings as one
+                      long run of text with no columns and no headings */}
+                  <div className={styles.table} style={gridStyle} role="table" aria-label={t(lang, 'table.aria')}>
                     <div
                       className={styles.tableHead}
                       style={gutterPad ? { paddingLeft: 20 + gutterPad } : undefined}
+                      role="row"
                     >
                       <SortableHeader facetsByTag={facetsByTag} columnFilters={columnFilters} />
                       {columns.map((column) => (
-                        <span key={column.id}>
+                        <span key={column.id} role="columnheader" aria-sort="none">
                           <ColumnHeader column={column} />
                         </span>
                       ))}
@@ -331,13 +335,14 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
       //RowNav does the clicking and the keyboard, so the row stays a server
       //component with no handlers of its own
       data-href={`/meetings/${meeting.id}`}
+      role="row"
     >
-      <span className={styles.date}>
+      <span className={styles.date} role="cell">
         {formatDayMonth(meeting.date, lang)}
         <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date, lang)}</span>
       </span>
 
-      <span className={styles.titleCell}>
+      <span className={styles.titleCell} role="cell">
         <EditableTitle
           meetingId={meeting.id}
           value={meetingTitle(meeting, lang)}
@@ -348,9 +353,11 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
         {summary && <span className={styles.rowSummary}>{summary}</span>}
       </span>
 
-      <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
+      <span role="cell">
+        <TypePicker meetingId={meeting.id} value={meetingTypes(meeting)} variant="compact" />
+      </span>
 
-      <span className={styles.duration}>
+      <span className={styles.duration} role="cell">
         <span className={styles.durationTrack}>
           <span className={styles.durationFill} style={{ width: `${barWidth}%` }} />
         </span>
@@ -359,15 +366,18 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
 
       <AvatarStack participants={participants} lang={lang} />
 
-      <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+      <span role="cell">
+        <Stars meetingId={meeting.id} value={meeting.importance ?? 0} />
+      </span>
 
       {columns.map((column) => (
-        <CustomCell
-          key={column.id}
-          meetingId={meeting.id}
-          column={column}
-          value={fields[column.id]}
-        />
+        <span key={column.id} role="cell">
+          <CustomCell
+            meetingId={meeting.id}
+            column={column}
+            value={fields[column.id]}
+          />
+        </span>
       ))}
     </div>
   );
@@ -377,7 +387,7 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
 //participants written out by name, a few per row with a "+N" tail
 function AvatarStack({ participants, lang }) {
   if (participants.length === 0) {
-    return <span className={styles.dash}>—</span>;
+    return <span className={styles.dash} role="cell">—</span>;
   }
 
   const shown = participants.slice(0, VISIBLE_AVATARS);
@@ -385,7 +395,7 @@ function AvatarStack({ participants, lang }) {
   const names = participants.map((person) => person.name || person.email).join(', ');
 
   return (
-    <span className={styles.people} title={names}>
+    <span className={styles.people} title={names} role="cell">
       {shown.map((person) => (
         <span key={person.id} className={styles.personName}>
           {person.name || person.email}

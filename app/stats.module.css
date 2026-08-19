@@ -81,7 +81,7 @@
 .count {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  color: var(--ink-25);
+  color: var(--ink-45);
 }
 
 .dot {

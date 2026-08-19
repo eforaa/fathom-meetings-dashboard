@@ -13,7 +13,7 @@
 }
 
 .trigger:hover .add {
-    border-color: var(--ink-25);
+    border-color: var(--ink-45);
     color: var(--ink-70);
 }
 
@@ -86,7 +86,7 @@
 .addCompact {
     font-family: var(--font-mono), monospace;
     font-size: 11px;
-    color: var(--ink-25);
+    color: var(--ink-45);
 }
 
 .trigger:hover .addCompact {
@@ -127,7 +127,7 @@
 
 .option:disabled {
     cursor: default;
-    color: var(--ink-25);
+    color: var(--ink-45);
 }
 
 .box {
