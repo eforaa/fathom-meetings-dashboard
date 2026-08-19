@@ -53,10 +53,8 @@ export default function LoginPage() {
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
                     <LangSwitch />
                 </div>
-                <p className={styles.eyebrow}>
-                    <Avocado size={14} />
-                    {T('login.eyebrow')}
-                </p>
+                <Avocado size={52} />
+                <p className={styles.eyebrow}>{T('login.eyebrow')}</p>
                 <h1 className={styles.title}>{T('login.title')}</h1>
                 <p className={styles.subtitle}>{T('login.subtitle')}</p>
 
