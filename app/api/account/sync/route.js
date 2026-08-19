@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { runIngest } from '@/lib/ingest';
+import { rateLimit, EXPENSIVE } from '@/lib/rate-limit';
 
 //always executing the route
 export const dynamic = 'force-dynamic';
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 //the "sync now" button on the settings page
-export async function POST() {
+export async function POST(request) {
     const supabase = createClientForServer(await cookies());
     const {
         data: { user },
@@ -19,6 +20,10 @@ export async function POST() {
     if (!user) {
         return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
     }
+
+    //this pulls pages from Fathom on our key; a person needs it once in a while
+    const tooMany = rateLimit(request, { bucket: 'sync', identity: user.email, ...EXPENSIVE });
+    if (tooMany) return tooMany;
 
     try {
         //only this person, so one manual sync does not pull everyone else
