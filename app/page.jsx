@@ -28,6 +28,7 @@ import LangSwitch from './lang-switch';
 import Avocado from './avocado';
 import { listColumns } from '@/lib/columns';
 import Outline from './outline';
+import RowNav from './row-nav';
 import Stars from './stars';
 import EditableTitle from './editable-title';
 import TypePicker from './type-picker';
@@ -300,11 +301,15 @@ export default async function MeetingsPage({ searchParams }) {
                       ))}
                     </div>
 
-                    {flat ? (
-                      <Outline meta={outlineMeta}>{flat.map((entry) => row(entry.meeting, entry.key))}</Outline>
-                    ) : (
-                      meetings.map(row)
-                    )}
+                    <RowNav>
+                      {flat ? (
+                        <Outline meta={outlineMeta}>
+                          {flat.map((entry) => row(entry.meeting, entry.key))}
+                        </Outline>
+                      ) : (
+                        meetings.map((meeting) => row(meeting))
+                      )}
+                    </RowNav>
                   </div>
                 </div>
 
@@ -331,7 +336,14 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
   const summary = meetingSummary(meeting);
 
   return (
-    <div className={styles.row} data-unnamed={unnamed || undefined}>
+    <div
+      className={styles.row}
+      data-unnamed={unnamed || undefined}
+      //where this row leads. the whole row is a target, not just the title —
+      //RowNav does the clicking and the keyboard, so the row stays a server
+      //component with no handlers of its own
+      data-href={`/meetings/${meeting.id}`}
+    >
       <span className={styles.date}>
         {formatDayMonth(meeting.date, lang)}
         <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date, lang)}</span>
