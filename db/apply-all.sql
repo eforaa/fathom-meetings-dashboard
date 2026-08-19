@@ -118,3 +118,14 @@ create trigger fathom_accounts_touch
   before update on fathom_accounts
   for each row
   execute function touch_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- analysis_status: «в очереди» больше не существует (см. db/analysis-status.sql).
+--   NULL — разбор не запрашивали, 'done' — сохранён, 'failed' — не вышло.
+-- ---------------------------------------------------------------------------
+alter table meetings
+  alter column analysis_status drop default;
+
+update meetings
+   set analysis_status = null
+ where analysis_status = 'pending';
