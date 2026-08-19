@@ -129,3 +129,35 @@ alter table meetings
 update meetings
    set analysis_status = null
  where analysis_status = 'pending';
+
+-- ---------------------------------------------------------------------------
+-- Поиск по индексу вместо чтения расшифровок (см. db/search-index.sql).
+--   search_doc — слова всех текстовых полей, GIN-индекс по ней,
+--   trigram-индексы для поиска участников по подстроке.
+-- ---------------------------------------------------------------------------
+alter table meetings
+  add column if not exists search_doc tsvector
+  generated always as (
+    to_tsvector(
+      'simple',
+      coalesce(title, '') || ' ' ||
+      coalesce(ai_title, '') || ' ' ||
+      coalesce(custom_title, '') || ' ' ||
+      coalesce(fathom_title, '') || ' ' ||
+      coalesce(summary, '') || ' ' ||
+      coalesce(custom_summary, '') || ' ' ||
+      coalesce(fathom_summary, '') || ' ' ||
+      coalesce(raw_transcript, '')
+    )
+  ) stored;
+
+create index if not exists meetings_search_doc_idx
+  on meetings using gin (search_doc);
+
+create extension if not exists pg_trgm;
+
+create index if not exists participants_name_trgm_idx
+  on participants using gin (name gin_trgm_ops);
+
+create index if not exists participants_email_trgm_idx
+  on participants using gin (email gin_trgm_ops);
