@@ -93,4 +93,32 @@ for (const theme of ['light', 'dark']) {
         steps[0] > steps[1] && steps[1] > steps[2], true);
 }
 
+//Цветные подложки типов встреч. Их две работы: подсветка-таблетка в списке
+//типов (там текст пишется парным --type-*-ink) и полоса в сводке слева (там
+//поверх идут обычные чернила --ink-70). Обе пары должны читаться.
+//
+//Почему они не попали в общий список поверхностей выше: --ink-45 на этих
+//подложках даёт 4.3:1, и включи мы их туда целиком, тест потребовал бы
+//переделать места, где --ink-45 на них и не появляется. Проверяется ровно то,
+//что действительно встречается.
+const TYPES = ['internal', 'client', 'automation', 'onboarding', 'other'];
+
+for (const theme of ['light', 'dark']) {
+    const тема = theme === 'light' ? 'светлая' : 'тёмная';
+
+    const pairs = TYPES
+        .filter((name) => token[`type-${name}-tint`] && token[`type-${name}-ink`])
+        .map((name) => ({
+            name,
+            own: ratio(token[`type-${name}-ink`][theme], token[`type-${name}-tint`][theme]),
+            ink: ratio(token['ink-70'][theme], token[`type-${name}-tint`][theme]),
+        }));
+
+    check(`подложки типов, ${тема}: все пять на месте`, pairs.length, 5);
+    check(`парный цвет типа на своей подложке, ${тема}: 4.5:1`,
+        pairs.filter((p) => p.own < 4.5).map((p) => `${p.name} ${p.own.toFixed(2)}:1`), []);
+    check(`--ink-70 на подложке типа, ${тема}: 4.5:1`,
+        pairs.filter((p) => p.ink < 4.5).map((p) => `${p.name} ${p.ink.toFixed(2)}:1`), []);
+}
+
 done();
