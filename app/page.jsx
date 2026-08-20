@@ -104,7 +104,12 @@ export const dynamic = 'force-dynamic';
 
 //the six built-in tracks; custom columns are appended after them
 //Date first (Alexander's ask), then Meeting, Types, Duration, People, Priority
-const BUILTIN_GRID = '104px minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 84px';
+//The first and last tracks are 20px wider than the space their content needs:
+//the row's side padding lives inside those two cells rather than on the row.
+//That is what lets the date column stick to the left edge while the rest
+//scrolls under it — a sticky cell has to reach the edge itself, and it cannot
+//if the row holds the padding.
+const BUILTIN_GRID = '124px minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 104px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -282,7 +287,16 @@ export default async function MeetingsPage({ searchParams }) {
                   {/* roles, not markup: the layout is a CSS grid of divs, and
                       without them a screen reader reads 222 meetings as one
                       long run of text with no columns and no headings */}
-                  <div className={styles.table} style={gridStyle} role="table" aria-label={t(lang, 'table.aria')}>
+                  <div
+                    className={styles.table}
+                    style={gridStyle}
+                    role="table"
+                    aria-label={t(lang, 'table.aria')}
+                    //grouping draws a gutter to the left of every row; a column
+                    //stuck to the edge would sit on top of it, so it stays put
+                    //only in the plain list
+                    data-grouped={groupTags.length ? 'true' : undefined}
+                  >
                     <div
                       className={styles.tableHead}
                       style={gutterPad ? { paddingLeft: 20 + gutterPad } : undefined}

@@ -190,7 +190,8 @@
   display: grid;
   grid-template-columns: var(--grid);
   gap: 18px;
-  padding: 8px 20px;
+  /* боковых отступов у самой шапки нет — они внутри крайних ячеек, см. .table */
+  padding: 8px 0;
   background: light-dark(#fbfaf8, #171c20);
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono), monospace;
@@ -238,6 +239,41 @@
   background: var(--rule);
 }
 
+/* ── дата остаётся на месте ─────────────────────────────────────────────────
+   Таблице нужно 1340 px, а на ноутбуке их 1280: часть колонок уезжает за край,
+   и вместе с ними уплывала дата — единственное, по чему строка узнаётся.
+   Теперь первая колонка прилипает к левому краю, остальное скользит под ней.
+
+   Отступ строки живёт здесь, а не на строке: липкая ячейка должна сама
+   доходить до края, иначе под ней остаётся полоса, сквозь которую видно
+   уезжающее содержимое. Крайние дорожки сетки на эти 20 px шире — место под
+   текст осталось прежним. */
+.tableHead > *:first-child,
+.row > *:first-child {
+  padding-left: 20px;
+}
+
+.tableHead > *:last-child,
+.row > *:last-child {
+  padding-right: 20px;
+}
+
+.table:not([data-grouped='true']) .row > *:first-child,
+.table:not([data-grouped='true']) .tableHead > *:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  /* фон строки, каким бы он ни был: обычный, жёлтый «нужно имя», наведение
+     или курсор клавиатуры. Без него сквозь дату просвечивали бы соседние
+     колонки. */
+  background: inherit;
+}
+
+/* шапка стоит и по вертикали, и по горизонтали, поэтому её угол выше всех */
+.table:not([data-grouped='true']) .tableHead > *:first-child {
+  z-index: 6;
+}
+
 /* one row — hairline on top, not bottom; no radius (the card has it) */
 
 .row {
@@ -245,7 +281,7 @@
   grid-template-columns: var(--grid);
   gap: 18px;
   align-items: center;
-  padding: 8px 20px;
+  padding: 8px 0;
   border-radius: 0;
   border-bottom: none;
   border-top: 1px solid var(--rule-soft);
@@ -659,6 +695,30 @@
   .tableHead > *:not(:last-child)::after,
   .row > *:not(:last-child)::after {
     content: none;
+  }
+
+  /* сложенная строка — не таблица: колонке не к чему прилипать, а боковой
+     отступ снова принадлежит строке целиком */
+  .row {
+    padding: 12px 14px;
+  }
+
+  /* селектор повторяет :not([data-grouped]) — иначе он слабее того, который
+     включает прилипание, и колонка осталась бы липкой там, где липнуть не к
+     чему */
+  .table:not([data-grouped='true']) .row > *:first-child,
+  .table:not([data-grouped='true']) .tableHead > *:first-child {
+    position: static;
+  }
+
+  .row > *:first-child,
+  .tableHead > *:first-child {
+    padding-left: 0;
+  }
+
+  .row > *:last-child,
+  .tableHead > *:last-child {
+    padding-right: 0;
   }
 
   /* the title takes its own line, above everything else */
