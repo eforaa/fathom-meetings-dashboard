@@ -5,6 +5,7 @@ import { typeLabel, MAX_TYPES, MEETING_TYPES } from '@/lib/format';
 import { useLang, useT } from './lang-context';
 import styles from './type-picker.module.css';
 import { useDeferredRefresh } from './refresh';
+import { useMaybeSelection } from './selection';
 
 //picking up to MAX_TYPES types for one meeting
 //variant "compact" (the list) shows coloured dots; "full" (the meeting page)
@@ -14,6 +15,11 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
     const lang = useLang();
     const [refreshLater] = useDeferredRefresh();
     const [types, setTypes] = useState(value);
+    //пачка меняется прямо сейчас, и эта встреча в ней: вместо типов — плашка
+    //«меняем…». В списке хук находит провайдера, на странице одной встречи
+    //возвращает null, и всё остаётся как было
+    const batch = useMaybeSelection();
+    const inBatch = Boolean(batch?.applying && batch.has(meetingId));
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const boxRef = useRef(null);
@@ -64,6 +70,17 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
         } finally {
             setBusy(false);
         }
+    }
+
+    //пока пачка пишется, эта ячейка не показывает ни старое значение, ни
+    //новое: старое уже неверно, нового ещё нет. Плашка говорит ровно это
+    if (inBatch) {
+        return (
+            <span className={styles.changing}>
+                <span className={styles.changingDot} aria-hidden="true" />
+                {T('bulk.changing')}
+            </span>
+        );
     }
 
     return (

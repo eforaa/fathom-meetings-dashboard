@@ -101,6 +101,24 @@
 /* count as a subtle pill; it sits at the left end of the table tools row.
    It used to own a line of its own above the table, which cost the grid a head
    of height for one short pill. */
+.onlyChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--sage);
+  border-radius: 999px;
+  background: var(--sage-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.onlyChip:hover {
+  background: var(--paper-raised);
+}
+
 .count {
   padding: 3px 10px;
   border-radius: 999px;
@@ -261,6 +279,17 @@
   padding-right: 20px;
 }
 
+.table:not([data-grouped='true']) .row > *:nth-child(2),
+.table:not([data-grouped='true']) .tableHead > *:nth-child(2) {
+  position: sticky;
+  /* ровно за ячейкой отметки: 50px её дорожки плюс 18px зазора между
+     колонками. Без зазора дата примерзала на 18px левее, чем стоит, — то есть
+     дёргалась влево в первый же момент прокрутки */
+  left: calc(50px + 18px);
+  z-index: 2;
+  background: inherit;
+}
+
 .table:not([data-grouped='true']) .row > *:first-child,
 .table:not([data-grouped='true']) .tableHead > *:first-child {
   position: sticky;
@@ -273,7 +302,8 @@
 }
 
 /* шапка стоит и по вертикали, и по горизонтали, поэтому её угол выше всех */
-.table:not([data-grouped='true']) .tableHead > *:first-child {
+.table:not([data-grouped='true']) .tableHead > *:first-child,
+.table:not([data-grouped='true']) .tableHead > *:nth-child(2) {
   z-index: 6;
 }
 
@@ -740,7 +770,7 @@
   }
 
   /* the title takes its own line, above everything else */
-  .row > *:nth-child(2) {
+  .row > *:nth-child(3) {
     order: 1;
     flex: 1 1 100%;
   }
@@ -748,7 +778,7 @@
   /* date and time side by side, not stacked as in the column.
      the cell is a plain span whose .time is a block, so it has to become a
      flex container here — setting flex-direction alone does nothing to it */
-  .row > *:nth-child(1) {
+  .row > *:nth-child(2) {
     order: 2;
     display: flex;
     flex-direction: row;
@@ -756,7 +786,7 @@
     gap: 6px;
   }
 
-  .row > *:nth-child(4) {
+  .row > *:nth-child(5) {
     order: 3;
   }
 
@@ -767,7 +797,7 @@
   }
 
   /* participants read as a line of names rather than a stack */
-  .row > *:nth-child(5) {
+  .row > *:nth-child(6) {
     order: 4;
     flex: 1 1 100%;
     flex-direction: row;
@@ -775,18 +805,62 @@
     gap: 0 8px;
   }
 
-  .row > *:nth-child(3) {
+  .row > *:nth-child(4) {
     order: 5;
   }
 
   /* stars sit at the right end of the last line */
-  .row > *:nth-child(6) {
+  .row > *:nth-child(7) {
     order: 6;
     margin-left: auto;
   }
 
   /* custom columns follow, wrapping onto their own line when there are many */
-  .row > *:nth-child(n + 7) {
+  .row > *:nth-child(n + 8) {
     order: 7;
   }
+
+  /* ячейка отметки в сложенной строке: остаётся первой и узкой, чтобы
+     галочка не уезжала от строки, к которой относится */
+  .row > *:nth-child(1),
+  .tableHead > *:nth-child(1) {
+    order: 0;
+    flex: 0 0 auto;
+    padding-left: 0;
+  }
+}
+
+/* --- отметка строки ---------------------------------------------------------
+
+   Фон строки уже занят тремя состояниями: чередование через одну, подсветка
+   «нужно имя», курсор клавиатуры. Четвёртому там места нет — и если бы отметка
+   всё-таки красила фон, отмеченная жёлтая строка перестала бы быть жёлтой,
+   то есть человек потерял бы из виду ровно то, ради чего собирает пачку.
+
+   Поэтому отметка говорит о себе тремя другими способами: галочкой, планкой на
+   внутреннем крае её ячейки и линейками сверху — у самой строки и у следующей,
+   чтобы пачка подряд читалась одной полосой. Курсор клавиатуры оставляет себе
+   фон и планку на ВНЕШНЕМ крае той же ячейки: две планки по разные стороны
+   галочки, и оба состояния видны одновременно.
+
+   Селектор :has() смотрит внутрь строки на состояние галочки — благодаря
+   этому строка остаётся серверной разметкой и ничего не знает об отметке. */
+
+.row:has([data-checked='true']) > *:first-child {
+  box-shadow: inset -2px 0 0 var(--sage);
+}
+
+.row:has([data-checked='true']) {
+  border-top-color: var(--sage);
+}
+
+.row:has([data-checked='true']) + .row {
+  border-top-color: var(--sage);
+}
+
+/* ячейка отметки: содержимое по центру, боковой отступ строки внутри неё */
+.checkCell {
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
 }

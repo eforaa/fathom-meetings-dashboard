@@ -3,7 +3,10 @@
 // The trap these guard against is a shortcut that fires while someone is
 // typing: pressing "j" in the middle of renaming a meeting must write a "j",
 // not jump the cursor down a row.
-import { isTyping, nextIndex, wantsSearch, opensRow, clearsCursor } from '../lib/keys.js';
+import {
+    isTyping, nextIndex, wantsSearch, opensRow, clearsCursor,
+    selectionAction, escapeMeans,
+} from '../lib/keys.js';
 import { check, done } from './_check.mjs';
 
 // --- who is allowed to hear a shortcut -------------------------------------
@@ -39,5 +42,18 @@ check('but not while writing a title — it types a slash instead', wantsSearch(
 check('Enter opens the row the cursor is on', opensRow('Enter', 3), true);
 check('Enter with no cursor does nothing', opensRow('Enter', null), false);
 check('Escape puts the cursor away', clearsCursor('Escape'), true);
+
+// --- отметка строк ----------------------------------------------------------
+check('x отмечает строку под курсором', selectionAction('x'), 'toggle');
+check('Shift+X тянет отметку от прошлой до нынешней',
+    selectionAction('X', { shiftKey: true }), 'range');
+check('a берёт всё, что на экране', selectionAction('a'), 'all');
+check('другая буква ничего не отмечает', selectionAction('q'), null);
+//та же защита, что у остальных сочетаний: буква, набранная в поле ввода,
+//остаётся буквой
+check('x внутри поля ввода — просто икс', selectionAction('x', { typing: true }), null);
+
+check('Escape сначала снимает отметку', escapeMeans(true), 'selection');
+check('и только потом убирает курсор', escapeMeans(false), 'cursor');
 
 done();

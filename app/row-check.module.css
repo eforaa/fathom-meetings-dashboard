@@ -1,0 +1,43 @@
+/* Галочка отметки — в шапке и в каждой строке.
+
+   Фон строки ей не принадлежит: он уже занят чередованием, подсветкой «нужно
+   имя» и курсором клавиатуры. Отметка говорит о себе знаком и планкой, но не
+   заливкой — иначе жёлтая строка, которую отметили, перестала бы быть жёлтой,
+   и человек потерял бы из виду то самое, ради чего он эту пачку и собирает. */
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 1px solid var(--ink-25);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--on-sage);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.check:hover {
+  border-color: var(--sage);
+}
+
+.check[data-checked='true'] {
+  border-color: var(--sage);
+  background: var(--sage);
+}
+
+/* идёт запись: заливка бледнеет до мягкого оттенка акцента, знак остаётся
+   на месте. Не «выключено», а «сейчас» */
+.check[data-busy='true'] {
+  background: var(--sage-soft);
+  border-color: var(--sage);
+  color: var(--sage);
+  cursor: default;
+}
+
+.mark {
+  width: 10px;
+  height: 10px;
+}
