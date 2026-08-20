@@ -10,7 +10,7 @@
     "test": "node tests/run.mjs"
   },
   "dependencies": {
-    "@aivocado/mindsheet": "github:svedenieva/mindsheet",
+    "@aivocado/mindsheet": "git+https://github.com/svedenieva/mindsheet.git#d12bc6bbb3819417ba9b261139f33268237f594c",
     "@anthropic-ai/claude-agent-sdk": "^0.3.207",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
