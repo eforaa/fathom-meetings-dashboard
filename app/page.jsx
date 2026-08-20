@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings, searchMeetingIds } from '@/lib/queries';
+import { readRange, filterByRange } from '@/lib/date-range';
 import {
   formatDayMonth,
   formatTime,
@@ -44,6 +45,7 @@ import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import SearchBox from './search-box';
+import DateFilter from './date-filter';
 import Stats from './stats';
 import styles from './page.module.css';
 
@@ -182,7 +184,12 @@ export default async function MeetingsPage({ searchParams }) {
   const searchIds = query.length >= 2 ? await searchMeetingIds(user?.email, query) : null;
   const searched = searchIds ? all.filter((m) => searchIds.has(m.id)) : all;
 
-  const filtered = applyColumnFilters(searched, peopleOf, columnFilters, lang);
+  //отбор по датам (?from=&to=) — до всего остального: он самый дешёвый и
+  //отсекает больше всех
+  const range = readRange({ from: sp.from, to: sp.to });
+  const inDates = filterByRange(searched, range);
+
+  const filtered = applyColumnFilters(inDates, peopleOf, columnFilters, lang);
   const sorted = applySlots(filtered, peopleOf, slots, lang);
 
   //Показать ровно эти встречи (?only=id~id).
@@ -305,6 +312,7 @@ export default async function MeetingsPage({ searchParams }) {
                       <span aria-hidden="true">×</span>
                     </Link>
                   )}
+                  <DateFilter />
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />
