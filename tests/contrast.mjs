@@ -63,7 +63,10 @@ check('surfaces were collected from the stylesheets too', backgrounds.length >= 
 
 //ink-25 is deliberately absent: it draws hairlines, hover borders and the
 //unset stars, never words. A border at text contrast reads as an error state.
-const TEXT = ['ink', 'ink-70', 'ink-45'];
+//--error и --warn попали сюда, когда история сбора начала писать ими слова
+//(«ошибка», «не завершён»). До этого они были только заливкой значков, а с
+//текстом требование другое
+const TEXT = ['ink', 'ink-70', 'ink-45', 'error', 'warn'];
 
 for (const name of TEXT) {
     for (const theme of ['light', 'dark']) {
@@ -78,10 +81,15 @@ for (const name of TEXT) {
     }
 }
 
-//the scale must stay a scale: three steps a person can tell apart
+//the scale must stay a scale: three steps a person can tell apart.
+//только чернила: --error и --warn проверяются выше на читаемость, но в шкалу
+//не входят — они говорят о смысле, а не о степени приглушённости, и требовать
+//от них места в лесенке значило бы проверять то, чего никто не задумывал
+const SCALE = ['ink', 'ink-70', 'ink-45'];
+
 for (const theme of ['light', 'dark']) {
-    const steps = TEXT.map((n) => ratio(token[n][theme], token.paper[theme]));
-    check(`--${TEXT.join(' > --')}, ${theme === 'light' ? 'светлая' : 'тёмная'}: ступени идут по убыванию`,
+    const steps = SCALE.map((n) => ratio(token[n][theme], token.paper[theme]));
+    check(`--${SCALE.join(' > --')}, ${theme === 'light' ? 'светлая' : 'тёмная'}: ступени идут по убыванию`,
         steps[0] > steps[1] && steps[1] > steps[2], true);
 }
 

@@ -1,0 +1,145 @@
+/* История сбора встреч. Живёт рядом с карточкой аккаунта и повторяет её
+   оформление — это одна и та же тема, разделённая на «что настроено» и
+   «как оно себя ведёт». */
+
+.section {
+  margin-top: 32px;
+}
+
+.sectionTitle {
+  margin: 0 0 14px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-45);
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+}
+
+/* строка состояния */
+
+.state {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.dot {
+  flex: none;
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-25);
+}
+
+/* цвет усиливается вместе со смыслом: спокойный — тревожный — сломанный.
+   Цветом здесь только точка: сам текст говорит то же самое словами, и человек,
+   который цвет не различает, ничего не теряет */
+.state[data-level='ok'] .dot {
+  background: var(--sage);
+}
+
+.state[data-level='late'] .dot {
+  background: var(--warn-dot);
+}
+
+.state[data-level='stale'] .dot,
+.state[data-level='failing'] .dot {
+  background: var(--error);
+}
+
+.since {
+  color: var(--ink-45);
+}
+
+.quiet {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-70);
+}
+
+.empty {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-45);
+}
+
+/* таблица запусков */
+
+.table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  padding: 0 10px 7px 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-45);
+  text-align: left;
+}
+
+.table td {
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-70);
+  vertical-align: baseline;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.num {
+  width: 1%;
+  padding-right: 0;
+  text-align: right;
+  /* цифры одной ширины: столбец чисел должен читаться как столбец */
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.result {
+  color: var(--ink-70);
+}
+
+.result[data-result='failed'] {
+  color: var(--error);
+}
+
+/* «не завершён» — запуск, который открылся и не закрылся. Не ошибка, но и не
+   успех, поэтому и выглядит как ни то ни другое */
+.result[data-result='cut'] {
+  color: var(--warn);
+}
+
+.error {
+  display: block;
+  max-width: 260px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-45);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

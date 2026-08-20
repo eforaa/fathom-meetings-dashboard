@@ -161,3 +161,27 @@ create index if not exists participants_name_trgm_idx
 
 create index if not exists participants_email_trgm_idx
   on participants using gin (email gin_trgm_ops);
+
+-- ---------------------------------------------------------------------------
+-- 5. Журнал синхронизаций: по строке на каждый запуск сбора встреч.
+--    В fathom_accounts лежит только последний результат, и он перезаписывается;
+--    история отвечает на вопрос «сбор молчит второй день или второй месяц».
+--    Подробности и рассуждения — в db/sync-log.sql.
+-- ---------------------------------------------------------------------------
+create table if not exists sync_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_email text not null,
+  source text not null check (source in ('cron', 'manual', 'backfill')),
+  started_at timestamptz not null default now(),
+  finished_at timestamptz,
+  ok boolean,
+  error text,
+  fetched integer,
+  inserted integer,
+  skipped integer,
+  people_refreshed integer,
+  meetings_total integer
+);
+
+create index if not exists sync_runs_email_started_idx
+  on sync_runs (user_email, started_at desc);
