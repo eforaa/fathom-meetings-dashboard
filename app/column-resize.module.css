@@ -1,0 +1,95 @@
+/* Границы между колонками, за которые можно тянуть.
+
+   Слой лежит поверх таблицы и сам событий не ловит — их ловят только полоски.
+   Иначе он перехватывал бы щелчки по строкам, и таблица перестала бы
+   открываться по клику. */
+
+.layer {
+  position: absolute;
+  inset: 0;
+  /* выше липкой ячейки с датой (у неё 6) — иначе первая граница пряталась бы
+     под ней и не давалась в руки */
+  z-index: 7;
+  pointer-events: none;
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+  /* полоска шире, чем видно: попасть в линию толщиной в пиксель мышью
+     невозможно, а в девять пикселей — легко. Видимая часть рисуется по центру
+     этой области */
+  width: 9px;
+  height: 37px;
+  margin-left: -4px;
+  cursor: col-resize;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.handle::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 4px;
+  width: 1px;
+  background: transparent;
+  transition: background-color 0.12s ease;
+}
+
+/* линия проявляется под рукой и при переходе клавишей: до этого момента
+   шапка остаётся спокойной */
+.handle:hover::after,
+.handle:focus-visible::after {
+  background: var(--sage);
+}
+
+.handle:focus-visible {
+  outline: none;
+}
+
+.handle:focus-visible::after {
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  left: 3.5px;
+}
+
+/* пока тянут, курсор остаётся тем же над всей страницей, а текст не
+   выделяется — иначе движение мыши подсвечивает пол-таблицы синим */
+:global(body).dragging {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* вернуть все колонки к задуманному */
+.reset {
+  position: absolute;
+  top: -26px;
+  right: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-45);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.reset:hover {
+  border-color: var(--ink-25);
+  color: var(--ink);
+}
+
+/* на узком экране строка складывается и колонок как таковых нет — тянуть
+   нечего */
+@media (max-width: 860px) {
+  .layer {
+    display: none;
+  }
+}

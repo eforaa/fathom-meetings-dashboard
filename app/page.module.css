@@ -179,6 +179,9 @@
 
 .table {
   min-width: 940px;
+  /* якорь для слоя с границами колонок: полоски стоят по стыкам ячеек шапки
+     и должны ехать вместе с таблицей, когда её прокручивают вбок */
+  position: relative;
 }
 
 /* table head — sticks to the top of the scroll region while rows scroll under it */

@@ -29,6 +29,7 @@ import Avocado from './avocado';
 import { listColumns } from '@/lib/columns';
 import Outline from './outline';
 import RowNav from './row-nav';
+import ColumnResize from './column-resize';
 import Stars from './stars';
 import EditableTitle from './editable-title';
 import TypePicker from './type-picker';
@@ -309,6 +310,15 @@ export default async function MeetingsPage({ searchParams }) {
                         </span>
                       ))}
                     </div>
+
+                    {/* границы между колонками поверх таблицы: слой клиентский,
+                        сама таблица остаётся серверной разметкой */}
+                    <ColumnResize
+                      defaultGrid={gridStyle['--grid']}
+                      lang={lang}
+                      label={t(lang, 'columns.resize')}
+                      resetLabel={t(lang, 'columns.resetWidths')}
+                    />
 
                     <RowNav>
                       {flat ? (
