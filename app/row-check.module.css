@@ -28,6 +28,15 @@
   background: var(--sage);
 }
 
+/* идёт запись: заливка бледнеет до мягкого оттенка акцента, знак остаётся
+   на месте. Не «выключено», а «сейчас» */
+.check[data-busy='true'] {
+  background: var(--sage-soft);
+  border-color: var(--sage);
+  color: var(--sage);
+  cursor: default;
+}
+
 .mark {
   width: 10px;
   height: 10px;

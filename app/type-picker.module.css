@@ -148,3 +148,25 @@
     font-size: 11px;
     color: var(--ink-45);
 }
+
+/* «меняем…» на месте типов, пока идёт запись по пачке.
+   Не гаснущая строка и не крутящийся кружок: ячейка честно говорит, что
+   старое значение уже неверно, а нового ещё нет */
+.changing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--wash);
+  font-size: 11.5px;
+  color: var(--ink-70);
+  white-space: nowrap;
+}
+
+.changingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-25);
+}

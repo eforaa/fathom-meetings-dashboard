@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSelection } from './selection';
 import { useDeferredRefresh } from './refresh';
 import styles from './bulk-bar.module.css';
@@ -18,7 +19,7 @@ import styles from './bulk-bar.module.css';
 const TOAST_MS = 8000;
 
 export default function BulkBar({ types, typesById, words }) {
-    const { count, ids, clear } = useSelection();
+    const { count, ids, clear, setApplying } = useSelection();
     const [refreshLater] = useDeferredRefresh();
 
     const [busy, setBusy] = useState(false);
@@ -26,6 +27,9 @@ export default function BulkBar({ types, typesById, words }) {
     const [result, setResult] = useState(null);
     const lastRequest = useRef(null);
     const timer = useRef(null);
+    const menuRef = useRef(null);
+    const barRef = useRef(null);
+    const triggerRef = useRef(null);
 
     //плашка результата живёт восемь секунд. Дольше — она начинает мешать,
     //короче — её не успевают прочитать
@@ -36,6 +40,24 @@ export default function BulkBar({ types, typesById, words }) {
         return () => clearTimeout(timer.current);
     }, [result]);
 
+    //Escape, нажатый в самой панели, возвращает человека туда, откуда он
+    //пришёл. Без этого фокус остаётся на исчезнувшей кнопке, браузер отдаёт
+    //его в начало страницы, и работа без мыши обрывается на середине
+    useEffect(() => {
+        if (!count) return undefined;
+
+        function onKey(event) {
+            if (event.key !== 'Escape' || menu) return;
+            if (!barRef.current?.contains(document.activeElement)) return;
+
+            clear();
+            document.querySelector('[data-table-scroll]')?.focus();
+        }
+
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [count, menu, clear]);
+
     //пока панель поднята, таблица получает пустоту в подвале: иначе последняя
     //строка списка оказывается под ней и до неё не добраться прокруткой
     useEffect(() => {
@@ -44,10 +66,36 @@ export default function BulkBar({ types, typesById, words }) {
         return () => { delete document.body.dataset.bulk; };
     }, [count, result]);
 
-    //панель и меню закрываются по Escape; отметку снимает список
+    //Клавиатура в меню — та же, что у одиночного выбора типа: стрелки ходят
+    //по пунктам, Escape закрывает и возвращает фокус на кнопку, которая меню
+    //открыла. Без возврата фокус уезжает в начало страницы, и человек,
+    //работающий без мыши, теряет место.
     useEffect(() => {
         if (!menu) return undefined;
-        const onKey = (event) => { if (event.key === 'Escape') setMenu(null); };
+
+        const box = menuRef.current;
+        box?.querySelector('[role="menuitem"]')?.focus();
+
+        function onKey(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                setMenu(null);
+                triggerRef.current?.focus();
+                return;
+            }
+
+            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+            const items = [...(box?.querySelectorAll('[role="menuitem"]') ?? [])];
+            if (!items.length) return;
+
+            event.preventDefault();
+            const at = items.indexOf(document.activeElement);
+            const step = event.key === 'ArrowDown' ? 1 : -1;
+            const next = at === -1 ? 0 : (at + step + items.length) % items.length;
+            items[next].focus();
+        }
+
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
     }, [menu]);
@@ -56,6 +104,8 @@ export default function BulkBar({ types, typesById, words }) {
 
     async function send(payload, describe) {
         setBusy(true);
+        //то же самое видят галочки и ячейки типа в отмеченных строках
+        setApplying(true);
         setMenu(null);
         lastRequest.current = { payload, describe };
 
@@ -80,6 +130,7 @@ export default function BulkBar({ types, typesById, words }) {
             setResult({ error: true, describe });
         } finally {
             setBusy(false);
+            setApplying(false);
         }
     }
 
@@ -138,6 +189,20 @@ export default function BulkBar({ types, typesById, words }) {
                         </span>
                     </div>
 
+                    {/* какие именно три встречи остались как были — вопрос,
+                        который возникает сразу же. Ссылка показывает ровно их:
+                        обычным фильтром такой список не выразить, у них нет
+                        ничего общего, кроме того, что с ними только что
+                        произошло */}
+                    {!result.error && result.unchanged?.length > 0 && (
+                        <Link
+                            href={`/?only=${result.unchanged.join('~')}`}
+                            className={styles.action}
+                        >
+                            {words.showUnchanged}
+                        </Link>
+                    )}
+
                     {result.error ? (
                         <button type="button" className={styles.action} onClick={retry}>
                             {words.retry}
@@ -156,7 +221,7 @@ export default function BulkBar({ types, typesById, words }) {
     //--- сама панель ---------------------------------------------------------
     return (
         <div className={styles.dock}>
-            <div className={styles.bar} data-busy={busy ? 'true' : undefined}>
+            <div className={styles.bar} data-busy={busy ? 'true' : undefined} ref={barRef}>
                 <span className={styles.countBox}>
                     <span className={styles.countLabel}>{busy ? words.applying : words.selected}</span>
                     <span className={styles.countValue}>{count}</span>
@@ -171,6 +236,7 @@ export default function BulkBar({ types, typesById, words }) {
                         disabled={busy}
                         aria-expanded={menu === 'type'}
                         aria-haspopup="menu"
+                        ref={menu === 'type' ? triggerRef : null}
                         onClick={() => setMenu(menu === 'type' ? null : 'type')}
                     >
                         <span className={styles.long}>{words.setType}</span>
@@ -179,7 +245,7 @@ export default function BulkBar({ types, typesById, words }) {
                     </button>
 
                     {menu === 'type' && (
-                        <div className={styles.menu} role="menu">
+                        <div className={styles.menu} role="menu" ref={menuRef}>
                             {types.map((type) => (
                                 <button
                                     key={type.key}
@@ -212,6 +278,7 @@ export default function BulkBar({ types, typesById, words }) {
                         disabled={busy}
                         aria-expanded={menu === 'priority'}
                         aria-haspopup="menu"
+                        ref={menu === 'priority' ? triggerRef : null}
                         onClick={() => setMenu(menu === 'priority' ? null : 'priority')}
                     >
                         <span className={styles.long}>{words.setPriority}</span>
@@ -220,7 +287,7 @@ export default function BulkBar({ types, typesById, words }) {
                     </button>
 
                     {menu === 'priority' && (
-                        <div className={styles.menu} role="menu">
+                        <div className={styles.menu} role="menu" ref={menuRef}>
                             {[5, 4, 3, 2, 1].map((value) => (
                                 <button
                                     key={value}

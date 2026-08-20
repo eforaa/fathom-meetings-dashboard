@@ -39,8 +39,12 @@ function Mark({ state }) {
 }
 
 export function RowCheck({ id, label }) {
-    const { has, toggle, toggleRange } = useSelection();
+    const { has, toggle, toggleRange, applying } = useSelection();
     const checked = has(id);
+    //пока идёт запись — только галочка меняет вид. Строка не гаснет: текст в
+    //ней читают и в этот момент, а приглушённая строка выглядит недоступной,
+    //хотя недоступна она ровно на полсекунды
+    const busy = applying && checked;
 
     function onClick(event) {
         event.preventDefault();
@@ -58,6 +62,8 @@ export function RowCheck({ id, label }) {
             aria-label={label}
             className={styles.check}
             data-checked={checked ? 'true' : undefined}
+            data-busy={busy ? 'true' : undefined}
+            disabled={busy}
             onClick={onClick}
         >
             {checked && <Mark state="all" />}

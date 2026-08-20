@@ -185,12 +185,21 @@ export default async function MeetingsPage({ searchParams }) {
   const filtered = applyColumnFilters(searched, peopleOf, columnFilters, lang);
   const sorted = applySlots(filtered, peopleOf, slots, lang);
 
+  //Показать ровно эти встречи (?only=id~id).
+  //
+  //Сюда ведёт ссылка «показать их» из плашки результата: пачку изменили, три
+  //встречи остались как были, и человек хочет посмотреть — какие. Обычными
+  //фильтрами такой список не выразить: у этих трёх нет ничего общего, кроме
+  //того, что с ними только что произошло.
+  const only = String(sp.only ?? '').split('~').filter(Boolean);
+
   //optional "needs a name" view (?nameless=1) plus its live count for the badge
   const namelessCount = all.filter((m) => NEEDS_NAME.has(meetingTitleSource(m))).length;
   const onlyNameless = sp.nameless === '1';
+  const chosen = only.length ? sorted.filter((m) => only.includes(m.id)) : sorted;
   const meetings = onlyNameless
-    ? sorted.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)))
-    : sorted;
+    ? chosen.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)))
+    : chosen;
 
   //the longest meeting on screen sets the scale of the duration bars.
   //ignore absurd values (a broken multi-day span would flatten every real bar)
@@ -286,6 +295,16 @@ export default async function MeetingsPage({ searchParams }) {
                   <span className={styles.count}>
                     {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
                   </span>
+
+                  {/* из вида «только эти» должен быть выход, иначе человек
+                      остаётся в списке из трёх встреч и не понимает, куда
+                      делись остальные двести */}
+                  {only.length > 0 && (
+                    <Link href="/" className={styles.onlyChip}>
+                      {t(lang, 'bulk.onlyChosen')}
+                      <span aria-hidden="true">×</span>
+                    </Link>
+                  )}
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />
@@ -295,7 +314,14 @@ export default async function MeetingsPage({ searchParams }) {
                     панель действий смотрят в него, а строки остаются серверной
                     разметкой */}
                 <SelectionProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
-                <div className={styles.tableScroll} data-table-scroll>
+                <div
+                  className={styles.tableScroll}
+                  data-table-scroll
+                  //Escape из панели действий возвращает фокус сюда: у списка
+                  //должно быть куда его принять, иначе он уезжает в начало
+                  //страницы
+                  tabIndex={-1}
+                >
                   {/* roles, not markup: the layout is a CSS grid of divs, and
                       without them a screen reader reads 222 meetings as one
                       long run of text with no columns and no headings */}
@@ -368,6 +394,7 @@ export default async function MeetingsPage({ searchParams }) {
                     partial: t(lang, 'bulk.partial'),
                     failed: t(lang, 'bulk.failed'),
                     failedNote: t(lang, 'bulk.failedNote'),
+                    showUnchanged: t(lang, 'bulk.showUnchanged'),
                     retry: t(lang, 'bulk.retry'),
                     undo: t(lang, 'bulk.undo'),
                     undone: t(lang, 'bulk.undone'),

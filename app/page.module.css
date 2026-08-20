@@ -101,6 +101,24 @@
 /* count as a subtle pill; it sits at the left end of the table tools row.
    It used to own a line of its own above the table, which cost the grid a head
    of height for one short pill. */
+.onlyChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--sage);
+  border-radius: 999px;
+  background: var(--sage-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.onlyChip:hover {
+  background: var(--paper-raised);
+}
+
 .count {
   padding: 3px 10px;
   border-radius: 999px;

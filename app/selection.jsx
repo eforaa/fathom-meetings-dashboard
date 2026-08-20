@@ -22,8 +22,20 @@ export function useSelection() {
     return value;
 }
 
+//Тот же ответ, но без провайдера — null, а не ошибка. Редакторы типа и
+//важности живут и в списке, и на странице одной встречи; на второй никакой
+//пачки нет, и падать из-за этого им не за что.
+export function useMaybeSelection() {
+    return useContext(SelectionContext);
+}
+
 export default function SelectionProvider({ ids = [], children }) {
     const [selected, setSelected] = useState(() => new Set());
+    //идёт ли сейчас запись. Знать об этом должны не только кнопки панели:
+    //пока пачка меняется, то же самое должно быть видно в самих строках —
+    //иначе человек смотрит на список и не понимает, к нему ли относится
+    //полоса, бегущая внизу экрана
+    const [applying, setApplying] = useState(false);
     //последняя тронутая строка — точка отсчёта для Shift+X
     const anchor = useRef(null);
 
@@ -68,6 +80,8 @@ export default function SelectionProvider({ ids = [], children }) {
     }, []);
 
     const value = useMemo(() => ({
+        applying,
+        setApplying,
         selected,
         ids: [...selected],
         count: selected.size,
@@ -79,7 +93,7 @@ export default function SelectionProvider({ ids = [], children }) {
         toggleRange,
         selectAll,
         clear,
-    }), [selected, order, toggle, toggleRange, selectAll, clear]);
+    }), [applying, selected, order, toggle, toggleRange, selectAll, clear]);
 
     return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;
 }
