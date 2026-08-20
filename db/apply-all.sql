@@ -185,3 +185,11 @@ create table if not exists sync_runs (
 
 create index if not exists sync_runs_email_started_idx
   on sync_runs (user_email, started_at desc);
+
+-- ---------------------------------------------------------------------------
+-- 6. Доступ к custom_columns.
+--    Единственная таблица, стоявшая без RLS: публичный anon-ключ (он лежит в
+--    браузерном бандле) читал и писал её. Политики не нужны — весь законный
+--    доступ идёт сервисным ключом с сервера, а он RLS не касается.
+-- ---------------------------------------------------------------------------
+alter table custom_columns enable row level security;
