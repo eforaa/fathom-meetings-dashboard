@@ -145,4 +145,16 @@ check('файлы стилей разобраны', files.length >= 10, true);
 
 check('ни одно правило внутри @media не слабее того, что оно отменяет', losers, []);
 
+//Тот же капкан, вид сбоку. Чередование фона строк написано через переменную
+//--row-bg именно потому, что селектор полосы точнее, чем .row:hover: задай
+//она background напрямую — полоса легла бы поверх наведения, жёлтой строки
+//«нужно имя» и курсора клавиатуры, и все три перестали бы быть видны на
+//каждой второй строке.
+const stripes = parse(readFileSync(join(APP, 'page.module.css'), 'utf8'));
+const direct = [...stripes.outer, ...stripes.inMedia]
+    .filter((r) => r.selector.includes('nth-child(even)') && r.props.includes('background'))
+    .map((r) => r.selector);
+
+check('полоса задаётся переменной, а не свойством background', direct, []);
+
 done();

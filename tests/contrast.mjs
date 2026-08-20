@@ -42,7 +42,7 @@ const token = tokens(globals);
 //every colour any stylesheet paints a background with, plus the surface tokens
 function surfaces() {
     const list = [];
-    for (const name of ['paper', 'paper-raised', 'wash', 'warn-row']) {
+    for (const name of ['paper', 'paper-raised', 'wash', 'warn-row', 'row-alt']) {
         if (token[name]) list.push({ where: `--${name}`, ...token[name] });
     }
 

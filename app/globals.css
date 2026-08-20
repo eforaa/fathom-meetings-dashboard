@@ -32,6 +32,11 @@
   --paper-raised: light-dark(#ffffff, #14181b);
   --wash: light-dark(#f5f3f0, #171c20);
 
+  /* фон каждой второй строки. Разница нарочно на пределе заметности: полосе
+     достаточно вести глаз вдоль строки при прокрутке вбок, и она не должна
+     спорить с наведением, которое темнее её на ступень */
+  --row-alt: light-dark(#faf9f7, #171c20);
+
   /* accent — deeper, less grey teal */
   --sage: light-dark(#3f6b6e, #8fc6b8);
   --sage-soft: light-dark(#e3ebe9, #1a2a26);
