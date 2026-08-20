@@ -9,6 +9,14 @@ import { useDeferredRefresh } from './refresh';
 export default function Stars({ meetingId, value = 0 }) {
     const [refreshLater] = useDeferredRefresh();
     const [current, setCurrent] = useState(value);
+
+    //то же, что в ячейке типов: пакетная правка меняет важность на сервере, и
+    //без этого звёзды показывали бы прежнюю оценку до перезагрузки страницы
+    const [fromServer, setFromServer] = useState(value);
+    if (fromServer !== value) {
+        setFromServer(value);
+        setCurrent(value);
+    }
     const [hover, setHover] = useState(0);
     const [busy, setBusy] = useState(false);
 

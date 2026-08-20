@@ -6,6 +6,7 @@ import { useLang, useT } from './lang-context';
 import styles from './type-picker.module.css';
 import { useDeferredRefresh } from './refresh';
 import { useMaybeSelection } from './selection';
+import { sameTypes } from '@/lib/bulk';
 
 //picking up to MAX_TYPES types for one meeting
 //variant "compact" (the list) shows coloured dots; "full" (the meeting page)
@@ -15,6 +16,22 @@ export default function TypePicker({ meetingId, value = [], variant = 'full' }) 
     const lang = useLang();
     const [refreshLater] = useDeferredRefresh();
     const [types, setTypes] = useState(value);
+
+    //Значение пришло с сервера и не совпадает с показанным — берём серверное.
+    //
+    //Собственное состояние здесь для того, чтобы щелчок по типу был виден
+    //мгновенно, не дожидаясь ответа. Но менять типы этой встречи можно и не
+    //отсюда: пакетная правка меняет их сразу у двенадцати строк, и тогда
+    //сервер знает новое значение, а эта ячейка продолжает показывать старое —
+    //до перезагрузки страницы. Именно так эта ошибка и выглядела.
+    //
+    //Сравнение по содержимому, а не по ссылке: массив прилетает новый при
+    //каждой отрисовке, и сравнение ссылок означало бы бесконечный цикл.
+    const [shown, setShown] = useState(value);
+    if (!sameTypes(shown, value)) {
+        setShown(value);
+        setTypes(value);
+    }
     //пачка меняется прямо сейчас, и эта встреча в ней: вместо типов — плашка
     //«меняем…». В списке хук находит провайдера, на странице одной встречи
     //возвращает null, и всё остаётся как было
