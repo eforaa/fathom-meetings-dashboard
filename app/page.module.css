@@ -204,6 +204,40 @@
   white-space: nowrap;
 }
 
+/* ── столбцы видно ──────────────────────────────────────────────────────────
+   Вертикальные линии — то, чем таблица отличается от списка: глаз ведёт
+   строку по колонке, а не по воздуху.
+
+   Линия рисуется псевдоэлементом, а не рамкой ячейки, по двум причинам:
+   рамка тянулась бы только на высоту содержимого ячейки и вышла бы рваной,
+   а ещё она сдвинула бы сетку на свой пиксель. Псевдоэлемент лежит ровно
+   посередине 18-пиксельного промежутка и захватывает вертикальные отступы
+   строки, поэтому линия идёт от края до края. */
+.tableHead > *,
+.row > * {
+  position: relative;
+}
+
+.tableHead > *:not(:last-child)::after,
+.row > *:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  /* середина промежутка между колонками */
+  right: -9px;
+  /* вертикальные отступы строки, чтобы линия шла во всю высоту */
+  top: -8px;
+  bottom: -8px;
+  width: 1px;
+  background: var(--rule-soft);
+  /* линия — это разметка, а не содержимое: указателю мыши она не мешает */
+  pointer-events: none;
+}
+
+/* в шапке линии чуть заметнее: она задаёт ритм всей таблице */
+.tableHead > *:not(:last-child)::after {
+  background: var(--rule);
+}
+
 /* one row — hairline on top, not bottom; no radius (the card has it) */
 
 .row {
@@ -215,6 +249,10 @@
   border-radius: 0;
   border-bottom: none;
   border-top: 1px solid var(--rule-soft);
+  /* собственный фон, а не прозрачность: поверх него ложатся наведение,
+     жёлтая строка «нужно имя» и курсор клавиатуры — иначе они смешивались бы
+     с фоном карточки и вели себя по-разному в светлой и тёмной теме */
+  background: var(--paper-raised);
   transition: background-color 0.12s ease;
 }
 
@@ -301,6 +339,7 @@
   font-family: var(--font-mono), monospace;
   font-size: 11px;
   color: var(--ink-45);
+  font-variant-numeric: tabular-nums;
 }
 
 /* people — names written out, a few per row */
@@ -368,6 +407,9 @@
   font-size: 11.5px;
   line-height: 1.35;
   color: var(--ink-70);
+  /* цифры одной ширины: 11 и 18 августа занимают одинаковое место, и колонка
+     перестаёт подрагивать от строки к строке */
+  font-variant-numeric: tabular-nums;
 }
 
 .time {
@@ -608,6 +650,15 @@
 
   .row > * {
     min-width: 0;
+  }
+
+  /* колонок нет — разделять нечего.
+     Селектор повторяет :not(:last-child) не для красоты: без него правило
+     слабее того, что рисует линии, и они остались бы висеть поперёк
+     сложенной строки. */
+  .tableHead > *:not(:last-child)::after,
+  .row > *:not(:last-child)::after {
+    content: none;
   }
 
   /* the title takes its own line, above everything else */

@@ -112,7 +112,13 @@ export default function EditableTitle({ meetingId, value, href, variant = 'row',
     return (
         <span className={styles.rowWrap}>
             {mark}
-            <Link href={href} className={styles.link}>
+            <Link
+                href={href}
+                className={styles.link}
+                //длинное название обрезается многоточием, и прочитать его целиком
+                //было негде — теперь оно всплывает под указателем
+                title={value}
+            >
                 {value || T('row.untitled')}
             </Link>
             {pencil}
