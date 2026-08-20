@@ -46,6 +46,7 @@ import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import SearchBox from './search-box';
 import DateFilter from './date-filter';
+import ExportButton from './export-button';
 import Stats from './stats';
 import styles from './page.module.css';
 
@@ -313,6 +314,9 @@ export default async function MeetingsPage({ searchParams }) {
                     </Link>
                   )}
                   <DateFilter />
+                  {/* выгружается ровно то, что сейчас в списке, и в том же
+                      порядке — поэтому id берутся с уже отобранного списка */}
+                  <ExportButton ids={meetings.map((m) => m.id)} />
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
                   <ColumnManager />

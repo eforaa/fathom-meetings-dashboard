@@ -1,0 +1,79 @@
+/* Кнопка выгрузки в строке над таблицей: тот же вид, что у отбора по датам —
+   это соседи по ряду и по назначению. */
+
+.box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-70);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.trigger:hover:not(:disabled) {
+  border-color: var(--ink-25);
+  color: var(--ink);
+}
+
+.trigger:disabled {
+  color: var(--ink-45);
+  cursor: default;
+}
+
+.count {
+  padding-left: 6px;
+  border-left: 1px solid var(--rule);
+  color: var(--ink-45);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-panel);
+}
+
+.item {
+  display: block;
+  width: 100%;
+  padding: 7px 9px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--wash);
+}
+
+.failed {
+  font-size: 11px;
+  color: var(--error);
+  white-space: nowrap;
+}
