@@ -1,0 +1,51 @@
+name: tests
+
+# Runs on every push and every pull request.
+#
+# Until now the 191 checks only ran when somebody remembered to type `npm test`
+# — which means they guarded the project exactly as well as human memory does.
+# A red mark here appears next to the commit, in the pull request, and in the
+# repository's own list, so a broken change cannot reach dev unnoticed.
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # npm ci installs exactly what package-lock.json pins, including the git
+      # dependency on @aivocado/mindsheet. That is what makes a run repeatable:
+      # the same commit installs the same code tomorrow.
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npx eslint app lib tests
+
+      # The tests need no database and no keys — that was a deliberate choice
+      # when they were written, and it is why this step is three seconds long.
+      - name: Tests
+        run: npm test
+
+      # The build is the only step that needs environment variables at all:
+      # importing the database client throws when they are missing. Nothing here
+      # connects anywhere, so these are obvious fakes rather than secrets — the
+      # values only have to exist. The step earns its place by catching what
+      # neither lint nor the tests can: a page that no longer compiles.
+      - name: Build
+        run: npm run build
+        env:
+          SUPABASE_URL: http://example.invalid
+          SUPABASE_SERVICE_KEY: not-a-real-key
+          NEXT_PUBLIC_SUPABASE_URL: http://example.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: not-a-real-key
+          ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef
