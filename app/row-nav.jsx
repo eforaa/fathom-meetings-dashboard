@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { isTyping, nextIndex, wantsSearch, opensRow, clearsCursor } from '@/lib/keys';
+import {
+    isTyping, nextIndex, wantsSearch, opensRow, clearsCursor,
+    selectionAction, escapeMeans,
+} from '@/lib/keys';
+import { useSelection } from './selection';
 
 //Clicking a row, and walking the list from the keyboard.
 //
@@ -16,6 +20,7 @@ import { isTyping, nextIndex, wantsSearch, opensRow, clearsCursor } from '@/lib/
 //between rows without the mouse.
 export default function RowNav({ children }) {
     const router = useRouter();
+    const selection = useSelection();
     const boxRef = useRef(null);
     //index of the row the keyboard cursor sits on; null until a key is pressed
     const cursor = useRef(null);
@@ -79,8 +84,36 @@ export default function RowNav({ children }) {
             if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
 
             if (clearsCursor(event.key)) {
+                //пока есть отметка, Escape снимает её: панель закрывает низ
+                //экрана, и убрать её человек хочет раньше, чем курсор
+                if (escapeMeans(selection.count > 0) === 'selection') {
+                    selection.clear();
+                    return;
+                }
+
                 for (const row of rows()) delete row.dataset.cursor;
                 cursor.current = null;
+                return;
+            }
+
+            //отметка строк: x, Shift+X, a
+            const marking = selectionAction(event.key, { shiftKey: event.shiftKey, typing });
+            if (marking) {
+                event.preventDefault();
+
+                if (marking === 'all') {
+                    selection.selectAll();
+                    return;
+                }
+
+                //x и Shift+X работают по строке под курсором; без курсора
+                //отмечать нечего — и молча брать первую строку было бы
+                //неожиданностью
+                const row = cursor.current == null ? null : rows()[cursor.current];
+                if (!row?.dataset.id) return;
+
+                if (marking === 'range') selection.toggleRange(row.dataset.id);
+                else selection.toggle(row.dataset.id);
                 return;
             }
 
@@ -103,7 +136,7 @@ export default function RowNav({ children }) {
 
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
-    }, [router]);
+    }, [router, selection]);
 
     //the click handler sits on the wrapper rather than on each row: the
     //keyboard route is the listener above, and every row still contains a real

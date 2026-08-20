@@ -30,6 +30,9 @@ import { listColumns } from '@/lib/columns';
 import Outline from './outline';
 import RowNav from './row-nav';
 import ColumnResize from './column-resize';
+import SelectionProvider from './selection';
+import { RowCheck, SelectAllCheck } from './row-check';
+import BulkBar from './bulk-bar';
 import Stars from './stars';
 import EditableTitle from './editable-title';
 import TypePicker from './type-picker';
@@ -110,7 +113,10 @@ export const dynamic = 'force-dynamic';
 //That is what lets the date column stick to the left edge while the rest
 //scrolls under it — a sticky cell has to reach the edge itself, and it cannot
 //if the row holds the padding.
-const BUILTIN_GRID = '124px minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 104px';
+//Первая дорожка — ячейка отметки. Как и последняя, она на 20px шире своего
+//содержимого: боковой отступ строки живёт внутри крайних ячеек, иначе
+//примерзающая колонка не дотянулась бы до края.
+const BUILTIN_GRID = '50px 124px minmax(230px, 2.2fr) 148px 126px minmax(150px, 1.1fr) 104px';
 
 //track width by custom column type
 function trackWidth(type) {
@@ -223,6 +229,7 @@ export default async function MeetingsPage({ searchParams }) {
       longest={longest}
       columns={columns}
       lang={lang}
+      selectLabel={t(lang, 'row.select')}
     />
   );
 
@@ -284,7 +291,11 @@ export default async function MeetingsPage({ searchParams }) {
                   <ColumnManager />
                 </div>
 
-                <div className={styles.tableScroll}>
+                {/* отметка строк — одно состояние на таблицу: шапка, строки и
+                    панель действий смотрят в него, а строки остаются серверной
+                    разметкой */}
+                <SelectionProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
+                <div className={styles.tableScroll} data-table-scroll>
                   {/* roles, not markup: the layout is a CSS grid of divs, and
                       without them a screen reader reads 222 meetings as one
                       long run of text with no columns and no headings */}
@@ -303,6 +314,10 @@ export default async function MeetingsPage({ searchParams }) {
                       style={gutterPad ? { paddingLeft: 20 + gutterPad } : undefined}
                       role="row"
                     >
+                      <span className={styles.checkCell} role="columnheader">
+                        <SelectAllCheck label={t(lang, 'row.selectAll')} />
+                      </span>
+
                       <SortableHeader facetsByTag={facetsByTag} columnFilters={columnFilters} />
                       {columns.map((column) => (
                         <span key={column.id} role="columnheader" aria-sort="none">
@@ -332,6 +347,34 @@ export default async function MeetingsPage({ searchParams }) {
                   </div>
                 </div>
 
+                <BulkBar
+                  types={MEETING_TYPES.map((key) => ({ key, label: typeLabel(key, lang) }))}
+                  typesById={Object.fromEntries(all.map((m) => [m.id, meetingTypes(m)]))}
+                  words={{
+                    selected: t(lang, 'bulk.selected'),
+                    applying: t(lang, 'bulk.applying'),
+                    setType: t(lang, 'bulk.setType'),
+                    setPriority: t(lang, 'bulk.setPriority'),
+                    shortType: t(lang, 'bulk.shortType'),
+                    shortPriority: t(lang, 'bulk.shortPriority'),
+                    clearType: t(lang, 'bulk.clearType'),
+                    clearPriority: t(lang, 'bulk.clearPriority'),
+                    clear: t(lang, 'bulk.clear'),
+                    doneType: t(lang, 'bulk.doneType'),
+                    doneTypeCleared: t(lang, 'bulk.doneTypeCleared'),
+                    donePriority: t(lang, 'bulk.donePriority'),
+                    donePriorityCleared: t(lang, 'bulk.donePriorityCleared'),
+                    doneNote: t(lang, 'bulk.doneNote'),
+                    partial: t(lang, 'bulk.partial'),
+                    failed: t(lang, 'bulk.failed'),
+                    failedNote: t(lang, 'bulk.failedNote'),
+                    retry: t(lang, 'bulk.retry'),
+                    undo: t(lang, 'bulk.undo'),
+                    undone: t(lang, 'bulk.undone'),
+                  }}
+                />
+                </SelectionProvider>
+
               </>
             )}
           </div>
@@ -342,7 +385,7 @@ export default async function MeetingsPage({ searchParams }) {
 }
 
 //one meeting as a row of the grid
-function MeetingRow({ meeting, participants, longest, columns, lang }) {
+function MeetingRow({ meeting, participants, longest, columns, lang, selectLabel }) {
   const minutes = meeting.duration_minutes;
   const barWidth =
     longest > 0 && minutes ? Math.max(4, Math.round((minutes / longest) * 100)) : 0;
@@ -354,6 +397,7 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
   return (
     <div
       className={styles.row}
+      data-id={meeting.id}
       data-unnamed={unnamed || undefined}
       //where this row leads. the whole row is a target, not just the title —
       //RowNav does the clicking and the keyboard, so the row stays a server
@@ -361,6 +405,10 @@ function MeetingRow({ meeting, participants, longest, columns, lang }) {
       data-href={`/meetings/${meeting.id}`}
       role="row"
     >
+      <span className={styles.checkCell} role="cell">
+        <RowCheck id={meeting.id} label={selectLabel} />
+      </span>
+
       <span className={styles.date} role="cell">
         {formatDayMonth(meeting.date, lang)}
         <span className={styles.time}>{formatTime(meeting.start_time ?? meeting.date, lang)}</span>

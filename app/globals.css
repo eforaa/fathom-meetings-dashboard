@@ -40,6 +40,16 @@
   /* accent — deeper, less grey teal */
   --sage: light-dark(#3f6b6e, #8fc6b8);
   --sage-soft: light-dark(#e3ebe9, #1a2a26);
+
+  /* Знак на заливке акцента: галочка отметки пишется поверх --sage, и обычные
+     чернила на нём не читаются. Пара подобрана так, чтобы обе темы прошли
+     4.5:1 — это меряет tests/contrast.mjs */
+  --on-sage: light-dark(#ffffff, #0e1113);
+
+  /* Рамка всплывающей панели действий: тот же акцент, приглушённый до линии.
+     Обычная --rule на панели, лежащей поверх таблицы, теряется — панель
+     переставала читаться как отдельный предмет */
+  --sage-edge: light-dark(#cddad6, #2b423c);
   --sage-hover: light-dark(#35595c, #a3d3c6);
 
   /* meeting types — muted, equal chroma; each has a tint for chips */

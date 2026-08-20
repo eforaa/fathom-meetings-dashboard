@@ -157,4 +157,19 @@ const direct = [...stripes.outer, ...stripes.inMedia]
 
 check('полоса задаётся переменной, а не свойством background', direct, []);
 
+//Отметка строки не имеет права красить фон.
+//
+//Фон занят тремя состояниями — чередование, «нужно имя», курсор клавиатуры, —
+//и четвёртое вытеснило бы одно из них молча. Отмеченная жёлтая строка обязана
+//остаться жёлтой; проверяется это здесь, потому что заливка выглядит слишком
+//соблазнительно простым решением, чтобы к ней однажды не вернулись.
+const rowStyles = parse(readFileSync(join(APP, 'page.module.css'), 'utf8'));
+const painted = [...rowStyles.outer, ...rowStyles.inMedia]
+    .filter((rule) => /data-checked/.test(rule.selector))
+    .filter((rule) => rule.props.some((p) => p === 'background' || p === 'background-color'))
+    .map((rule) => rule.selector);
+
+check('отметка строки не задаёт фон — он занят тремя другими состояниями',
+    painted, []);
+
 done();

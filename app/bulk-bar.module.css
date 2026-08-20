@@ -1,0 +1,242 @@
+/* Панель действий над отмеченной пачкой и плашка результата.
+
+   Плавает над списком у нижнего края окна: список длинный, и панель, уехавшая
+   вместе с ним наверх, заставляла бы возвращаться к ней прокруткой. */
+
+.dock {
+  position: fixed;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  /* сам док прозрачен для мыши — иначе полоса шириной в экран накрыла бы
+     нижние строки таблицы */
+  pointer-events: none;
+}
+
+.bar,
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* собирается по содержимому, а не растягивается: украинское «Задати
+     важливість» длиннее английского вдвое и должно просто удлинить панель */
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 9px 12px;
+  border: 1px solid var(--sage-edge);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-panel);
+  pointer-events: auto;
+}
+
+/* пока идёт запись — полоса по верхнему краю, а не крутящийся кружок:
+   она говорит «идёт» и не отвлекает движением */
+.bar[data-busy='true'] {
+  position: relative;
+  overflow: hidden;
+}
+
+.bar[data-busy='true']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--sage);
+}
+
+.countBox {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding-left: 2px;
+}
+
+.countLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.bar[data-busy='true'] .countLabel {
+  color: var(--sage);
+}
+
+.countValue {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--rule);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--wash);
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  /* надпись не переносится: панель растёт вширь, а не в высоту */
+  white-space: nowrap;
+  transition: background-color 0.12s ease;
+}
+
+.action:hover:not(:disabled) {
+  background: var(--sage-soft);
+}
+
+.action:disabled {
+  color: var(--ink-45);
+  cursor: default;
+}
+
+.hint {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: var(--ink-45);
+}
+
+/* меню типов и важности */
+
+.menuBox {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  min-width: 190px;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-panel);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--wash);
+}
+
+.itemCount {
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  color: var(--ink-45);
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.dot[data-type='internal_planning'] { background: var(--type-internal); }
+.dot[data-type='client_meeting'] { background: var(--type-client); }
+.dot[data-type='automation'] { background: var(--type-automation); }
+.dot[data-type='onboarding'] { background: var(--type-onboarding); }
+.dot[data-type='other'] { background: var(--type-other); }
+
+/* плашка результата */
+
+.toastText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-left: 4px;
+}
+
+.toastTitle {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.toastNote {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-45);
+}
+
+/* часть строк не изменилась — полоса внимания слева; ошибка — тревожная.
+   Цвет здесь второй голос: заголовок плашки говорит то же самое словами */
+.toast[data-kind='partial'] {
+  border-left: 3px solid var(--warn);
+}
+
+.toast[data-kind='error'] {
+  border-left: 3px solid var(--error);
+}
+
+/* узкое окно: панель становится полосой во всю ширину у самого низа, а
+   надписи — короткими */
+@media (max-width: 1080px) {
+  .dock {
+    bottom: 0;
+  }
+
+  .bar,
+  .toast {
+    width: 100%;
+    max-width: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .long {
+    display: none;
+  }
+}
+
+/* на широком экране короткие надписи не нужны */
+.short {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .short {
+    display: inline;
+  }
+}
+
+/* пустота под таблицей на время, пока панель поднята */
+:global(body[data-bulk='on']) [data-table-scroll] {
+  padding-bottom: 64px;
+}
