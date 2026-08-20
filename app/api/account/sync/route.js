@@ -27,7 +27,7 @@ export async function POST(request) {
 
     try {
         //only this person, so one manual sync does not pull everyone else
-         const result = await runIngest({ onlyEmail: user.email, maxPages: 3 });
+         const result = await runIngest({ onlyEmail: user.email, maxPages: 3, source: 'manual' });
         //success response
         return NextResponse.json({ ok: true, ...result });
     } catch (caught) {

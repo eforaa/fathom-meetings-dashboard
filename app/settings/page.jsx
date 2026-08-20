@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { getAccount } from '@/lib/accounts';
+import { recentRuns } from '@/lib/sync-log';
 import SettingsForm from './settings-form';
+import SyncLog from './sync-log';
 import { getLang } from '@/lib/i18n/server';
 import { t } from '@/lib/i18n';
 import LangSwitch from '../lang-switch';
@@ -26,6 +28,10 @@ export default async function SettingsPage() {
     //account data, without the key itself
     const account = await getAccount(user.email);
 
+    //история сбора. Пустой список — честный ответ и когда запусков ещё не
+    //было, и когда db/sync-log.sql в базе пока не применён
+    const runs = account ? await recentRuns(user.email) : [];
+
     return (
         <main className={styles.page}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -42,6 +48,8 @@ export default async function SettingsPage() {
             </header>
 
             <SettingsForm account={account} />
+
+            <SyncLog account={account} runs={runs} lang={lang} now={new Date().toISOString()} />
         </main>
     );
 }
