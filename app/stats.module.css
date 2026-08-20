@@ -1,94 +1,172 @@
-/* The meetings summary in the sidebar: a count and the split by type, as text.
-   No card and no shadow — it sits quietly above the sorting panel rather than
-   competing with it.
+/* Сводка по встречам в левой колонке.
 
-   There is no proportional bar: it stretched to whatever width it was given
-   and said almost nothing, since one "no type" segment usually took nearly all
-   of it. The five tiles that used to run across the top of the page (hours,
-   this week, this month, average) are gone too. */
+   Раньше здесь было пять строчек мелким серым по 11px — всё одного веса, всё
+   одного цвета, читалось как отладочный вывод. Цифры важны по-разному, и
+   выглядеть они должны по-разному: общее число крупно, четыре показателя
+   сеткой, типы — списком с полосами.
+
+   Карточка повторяет оформление таблицы (та же рамка, тот же радиус, тот же
+   фон), чтобы страница выглядела собранной из одинаковых деталей, а не из
+   случайных. */
 
 .summary {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   margin-bottom: 12px;
-  padding: 0 2px;
+  padding: 12px 12px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-card), var(--ring);
 }
+
+/* общее число — единственная по-настоящему крупная цифра на всей странице */
 
 .total {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin: 0;
+  gap: 7px;
+  margin: 0 0 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--rule-soft);
 }
 
 .totalValue {
   font-family: var(--font-display), Georgia, serif;
-  font-size: 19px;
+  font-size: 26px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .totalLabel {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--ink-45);
 }
 
-/* hours, this week, this month, average — a wrapping line above the split.
-   Value first, then its label, so the eye catches the numbers going down. */
+/* четыре показателя: два на два.
+   Значение стоит НАД подписью — глаз идёт по столбцу цифр, не спотыкаясь о
+   слова. В разметке это dd перед dt, что для списка определений законно:
+   порядок внутри пары браузером не оговаривается */
+
 .figures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 10px;
   margin: 0;
-  font-size: 11px;
-  color: var(--ink-45);
 }
 
 .figure {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .figureValue {
-  font-family: var(--font-mono), monospace;
-  font-size: 12px;
-  font-weight: 500;
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
-/* the split by type, one wrapping line of counts */
+.figureLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  line-height: 1.3;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+/* разбивка по типам */
+
 .split {
   display: flex;
-  flex-wrap: wrap;
-  gap: 3px 12px;
-  margin: 0;
+  flex-direction: column;
+  gap: 1px;
+  margin: 10px 0 0;
+  padding: 9px 0 0;
+  border-top: 1px solid var(--rule-soft);
+  list-style: none;
 }
 
 .item {
-  display: inline-flex;
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--ink-45);
+  gap: 7px;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+  font-size: 11.5px;
+  color: var(--ink-70);
 }
 
+/* полоса — подложка строки. Ширина приходит из разметки долей от 0 до 1;
+   в CSS она превращается в проценты, чтобы вся арифметика осталась здесь */
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--share, 0) * 100%);
+  border-radius: var(--radius);
+  background: var(--type-other-tint);
+}
+
+.item[data-type='internal_planning'] .bar { background: var(--type-internal-tint); }
+.item[data-type='client_meeting'] .bar { background: var(--type-client-tint); }
+.item[data-type='automation'] .bar { background: var(--type-automation-tint); }
+.item[data-type='onboarding'] .bar { background: var(--type-onboarding-tint); }
+.item[data-type='other'] .bar { background: var(--type-other-tint); }
+
+/* «без типа» — это не тип, а пробел в данных, и подложка ему не полагается:
+   иначе самая длинная и заметная полоса в блоке доставалась бы пустоте */
+.item[data-type='__untyped'] .bar {
+  background: none;
+}
+
+/* всё остальное лежит НАД полосой */
+.dot,
+.label,
 .count {
-  font-family: var(--font-mono), monospace;
-  font-size: 10px;
-  color: var(--ink-45);
+  position: relative;
+  z-index: 1;
 }
 
 .dot {
+  flex-shrink: 0;
   width: 7px;
   height: 7px;
-  flex-shrink: 0;
   border-radius: 50%;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  /* прижат к правому краю, цифры одной ширины: столбец чисел читается как
+     столбец, даже когда подписи разной длины */
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  /* не --ink-45: число стоит НА цветной подложке, а там он даёт 4.3:1 —
+     чуть ниже нормы. Строкой ниже, где подложки нет, он возвращается */
+  color: var(--ink-70);
+  font-variant-numeric: tabular-nums;
+}
+
+.item[data-type='__untyped'] .label,
+.item[data-type='__untyped'] .count {
+  color: var(--ink-45);
 }
 
 .dot[data-type='internal_planning'] { background: var(--type-internal); }
@@ -96,4 +174,4 @@
 .dot[data-type='automation'] { background: var(--type-automation); }
 .dot[data-type='onboarding'] { background: var(--type-onboarding); }
 .dot[data-type='other'] { background: var(--type-other); }
-.dot[data-type='__untyped'] { background: var(--rule); }
+.dot[data-type='__untyped'] { background: var(--ink-25); }
