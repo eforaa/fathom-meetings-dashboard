@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/run.mjs"
+    "test": "node tests/run.mjs",
+    "deploy": "npm test && vercel --prod --yes"
   },
   "dependencies": {
     "@aivocado/mindsheet": "git+https://github.com/svedenieva/mindsheet.git#d12bc6bbb3819417ba9b261139f33268237f594c",
