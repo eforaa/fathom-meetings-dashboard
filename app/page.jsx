@@ -4,6 +4,7 @@ import { getMeetings, searchMeetingIds } from '@/lib/queries';
 import { readRange, filterByRange } from '@/lib/date-range';
 import {
   formatDayMonth,
+  formatDate,
   formatTime,
   formatDuration,
   meetingTypes,
@@ -46,6 +47,8 @@ import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import ArchiveFilter from './archive-filter';
 import ShortcutsHelp from './shortcuts-help';
+import PreviewProvider from './preview';
+import PreviewPanel from './preview-panel';
 import NoSummaryFilter from './nosummary-filter';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
@@ -347,6 +350,8 @@ export default async function MeetingsPage({ searchParams }) {
                 {/* отметка строк — одно состояние на таблицу: шапка, строки и
                     панель действий смотрят в него, а строки остаются серверной
                     разметкой */}
+                <PreviewProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
+                <div className={styles.withPreview}>
                 <SelectionProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
                 <div
                   className={styles.tableScroll}
@@ -435,6 +440,26 @@ export default async function MeetingsPage({ searchParams }) {
                   }}
                 />
                 </SelectionProvider>
+
+                {/* панель просмотра: данные готовятся здесь, на сервере, и
+                    приходят готовыми строками — панели не за чем ходить в базу
+                    ради встречи, которая уже на экране */}
+                <PreviewPanel
+                  details={Object.fromEntries(meetings.map((m) => [m.id, {
+                    title: meetingTitle(m, lang),
+                    href: `/meetings/${m.id}`,
+                    //время берётся из date: отдельной колонки start_time в
+                    //базе нет, и ссылка на неё была бы вечным undefined
+                    date: `${formatDate(m.date, lang)} · ${formatTime(m.date, lang)}`,
+                    duration: m.duration_minutes == null ? null : formatDuration(m.duration_minutes, lang),
+                    types: meetingTypes(m).map((key) => ({ key, label: typeLabel(key, lang) })),
+                    summary: meetingSummary(m),
+                    people: (peopleOf.get(m.id) ?? []).map((person) => person.name),
+                    recordingUrl: m.recording_url ?? null,
+                  }]))}
+                />
+                </div>
+                </PreviewProvider>
 
               </>
             )}

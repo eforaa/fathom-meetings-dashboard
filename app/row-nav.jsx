@@ -7,6 +7,7 @@ import {
     selectionAction, escapeMeans,
 } from '@/lib/keys';
 import { useSelection } from './selection';
+import { usePreview } from './preview';
 
 //Clicking a row, and walking the list from the keyboard.
 //
@@ -21,6 +22,7 @@ import { useSelection } from './selection';
 export default function RowNav({ children }) {
     const router = useRouter();
     const selection = useSelection();
+    const preview = usePreview();
     const boxRef = useRef(null);
     //index of the row the keyboard cursor sits on; null until a key is pressed
     const cursor = useRef(null);
@@ -43,6 +45,14 @@ export default function RowNav({ children }) {
             return;
         }
 
+        //щелчок открывает просмотр сбоку, а не уводит со страницы: список,
+        //фильтры и прокрутка остаются на месте. Уйти на страницу встречи
+        //по-прежнему можно — ссылкой в названии или из самой панели
+        if (row.dataset.id) {
+            preview.open(row.dataset.id);
+            return;
+        }
+
         router.push(row.dataset.href);
     }
 
@@ -62,6 +72,10 @@ export default function RowNav({ children }) {
             for (const other of list) delete other.dataset.cursor;
             row.dataset.cursor = 'on';
             row.scrollIntoView({ block: 'nearest' });
+
+            //пока панель открыта, она идёт за курсором: человек листает список
+            //стрелками и читает конспекты подряд, не трогая мышь
+            if (preview.isOpen && row.dataset.id) preview.open(row.dataset.id);
         }
 
         function onKey(event) {
@@ -136,7 +150,7 @@ export default function RowNav({ children }) {
 
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
-    }, [router, selection]);
+    }, [router, selection, preview]);
 
     //the click handler sits on the wrapper rather than on each row: the
     //keyboard route is the listener above, and every row still contains a real
