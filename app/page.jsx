@@ -44,6 +44,7 @@ import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
+import ArchiveFilter from './archive-filter';
 import NoSummaryFilter from './nosummary-filter';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
@@ -208,10 +209,19 @@ export default async function MeetingsPage({ searchParams }) {
   //optional "no summary" view (?nosummary=1): calls Fathom hasn't written a
   //конспект for yet — the ones still waiting to be filled in
   const noSummaryCount = all.filter((m) => !meetingSummary(m)).length;
+  //Архив: встречи владельцев без ключа Fathom. Они застыли — новых конспектов
+  //и участников у них не будет, — поэтому в общем списке их нет, но по кнопке
+  //открываются целиком. До применения db/archive-orphans.sql поля нет вовсе, и
+  //тогда архив просто пуст: ни одна встреча не помечена
+  const archivedCount = all.filter((m) => m.archived).length;
+  const showArchived = sp.archived === '1';
+
   const onlyNameless = sp.nameless === '1';
   const onlyNoSummary = sp.nosummary === '1';
   const chosen = only.length ? sorted.filter((m) => only.includes(m.id)) : sorted;
-  let meetings = chosen;
+  //архив либо показывается один, либо не показывается вовсе — смешивать их в
+  //одном списке значит вернуть ту же путаницу, ради которой отметка и заведена
+  let meetings = chosen.filter((m) => Boolean(m.archived) === showArchived);
   if (onlyNameless) meetings = meetings.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)));
   if (onlyNoSummary) meetings = meetings.filter((m) => !meetingSummary(m));
 
@@ -325,6 +335,7 @@ export default async function MeetingsPage({ searchParams }) {
                   <ExportButton ids={meetings.map((m) => m.id)} />
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
+                  <ArchiveFilter count={archivedCount} />
                   <NoSummaryFilter count={noSummaryCount} />
                   <ColumnManager />
                 </div>
