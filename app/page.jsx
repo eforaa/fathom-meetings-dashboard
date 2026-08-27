@@ -45,6 +45,7 @@ import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import ArchiveFilter from './archive-filter';
+import ShortcutsHelp from './shortcuts-help';
 import NoSummaryFilter from './nosummary-filter';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
@@ -296,6 +297,9 @@ export default async function MeetingsPage({ searchParams }) {
           <ThemeToggle />
         </div>
       </header>
+
+      {/* «?» в любом месте страницы показывает, что вообще можно нажимать */}
+      <ShortcutsHelp />
 
       <main className={styles.body}>
         <div className={styles.layout}>
