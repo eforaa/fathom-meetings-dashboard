@@ -172,4 +172,30 @@ const painted = [...rowStyles.outer, ...rowStyles.inMedia]
 check('отметка строки не задаёт фон — он занят тремя другими состояниями',
     painted, []);
 
+//Третья ловушка того же рода, и её прошлый сторож не поймал.
+//
+//Прилипание колонок отключается в свёрнутой строке — там колонок нет вовсе.
+//Когда слева добавилась ячейка отметки, дата стала второй, а отключение
+//осталось написанным только для первой: в свёрнутой строке дата продолжала
+//примерзать на 68 пикселей и наезжала на длительность.
+//
+//Проверка выше сравнивает правила, которые ОБА есть. Здесь другое: правила
+//просто нет. Поэтому — отдельно: у каждой примерзающей ячейки обязан быть
+//сброс внутри медиазапроса.
+const table = parse(readFileSync(join(APP, 'page.module.css'), 'utf8'));
+
+const sticky = table.outer
+    .filter((rule) => rule.props.includes('position'))
+    .filter((rule) => /:first-child|:nth-child\(\d+\)/.test(rule.selector))
+    .map((rule) => core(rule.selector));
+
+const released = new Set(
+    table.inMedia
+        .filter((rule) => rule.props.includes('position'))
+        .map((rule) => core(rule.selector)),
+);
+
+check('каждая примерзающая ячейка отпускается в свёрнутой строке',
+    [...new Set(sticky)].filter((selector) => !released.has(selector)), []);
+
 done();
