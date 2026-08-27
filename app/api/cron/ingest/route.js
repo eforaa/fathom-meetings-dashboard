@@ -8,16 +8,22 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function GET(request) {
-  //the secret is guessable one try at a time, so the tries are counted.
-  //Vercel calls this once a day and never comes near the cap.
-  const tooMany = rateLimit(request, { bucket: 'cron', identity: null, ...GUESSING });
-  if (tooMany) return tooMany;
-
-  //getting the password 
+  //Порядок здесь важен, и раньше он был обратным.
+  //
+  //Счётчик попыток стоял ПЕРЕД проверкой секрета, а ключ счётчика берётся из
+  //заголовка x-forwarded-for, который подделывается тривиально. Значит, чужой
+  //мог исчерпать лимит и не пустить настоящий ночной сбор — не зная секрета
+  //вовсе.
+  //
+  //Теперь сначала секрет. Правильный запрос проходит всегда, а считаются
+  //только неудачные попытки — ровно то, ради чего счётчик и заводился: секрет
+  //подбирается по одной попытке за раз.
   const secret = process.env.CRON_SECRET;
 
-  //checking whether the request contains the correct header
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
+    const tooMany = rateLimit(request, { bucket: 'cron', identity: null, ...GUESSING });
+    if (tooMany) return tooMany;
+
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
