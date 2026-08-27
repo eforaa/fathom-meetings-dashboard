@@ -4,7 +4,7 @@
 // that matches nothing looks exactly like "there are no such meetings". And it
 // is the piece a stranger's text reaches first, so the special characters of
 // tsquery syntax must never survive it.
-import { toTsQuery, isMissingSearchColumn } from '../lib/search-query.js';
+import { toTsQuery, isMissingSearchColumn, safeLike } from '../lib/search-query.js';
 import { check, done } from './_check.mjs';
 
 // --- ordinary words ---------------------------------------------------------
@@ -41,5 +41,26 @@ check('so is the postgres code for it', isMissingSearchColumn('42703'), true);
 check('an unrelated failure is not mistaken for it',
     isMissingSearchColumn('connection refused'), false);
 check('and neither is nothing at all', isMissingSearchColumn(undefined), false);
+
+// --- запасной путь: подстрока через ILIKE ----------------------------------
+// Здесь текст склеивается в строку фильтра PostgREST вида
+// `title.ilike.%слово%,ai_title.ilike.%слово%`, поэтому символы этой
+// грамматики из пользовательского ввода в неё попадать не должны: набранное в
+// поиске `x.ilike.*` дописывало бы собственное условие отбора.
+check('обычное слово проходит целиком', safeLike('клиент'), 'клиент');
+check('адрес не ломается: точка и собака нужны',
+    safeLike('anna@example.com'), 'anna@example.com');
+check('дефис и подчёркивание остаются', safeLike('ai-vocado_1'), 'ai-vocado_1');
+
+// запятая — разделитель условий, без неё нового условия не создать
+check('запятая не доезжает до фильтра', safeLike('a,b').includes(','), false);
+check('скобки тоже', safeLike('a(b)c').includes('('), false);
+check('кавычки и точка с запятой', safeLike(`ta'; DROP--`).includes("'"), false);
+check('звёздочка и процент — знаки шаблона, не текста',
+    safeLike('%a*b%'), 'a b');
+check('попытка дописать условие остаётся текстом',
+    safeLike("ta'; DROP-- .ilike.*"), 'ta DROP-- .ilike.');
+check('несколько пробелов схлопываются', safeLike('a    b'), 'a b');
+check('пусто на входе — пусто на выходе', safeLike(null), '');
 
 done();
