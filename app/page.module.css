@@ -790,6 +790,10 @@
 
   .row > *:nth-child(5) {
     order: 3;
+    /* «1 год 28 хв» — два слова, и в свёрнутой строке они переносились на
+       вторую строку, разрывая ряд «дата · время · длительность» пополам.
+       Длительность короткая по смыслу: ей нечего переносить */
+    white-space: nowrap;
   }
 
   /* the bar compares a meeting to the longest one in a column of them; on its
