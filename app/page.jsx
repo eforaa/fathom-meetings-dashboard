@@ -44,6 +44,8 @@ import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
+import NoSummaryFilter from './nosummary-filter';
+import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
 import DateFilter from './date-filter';
 import ExportButton from './export-button';
@@ -203,11 +205,15 @@ export default async function MeetingsPage({ searchParams }) {
 
   //optional "needs a name" view (?nameless=1) plus its live count for the badge
   const namelessCount = all.filter((m) => NEEDS_NAME.has(meetingTitleSource(m))).length;
+  //optional "no summary" view (?nosummary=1): calls Fathom hasn't written a
+  //конспект for yet — the ones still waiting to be filled in
+  const noSummaryCount = all.filter((m) => !meetingSummary(m)).length;
   const onlyNameless = sp.nameless === '1';
+  const onlyNoSummary = sp.nosummary === '1';
   const chosen = only.length ? sorted.filter((m) => only.includes(m.id)) : sorted;
-  const meetings = onlyNameless
-    ? chosen.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)))
-    : chosen;
+  let meetings = chosen;
+  if (onlyNameless) meetings = meetings.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)));
+  if (onlyNoSummary) meetings = meetings.filter((m) => !meetingSummary(m));
 
   //the longest meeting on screen sets the scale of the duration bars.
   //ignore absurd values (a broken multi-day span would flatten every real bar)
@@ -319,6 +325,7 @@ export default async function MeetingsPage({ searchParams }) {
                   <ExportButton ids={meetings.map((m) => m.id)} />
                   <SearchBox />
                   <NamelessFilter count={namelessCount} />
+                  <NoSummaryFilter count={noSummaryCount} />
                   <ColumnManager />
                 </div>
 
@@ -419,6 +426,9 @@ export default async function MeetingsPage({ searchParams }) {
           </div>
         </div>
       </main>
+
+      {/* "?" opens the keyboard-shortcuts help; the list it shows mirrors lib/keys.js */}
+      <Shortcuts />
     </div>
   );
 }
