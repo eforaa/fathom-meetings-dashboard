@@ -755,7 +755,9 @@
      включает прилипание, и колонка осталась бы липкой там, где липнуть не к
      чему */
   .table:not([data-grouped='true']) .row > *:first-child,
-  .table:not([data-grouped='true']) .tableHead > *:first-child {
+  .table:not([data-grouped='true']) .tableHead > *:first-child,
+  .table:not([data-grouped='true']) .row > *:nth-child(2),
+  .table:not([data-grouped='true']) .tableHead > *:nth-child(2) {
     position: static;
   }
 
