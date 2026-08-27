@@ -1,0 +1,110 @@
+/* Список сочетаний клавиш. Открывается по «?», закрывается всем, чем можно. */
+
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  /* затемнение, а не размытие: размытие на слабой машине заметно тормозит,
+     а прочитать список надо мгновенно */
+  background: light-dark(rgb(26 26 24 / 0.28), rgb(0 0 0 / 0.55));
+}
+
+.sheet {
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-panel);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  padding: 2px 6px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink-45);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 5px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+/* колонка клавиш фиксированной ширины: описания выстраиваются в столбец,
+   а не пляшут вслед за длиной сочетания */
+.keys {
+  flex: 0 0 104px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+}
+
+.key {
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--wash);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.what {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-70);
+}
+
+.note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-45);
+}

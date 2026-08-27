@@ -5,7 +5,7 @@
 // not jump the cursor down a row.
 import {
     isTyping, nextIndex, wantsSearch, opensRow, clearsCursor,
-    selectionAction, escapeMeans,
+    selectionAction, escapeMeans, opensHelp,
 } from '../lib/keys.js';
 import { check, done } from './_check.mjs';
 
@@ -55,5 +55,11 @@ check('x внутри поля ввода — просто икс', selectionAct
 
 check('Escape сначала снимает отметку', escapeMeans(true), 'selection');
 check('и только потом убирает курсор', escapeMeans(false), 'cursor');
+
+// --- подсказка по клавишам --------------------------------------------------
+check('вопросительный знак открывает список сочетаний', opensHelp('?'), true);
+//та же защита, что у остальных: знак вопроса в тексте остаётся знаком вопроса
+check('но не тогда, когда человек пишет', opensHelp('?', true), false);
+check('другая клавиша подсказку не открывает', opensHelp('/'), false);
 
 done();
