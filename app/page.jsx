@@ -50,6 +50,7 @@ import ShortcutsHelp from './shortcuts-help';
 import PreviewProvider from './preview';
 import PreviewPanel from './preview-panel';
 import NoSummaryFilter from './nosummary-filter';
+import GapFilter from './gap-filter';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
 import DateFilter from './date-filter';
@@ -221,6 +222,13 @@ export default async function MeetingsPage({ searchParams }) {
   const showArchived = sp.archived === '1';
 
   const onlyNameless = sp.nameless === '1';
+  //ещё два пробела в данных, по которым ищут, когда садятся прибирать список:
+  //встреча без типа и встреча без оценки важности
+  const noTypeCount = all.filter((m) => !meetingTypes(m).length).length;
+  const noRatingCount = all.filter((m) => !m.importance).length;
+  const onlyNoType = sp.notype === '1';
+  const onlyNoRating = sp.norating === '1';
+
   const onlyNoSummary = sp.nosummary === '1';
   const chosen = only.length ? sorted.filter((m) => only.includes(m.id)) : sorted;
   //архив либо показывается один, либо не показывается вовсе — смешивать их в
@@ -228,6 +236,10 @@ export default async function MeetingsPage({ searchParams }) {
   let meetings = chosen.filter((m) => Boolean(m.archived) === showArchived);
   if (onlyNameless) meetings = meetings.filter((m) => NEEDS_NAME.has(meetingTitleSource(m)));
   if (onlyNoSummary) meetings = meetings.filter((m) => !meetingSummary(m));
+  //фильтры складываются: «без типа» и «без оценки» вместе покажут те, у
+  //которых нет ни того, ни другого
+  if (onlyNoType) meetings = meetings.filter((m) => !meetingTypes(m).length);
+  if (onlyNoRating) meetings = meetings.filter((m) => !m.importance);
 
   //the longest meeting on screen sets the scale of the duration bars.
   //ignore absurd values (a broken multi-day span would flatten every real bar)
@@ -344,6 +356,8 @@ export default async function MeetingsPage({ searchParams }) {
                   <NamelessFilter count={namelessCount} />
                   <ArchiveFilter count={archivedCount} />
                   <NoSummaryFilter count={noSummaryCount} />
+                  <GapFilter param="notype" word="notype.button" count={noTypeCount} />
+                  <GapFilter param="norating" word="norating.button" count={noRatingCount} />
                   <ColumnManager />
                 </div>
 
