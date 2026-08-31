@@ -6,7 +6,7 @@
 //   B. a row whose *name* is an address, alongside the same human's real name
 //
 // Run: node tests/people-dedupe.mjs   (no database, no env needed)
-import { peopleByMeeting, MANUAL_ALIASES } from '../lib/people.js';
+import { peopleByMeeting, peopleByRow, MANUAL_ALIASES } from '../lib/people.js';
 import { check, done } from './_check.mjs';
 
 
@@ -76,5 +76,43 @@ check('однофамилец в список не попадает', names('a3'
 check('в списке только пары', MANUAL_ALIASES.every((pair) => pair.length === 2), true);
 check('обе стороны — непустые строки',
     MANUAL_ALIASES.every((pair) => pair.every((v) => typeof v === 'string' && v.trim())), true);
+
+//--- каждая строка знает своего человека -------------------------------------
+//Это то, что переносится в базу. Проверка здесь одна и главная: НИ ОДНА
+//строка с именем или адресом не должна остаться без человека — первая версия
+//теряла 394 строки из 5609, сравнивая показанное имя с записанным.
+const rows = new Map([
+    ['r1', [
+        { id: 1, name: 'Daniil Soloviov', email: null },
+        { id: 2, name: null, email: 'd.solovyov@privilegija.ua' },
+        { id: 3, name: 'Тетяна Гуль', email: null },
+    ]],
+    ['r2', [
+        { id: 4, name: null, email: 'd.soloviov@aivocado.ai' },
+        { id: 5, name: 't.gul@aivocado.ai', email: null },
+    ]],
+]);
+
+const perRow = peopleByRow([{ id: 'r1' }, { id: 'r2' }], rows);
+
+check('у каждой строки есть человек', perRow.size, 5);
+//три записи Даниила — один и тот же человек
+check('разные ники одного человека дают одного человека',
+    new Set([perRow.get(1).id, perRow.get(2).id, perRow.get(4).id]).size, 1);
+//сверять надо в пределах ОДНОЙ выборки: ключ человека — первая по алфавиту
+//из известных почт, а какие почты известны, зависит от того, какие встречи
+//загружены. Возьми только первую встречу — ключом станет другая почта того же
+//человека. Это свойство склейки «в памяти» и ровно та причина, по которой её
+//переносят в базу
+const bothMeetings = peopleByMeeting([{ id: 'r1' }, { id: 'r2' }], rows);
+check('и человек тот же, что показан в списке встречи',
+    perRow.get(1).id, bothMeetings.get('r1').find((p) => p.name === perRow.get(1).name).id);
+check('от набора встреч зависит ключ, а не сам человек',
+    peopleByMeeting([{ id: 'r1' }], rows).get('r1').length, 2);
+check('Тетяна не смешалась с Даниилом',
+    perRow.get(3).id === perRow.get(1).id, false);
+check('её адрес — это она же', perRow.get(5).id, perRow.get(3).id);
+check('строка без имени и адреса человека не получает',
+    peopleByRow([{ id: 'r3' }], new Map([['r3', [{ id: 9, name: null, email: null }]]])).size, 0);
 
 done();
