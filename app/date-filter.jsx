@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useT } from './lang-context';
-import { readRange, presetRange, rangeShape } from '@/lib/date-range';
+import { readRange, presetRange, rangeShape, rangeLabel } from '@/lib/date-range';
 import { usePanelFit } from './use-panel-fit';
 import styles from './date-filter.module.css';
 
@@ -65,17 +65,12 @@ export default function DateFilter() {
     }
 
     const shape = rangeShape(range);
-    const nice = (day) => day.split('-').reverse().slice(0, 2).join('.');
 
     //подпись на кнопке говорит, что именно отобрано: кнопка «Даты», которая
     //выглядит одинаково с отбором и без него, — главный способ забыть, что
-    //половина списка спрятана
-    const label =
-        shape.kind === 'any' ? T('dates.any')
-            : shape.kind === 'day' ? nice(shape.day)
-                : shape.kind === 'between' ? `${nice(shape.from)} — ${nice(shape.to)}`
-                    : shape.kind === 'since' ? `${T('dates.sinceShort')} ${nice(shape.day)}`
-                        : `${T('dates.untilShort')} ${nice(shape.day)}`;
+    //половина списка спрятана. Ту же строку показывает свёрнутая панель
+    //сортировки, поэтому она собирается в lib/date-range.js
+    const label = rangeLabel(range, T);
 
     const PRESETS = ['today', 'week', 'month', 'thisMonth'];
 
