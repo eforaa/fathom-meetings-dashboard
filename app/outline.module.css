@@ -60,7 +60,7 @@
 }
 
 .label {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
   font-size: 14px;
   color: var(--ink);
 }

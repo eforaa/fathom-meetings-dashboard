@@ -66,7 +66,7 @@
 }
 
 .settingsLink {
-  font-family: var(--font-ui), sans-serif;
+  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
   font-size: 13px;
   color: var(--ink-45);
   text-decoration: none;
@@ -228,7 +228,7 @@
   gap: 18px;
   /* боковых отступов у самой шапки нет — они внутри крайних ячеек, см. .table */
   padding: 8px 0;
-  background: light-dark(#fbfaf8, #171c20);
+  background: light-dark(#faf7f2, #28241e);
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono), monospace;
   font-size: 10px;
@@ -356,7 +356,7 @@
 /* наведение — на ступень темнее полосы, иначе на полосатых строках его
    попросту не видно */
 .row:hover {
-  background: light-dark(#f5f3f0, #1d2429);
+  background: light-dark(#f3eee6, #363128);
 }
 
 /* a meeting that still needs a name gets a tinted row */
@@ -548,7 +548,7 @@
 }
 
 .groupLabel {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
 }
