@@ -299,7 +299,11 @@ export default async function MeetingsPage({ searchParams }) {
           </span>
         </div>
 
-        <div className={styles.headerActions}>
+        {/* Переходы по разделам — своей группой и СОСЕДОМ правой части,
+            а не её содержимым: на телефоне группа уезжает на вторую строку
+            шапки, и там ей нужна вся ширина. Выход, языки и тема остаются
+            на первой — их нажимают, а разделы просматривают. */}
+        <nav className={styles.headerNav}>
           <Link href="/connect" className={styles.settingsLink}>
             {t(lang, 'nav.connect')}
           </Link>
@@ -312,6 +316,9 @@ export default async function MeetingsPage({ searchParams }) {
           <Link href="/settings" className={styles.settingsLink}>
             {t(lang, 'nav.settings')}
           </Link>
+        </nav>
+
+        <div className={styles.headerActions}>
           <SignOut email={user?.email} />
           <LangSwitch />
           <ThemeToggle />
@@ -355,7 +362,7 @@ export default async function MeetingsPage({ searchParams }) {
                     <Link href="/" className={styles.onlyChip}>
                       {t(lang, 'bulk.onlyChosen')}
                       <span aria-hidden="true">×</span>
-                    </Link>
+                  </Link>
                   )}
                   <DateFilter />
                   {/* выгружается ровно то, что сейчас в списке, и в том же
@@ -613,9 +620,9 @@ function EmptyState({ lang }) {
           <span className={styles.onboardBody}>
             <b>{t(lang, 'empty.step1Strong')}</b>
             {t(lang, 'empty.step1Text')}
-            <Link href="/settings" className={styles.onboardLink}>
+          <Link href="/settings" className={styles.onboardLink}>
               {t(lang, 'empty.step1Link')}
-            </Link>
+          </Link>
           </span>
         </li>
         <li className={styles.onboardStep}>
@@ -623,9 +630,9 @@ function EmptyState({ lang }) {
           <span className={styles.onboardBody}>
             <b>{t(lang, 'empty.step2Strong')}</b>
             {t(lang, 'empty.step2Text')}
-            <Link href="/connect" className={styles.onboardLink}>
+          <Link href="/connect" className={styles.onboardLink}>
               {t(lang, 'empty.step2Link')}
-            </Link>
+          </Link>
           </span>
         </li>
       </ol>
