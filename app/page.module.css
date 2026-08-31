@@ -155,11 +155,22 @@
 @media (max-width: 860px) {
   .layout {
     flex-direction: column;
+    /* В колонке flex-start — это выравнивание по ШИРИНЕ, и колонки получали
+       ширину по содержимому. Полоса кнопок, которую листают вбок, тут же
+       растягивала страницу до 1100px, и вбок ездила вся страница целиком. */
+    align-items: stretch;
   }
 
   .sidebar {
     width: 100%;
     position: static;
+  }
+
+  /* ширину задаёт экран, а не самая длинная строчка внутри */
+  .content {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
@@ -704,8 +715,67 @@
      1 date · 2 title · 3 type · 4 duration · 5 people · 6 stars · 7+ custom */
 
 @media (max-width: 860px) {
+  /* Шапке нужно 668px на экране в 375: восемь ссылок с переключателями языка
+     и темы. Она не переносится (высота полосы фиксирована) и не сжимается —
+     значит просто уезжала за край, и «Sign out» с языками на телефоне было
+     не достать. Теперь это полоса, которую листают вбок, как ряд вкладок:
+     ничего не пропало и ничего не налезло. */
   .header {
     padding: 0 16px;
+    gap: 12px;
+  }
+
+  .brand {
+    flex-shrink: 0;
+  }
+
+  /* «meetings explorer» — подпись к названию, и первое, чем можно
+     пожертвовать: название и без неё понятно */
+  .brandKicker {
+    display: none;
+  }
+
+  .headerActions {
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .headerActions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .headerActions > * {
+    flex-shrink: 0;
+  }
+
+  /* То же самое с рядом над таблицей. Перенос убирал кнопки с экрана не
+     вбок, а вниз: десять штук складывались в четыре ряда высотой 131px, и
+     до первой встречи приходилось прокручивать полэкрана. */
+  .tableTools {
+    flex-wrap: nowrap;
+    /* прижатый вправо ряд при переполнении уезжает влево, за нулевую
+       координату, — а туда прокрутка не достаёт: кнопки были бы не просто
+       за краем, а недосягаемы */
+    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .tableTools::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tableTools > * {
+    flex-shrink: 0;
+  }
+
+  .tableTools .count {
+    margin-right: 8px;
   }
 
   .body {
@@ -775,10 +845,37 @@
     padding-right: 0;
   }
 
-  /* the title takes its own line, above everything else */
+  /* Заголовок делит первую строку с галочкой, а не уступает ей целую.
+     Пустая галочка над каждой встречей съедала строку из четырёх и была
+     первым, что видно в списке, — при том что отмечают пачками с клавиатуры,
+     то есть не с телефона. */
   .row > *:nth-child(3) {
     order: 1;
-    flex: 1 1 100%;
+    /* Основа во всю строку минус галочка — иначе дата помещается рядом с
+       заголовком и встаёт посреди строки без всякого смысла. Считается от
+       ширины строки, поэтому не зависит от размера экрана. */
+    flex: 1 1 calc(100% - 30px);
+    min-width: 0;
+  }
+
+  /* На узком экране заголовок — единственное, что читают, и он обязан быть
+     крупнее остального и дочитываться до конца. В колонке он обрезался
+     многоточием, потому что там ширина фиксированная; здесь ширины хватает
+     на две строки. */
+  .row > *:nth-child(3) > * {
+    display: flex;
+    min-width: 0;
+  }
+
+  .row > *:nth-child(3) a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
   }
 
   /* date and time side by side, not stacked as in the column.
@@ -806,28 +903,40 @@
     display: none;
   }
 
-  /* participants read as a line of names rather than a stack */
+  /* Участники — одной строкой с многоточием, а не абзацем.
+     Переносом они занимали до трёх строк на встречу, и список из двухсот
+     встреч превращался в сплошной текст, в котором не видно самих встреч. */
   .row > *:nth-child(6) {
-    order: 4;
+    order: 6;
     flex: 1 1 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0 8px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+  }
+
+  .row > *:nth-child(6) > * {
+    margin-right: 8px;
   }
 
   .row > *:nth-child(4) {
-    order: 5;
+    order: 4;
   }
 
-  /* stars sit at the right end of the last line */
+  /* Оценка — правый конец средней строки. Строк у встречи три:
+     заголовок · когда и какая · кто. Всё, что не заголовок и не люди,
+     собрано в среднюю, иначе у каждой мелочи заводится своя строка и
+     двести встреч читаются как сплошной столбик. */
   .row > *:nth-child(7) {
-    order: 6;
+    order: 5;
     margin-left: auto;
   }
 
   /* custom columns follow, wrapping onto their own line when there are many */
   .row > *:nth-child(n + 8) {
     order: 7;
+    flex: 1 1 100%;
   }
 
   /* ячейка отметки в сложенной строке: остаётся первой и узкой, чтобы
@@ -837,6 +946,10 @@
     order: 0;
     flex: 0 0 auto;
     padding-left: 0;
+    /* по верху первой строки: рядом с двухстрочным заголовком центр увёл бы
+       галочку на середину и оторвал от строки, к которой она относится */
+    align-self: flex-start;
+    margin-top: 3px;
   }
 }
 

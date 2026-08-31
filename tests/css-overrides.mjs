@@ -198,4 +198,56 @@ const released = new Set(
 check('каждая примерзающая ячейка отпускается в свёрнутой строке',
     [...new Set(sticky)].filter((selector) => !released.has(selector)), []);
 
+//--- полоса, которую листают вбок, но не долистать ---------------------------
+//
+//Ряд кнопок над таблицей и ссылки в шапке на телефоне не переносятся, а
+//прокручиваются вбок. Оба ряда прижаты вправо — так они задуманы на широком
+//экране. Прижатый вправо ряд при переполнении вылезает за ЛЕВЫЙ край, в
+//отрицательные координаты, а туда прокрутка не достаёт: кнопки не просто
+//уехали за край, их нельзя добыть вовсе.
+//
+//Выглядит это как обрезанный ряд — то есть ровно так же, как задумано, и
+//разницу видно, только если попробовать долистать.
+const blocks = (css) =>
+    [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+        selector: m[1].trim().split(String.fromCharCode(10)).pop().trim(),
+        body: m[2],
+    }));
+
+const unreachable = blocks(readFileSync(join(APP, 'page.module.css'), 'utf8'))
+    .filter((rule) => /overflow-x:\s*auto/.test(rule.body))
+    .filter((rule) => /flex-wrap:\s*nowrap/.test(rule.body))
+    .filter((rule) => !/justify-content:\s*(flex-start|start|left|normal)/.test(rule.body))
+    .map((rule) => rule.selector);
+
+check('прокручиваемый ряд начинается слева, иначе до его начала не добраться',
+    unreachable, []);
+
+//--- два места на одной полке ------------------------------------------------
+//
+//В свёрнутой строке порядок ячеек задаётся числами order — по одному на
+//ячейку, потому что назвать их нельзя: три из семи приходят из чужих модулей
+//и адресуются по счёту. Стоит вставить ячейку слева (так было с отметкой),
+//как весь счёт съезжает на единицу.
+//
+//Если двум ячейкам достаётся одно число, они не ссорятся и ничего не ломают —
+//просто встают в порядке разметки, то есть в том самом порядке колонок, от
+//которого мы на телефоне и уходим. Ошибка молчит, а строка выглядит собранной
+//наугад.
+const orders = new Map();
+for (const rule of blocks(readFileSync(join(APP, 'page.module.css'), 'utf8'))) {
+    const found = rule.body.match(/(?:^|;)\s*order:\s*([\w+ ()-]+)\s*;/m);
+    if (!found) continue;
+    for (const cell of rule.selector.matchAll(/\.row > \*:(?:nth-child\(([^)]+)\)|(first-child))/g)) {
+        orders.set((cell[1] ?? cell[2]).trim(), found[1].trim());
+    }
+}
+
+const taken = new Map();
+for (const [cell, order] of orders) taken.set(order, [...(taken.get(order) ?? []), cell]);
+
+check('у каждой ячейки свёрнутой строки своё место',
+    [...taken].filter(([, cells]) => cells.length > 1).map(([order]) => order), []);
+check('места розданы всем семи ячейкам', orders.size, 7);
+
 done();
