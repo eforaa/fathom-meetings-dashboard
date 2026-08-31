@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { buildTags, tagOptions } from '@/lib/tags';
 import { MEETING_TYPES, typeLabel } from '@/lib/format';
+import { readRange, rangeShape, rangeLabel } from '@/lib/date-range';
+import DateFilter from './date-filter';
 import { useLang, useT } from './lang-context';
 import styles from './slot.module.css';
 
@@ -86,12 +88,25 @@ export default function Slot({ slots, facetsBySlot, groups = [] }) {
                 </span>
                 {T('sort.panel')}
                 {!panelOpen && (
-                    <span className={styles.panelSummary}>{summarize(levels, groups, TAGS, T)}</span>
+                    <span className={styles.panelSummary}>
+                        {summarize(levels, groups, TAGS, T, readRange({
+                            from: searchParams.get('from'),
+                            to: searchParams.get('to'),
+                        }))}
+                    </span>
                 )}
             </button>
 
             {panelOpen && (
                 <div className={styles.panelBody}>
+                    {/* Отбор по датам переехал сюда из ряда над таблицей:
+                        это отбор, а не действие, и его место рядом с
+                        сортировкой и группировкой. */}
+                    <p className={styles.groupTitle}>{T('dates.title')}</p>
+                    <div className={styles.dateRow}>
+                        <DateFilter />
+                    </div>
+
                     <p className={styles.groupTitle}>{T('sort.byLevel')}</p>
 
                     {levels.map((slot, position) => (
@@ -341,7 +356,11 @@ function Level({
 }
 
 //one line describing the whole panel while it is folded away
-function summarize(levels, groups, tags, T) {
+//Строка под заголовком свёрнутой панели.
+//
+//Даты сюда попали не для полноты: панель сворачивается, и отбор, спрятанный
+//внутри неё, стал бы невидимым — список короче, а почему, не сказано нигде.
+function summarize(levels, groups, tags, T, range) {
     const order = levels
         .map((slot) => `${tags[slot.tag].label} ${slot.direction === 'asc' ? '↑' : '↓'}`)
         .join(' → ');
@@ -351,5 +370,8 @@ function summarize(levels, groups, tags, T) {
               levels: groups.map((id) => tags[id].label.toLowerCase()).join(' › '),
           })
         : '';
-    return `${order}${grouped}`;
+    const shape = rangeShape(range ?? {});
+    const dates = shape.kind === 'any' ? '' : ` · ${rangeLabel(range, T)}`;
+
+    return `${order}${grouped}${dates}`;
 }
