@@ -219,7 +219,11 @@
   overflow: auto;
   max-height: calc(100vh - 106px);
   border-radius: var(--radius-lg);
-  background: var(--paper-raised);
+  background: var(--glass-bg);
+  /* размытие — вторая половина стекла: без него это просто белый
+     прямоугольник с рамкой */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-card), var(--ring);
 }
 
