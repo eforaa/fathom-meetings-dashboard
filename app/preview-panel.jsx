@@ -63,6 +63,11 @@ export default function PreviewPanel({ details }) {
     const at = order.indexOf(openId);
 
     return (
+        <>
+        {/* на узком экране панель лежит поверх списка, и щелчок мимо неё
+            закрывает — как у любой выезжающей шторки */}
+        <div className={styles.veil} onClick={close} aria-hidden="true" />
+
         <aside
             className={styles.panel}
             ref={boxRef}
@@ -171,5 +176,6 @@ export default function PreviewPanel({ details }) {
                 </>
             )}
         </aside>
+        </>
     );
 }

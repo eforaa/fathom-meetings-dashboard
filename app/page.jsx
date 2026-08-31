@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getMeetings, searchMeetingIds } from '@/lib/queries';
+import { getAccount } from '@/lib/accounts';
 import { readRange, filterByRange } from '@/lib/date-range';
 import {
   formatDayMonth,
@@ -47,6 +48,7 @@ import SortableHeader from './sortable-header';
 import NamelessFilter from './nameless-filter';
 import ArchiveFilter from './archive-filter';
 import ShortcutsHelp from './shortcuts-help';
+import SyncAlert from './sync-alert';
 import PreviewProvider from './preview';
 import PreviewPanel from './preview-panel';
 import NoSummaryFilter from './nosummary-filter';
@@ -169,6 +171,9 @@ export default async function MeetingsPage({ searchParams }) {
 
   //custom columns this person added, shown after the built-in ones
   const columns = await listColumns(user?.email);
+  //состояние сбора: нужно ровно для предупреждения над списком, поэтому
+  //спрашивается одной строкой и ничего больше не тянет
+  const account = user?.email ? await getAccount(user.email) : null;
   const gridStyle = {
     '--grid': [BUILTIN_GRID, ...columns.map((column) => trackWidth(column.type))].join(' '),
   };
@@ -317,6 +322,10 @@ export default async function MeetingsPage({ searchParams }) {
       <ShortcutsHelp />
 
       <main className={styles.body}>
+        {/* если сбор молчит, об этом должно быть видно там, где бывают каждый
+            день, а не только на странице настроек */}
+        <SyncAlert account={account} lang={lang} now={new Date().toISOString()} />
+
         <div className={styles.layout}>
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
@@ -427,6 +436,11 @@ export default async function MeetingsPage({ searchParams }) {
                 </div>
 
                 <BulkBar
+                  //кнопка архива появляется, только когда колонка есть в базе:
+                  //до применения db/archive-orphans.sql её нет, и поле у строк
+                  //не приходит вовсе
+                  canArchive={all.some((m) => 'archived' in m)}
+                  inArchive={showArchived}
                   types={MEETING_TYPES.map((key) => ({ key, label: typeLabel(key, lang) }))}
                   typesById={Object.fromEntries(all.map((m) => [m.id, meetingTypes(m)]))}
                   words={{
@@ -439,6 +453,10 @@ export default async function MeetingsPage({ searchParams }) {
                     clearType: t(lang, 'bulk.clearType'),
                     clearPriority: t(lang, 'bulk.clearPriority'),
                     clear: t(lang, 'bulk.clear'),
+                    archive: t(lang, 'bulk.archive'),
+                    unarchive: t(lang, 'bulk.unarchive'),
+                    doneArchived: t(lang, 'bulk.doneArchived'),
+                    doneUnarchived: t(lang, 'bulk.doneUnarchived'),
                     doneType: t(lang, 'bulk.doneType'),
                     doneTypeCleared: t(lang, 'bulk.doneTypeCleared'),
                     donePriority: t(lang, 'bulk.donePriority'),

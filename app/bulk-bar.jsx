@@ -18,7 +18,7 @@ import styles from './bulk-bar.module.css';
 
 const TOAST_MS = 8000;
 
-export default function BulkBar({ types, typesById, words }) {
+export default function BulkBar({ types, typesById, words, canArchive = false, inArchive = false }) {
     const { count, ids, clear, setApplying } = useSelection();
     const [refreshLater] = useDeferredRefresh();
 
@@ -144,6 +144,15 @@ export default function BulkBar({ types, typesById, words }) {
 
     const applyImportance = (value) =>
         send({ ids, set: { importance: value } }, value ? words.donePriority.replace('{n}', value) : words.donePriorityCleared);
+
+    //Пометить архивом или вернуть — смотря где человек находится. В общем
+    //списке кнопка убирает, в архиве возвращает: одно и то же действие в двух
+    //направлениях, и две кнопки рядом были бы приглашением ошибиться.
+    const applyArchive = () =>
+        send(
+            { ids, set: { archived: !inArchive } },
+            inArchive ? words.doneUnarchived : words.doneArchived,
+        );
 
     const undo = () => {
         if (!result?.previous?.length) return;
@@ -311,6 +320,14 @@ export default function BulkBar({ types, typesById, words }) {
                         </div>
                     )}
                 </span>
+
+                {/* кнопки нет, пока db/archive-orphans.sql не применён: колонки
+                    ещё не существует, и нажатие кончилось бы ошибкой */}
+                {canArchive && (
+                    <button type="button" className={styles.action} disabled={busy} onClick={applyArchive}>
+                        {inArchive ? words.unarchive : words.archive}
+                    </button>
+                )}
 
                 <span className={styles.divider} aria-hidden="true" />
 

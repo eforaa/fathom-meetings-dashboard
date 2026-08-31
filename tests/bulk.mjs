@@ -33,6 +33,13 @@ check('важность вне шкалы прижимается к ней', pat
 check('пустой запрос — пустая правка', Object.keys(patchOf({})).length, 0);
 check('мусор вместо set — тоже', Object.keys(patchOf('ага')).length, 0);
 
+//архив — только «да» и «нет»: строка «true», пришедшая из чужого запроса, не
+//должна молча становиться истиной
+check('архив принимает истину', patchOf({ archived: true }).archived, true);
+check('и ложь', patchOf({ archived: false }).archived, false);
+check('строка «true» истиной не считается', patchOf({ archived: 'true' }).archived, false);
+check('поле, которого нет в запросе, не трогается', 'archived' in patchOf({}), false);
+
 //--- кому писать ------------------------------------------------------------
 const rows = [
     { id: A, types: ['internal_planning'], importance: 2 },
@@ -55,6 +62,13 @@ check('важность: ноль и отсутствие значения — �
 check('две правки сразу: хватает одного несовпадения',
     splitByNeed([{ id: A, types: ['x'], importance: 2 }],
         { types: ['x'], importance: 3 }).changed, [A]);
+check('в архив идут только те, кто ещё не в нём',
+    splitByNeed([{ id: A, archived: true }, { id: B, archived: false }], { archived: true }),
+    { changed: [B], unchanged: [A] });
+check('и наоборот при возврате',
+    splitByNeed([{ id: A, archived: true }, { id: B }], { archived: false }),
+    { changed: [A], unchanged: [B] });
+
 check('пустой список строк не ломает разделение',
     splitByNeed([], setClient), { changed: [], unchanged: [] });
 

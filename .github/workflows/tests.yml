@@ -2,7 +2,7 @@ name: tests
 
 # Runs on every push and every pull request.
 #
-# Until now the 686 checks only ran when somebody remembered to type `npm test`
+# Until now the 692 checks only ran when somebody remembered to type `npm test`
 # — which means they guarded the project exactly as well as human memory does.
 # A red mark here appears next to the commit, in the pull request, and in the
 # repository's own list, so a broken change cannot reach dev unnoticed.
