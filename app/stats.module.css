@@ -13,8 +13,26 @@
   margin-bottom: 12px;
   padding: 12px 12px 10px;
   border-radius: var(--radius-lg);
-  background: var(--paper-raised);
+  position: relative;
+  background: var(--glass-bg);
+  /* размытие — вторая половина стекла: без него это просто белый
+     прямоугольник с рамкой */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-card), var(--ring);
+  overflow: hidden;
+}
+
+/* Фирменная полоса — единственное место на странице, где она есть.
+   В DESIGN.md сказано ставить её скупо: она даёт странице принадлежность,
+   а на каждой карточке превратилась бы в шум. Сводка для этого подходит
+   лучше всего — это верхний блок и единственный сплошь из цифр. */
+.summary::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--gradient-brand);
 }
 
 /* общее число — единственная по-настоящему крупная цифра на всей странице */
