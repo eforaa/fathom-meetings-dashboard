@@ -72,7 +72,7 @@ export async function POST(request) {
     //id сюда просто не приедут
     const { data: rows, error: readFailed } = await db
         .from('meetings')
-        .select('id, types, importance')
+        .select('id, types, importance, archived')
         .in('id', ids)
         .eq('owner_email', user.email);
 

@@ -1,0 +1,53 @@
+/* Полоска предупреждения над списком. Появляется, только когда есть что
+   сказать: постоянная плашка «всё хорошо» через день перестаёт читаться. */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--warn-tint);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+/* «стоит» и «падает» тревожнее, чем «опаздывает» — и цветом, и словами:
+   текст рядом говорит то же самое, поэтому при выключенном цвете ничего не
+   теряется */
+.bar[data-level='stale'],
+.bar[data-level='failing'] {
+  background: light-dark(#fdf2f1, #231716);
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn-dot);
+}
+
+.bar[data-level='stale'] .dot,
+.bar[data-level='failing'] .dot {
+  background: var(--error);
+}
+
+.since {
+  color: var(--ink-70);
+}
+
+.link {
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-70);
+  white-space: nowrap;
+}
+
+.link:hover {
+  color: var(--sage);
+}
