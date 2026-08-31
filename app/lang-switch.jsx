@@ -5,38 +5,41 @@ import { LANGS, LANG_LABELS, rememberLang } from '@/lib/i18n';
 import { useLang, useT } from './lang-context';
 import styles from './lang-switch.module.css';
 
-//Three short buttons beside the theme toggle.
-//The theme can change without a reload — it is just an attribute on <html>.
-//The language cannot: every phrase was rendered on the server, so after the
-//cookie is set the page has to be asked for again. router.refresh() re-renders
-//the server components in place, keeping scroll position and the current view.
+//Одна кнопка вместо трёх.
+//
+//Раньше здесь стоял ряд из трёх коротких кнопок — УКР РУС ENG, — и он занимал
+//104 пикселя. На телефоне это была пятая часть всей шапки ради выбора, который
+//делают раз в жизни. Кнопка показывает нынешний язык и по нажатию переходит к
+//следующему по кругу; трёх шагов хватает, чтобы вернуться к любому.
+//
+//Язык не меняется без перезагрузки: все слова отрисованы на сервере. Поэтому
+//после записи cookie страницу надо попросить заново — router.refresh()
+//перерисовывает серверные компоненты на месте, сохраняя прокрутку и вид.
 export default function LangSwitch() {
     const router = useRouter();
     const current = useLang();
     const T = useT();
 
-    function choose(lang) {
-        if (lang === current) return;
+    const next = LANGS[(LANGS.indexOf(current) + 1) % LANGS.length];
 
-        rememberLang(lang);
+    function choose() {
+        rememberLang(next);
         router.refresh();
     }
 
     return (
-        <div className={styles.group} role="group" aria-label={T('lang.label')}>
-            {LANGS.map((lang) => (
-                <button
-                    key={lang}
-                    type="button"
-                    onClick={() => choose(lang)}
-                    className={styles.button}
-                    data-active={lang === current}
-                    aria-pressed={lang === current}
-                    lang={lang}
-                >
-                    {LANG_LABELS[lang]}
-                </button>
-            ))}
-        </div>
+        <button
+            type="button"
+            onClick={choose}
+            className={styles.button}
+            //Что здесь написано и что случится по нажатию — разные вещи, и
+            //экранный диктор должен читать второе, иначе кнопка сообщает о
+            //себе «УКР» и молчит о том, что она вообще что-то делает.
+            aria-label={`${T('lang.label')}: ${LANG_LABELS[current]} → ${LANG_LABELS[next]}`}
+            title={`${LANG_LABELS[current]} → ${LANG_LABELS[next]}`}
+            lang={current}
+        >
+            {LANG_LABELS[current]}
+        </button>
     );
 }
