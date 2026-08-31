@@ -754,11 +754,17 @@
      Двумя строками всё помещается целиком и листать нечего:
        строка 1 — название, выход, языки, тема (311px из 375);
        строка 2 — разделы (297px из 343). */
-  .header {
-    height: auto;
-    flex-wrap: wrap;
-    padding: 8px 16px;
-    row-gap: 6px;
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    row-gap: 6px;
+  }
+
+  @media (max-width: 360px) {
+    .header {
+      padding: 8px 12px;
+    }
   }
 
   .headerActions {
@@ -776,7 +782,10 @@
     order: 3;
     flex-basis: 100%;
     margin-left: 0;
-    justify-content: flex-start;
+    justify-content: space-between;
+    /* на второй строке отступ в 14px — роскошь: на 320px без него разделы
+       не помещались в строку целиком, а с ним помещаются */
+    gap: 10px;
     /* если языку понадобятся более длинные слова, чем украинскому, ряд
        листается — но только он, а не выход с темой */
     overflow-x: auto;
