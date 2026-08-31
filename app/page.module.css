@@ -62,6 +62,18 @@
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+/* Переходы по разделам — отдельной группой внутри правой части шапки.
+   На широком экране это ничего не меняет: тот же ряд с тем же отступом.
+   Группа нужна для узкого, где она уходит на вторую строку целиком. */
+.headerNav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  /* прижимает и себя, и правую часть к правому краю — как было, когда
+     ссылки лежали внутри неё */
   margin-left: auto;
 }
 
@@ -735,18 +747,48 @@
     display: none;
   }
 
+  /* Шапка на телефоне — две строки, а не одна прокручиваемая.
+     Прокрутка вбок формально давала доступ ко всему, но самое нужное —
+     выход, языки, тема — стоит в конце ряда, то есть за краем: 304 пикселя
+     из 536 были не видны, и о том, что ряд листается, ничто не сообщало.
+     Двумя строками всё помещается целиком и листать нечего:
+       строка 1 — название, выход, языки, тема (311px из 375);
+       строка 2 — разделы (297px из 343). */
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    row-gap: 6px;
+  }
+
   .headerActions {
     min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .headerActions > * {
+    flex-shrink: 0;
+  }
+
+  /* вся группа разделов — на свою строку, во всю ширину шапки */
+  .headerNav {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+    /* если языку понадобятся более длинные слова, чем украинскому, ряд
+       листается — но только он, а не выход с темой */
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
   }
 
-  .headerActions::-webkit-scrollbar {
+  .headerNav::-webkit-scrollbar {
     display: none;
   }
 
-  .headerActions > * {
+  .headerNav > * {
     flex-shrink: 0;
   }
 
