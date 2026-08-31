@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useT } from './lang-context';
 import { readRange, presetRange, rangeShape } from '@/lib/date-range';
+import { usePanelFit } from './use-panel-fit';
 import styles from './date-filter.module.css';
 
 //Отбор встреч по датам.
@@ -22,7 +23,12 @@ export default function DateFilter() {
     const searchParams = useSearchParams();
     const T = useT();
     const boxRef = useRef(null);
+    const panelRef = useRef(null);
     const [open, setOpen] = useState(false);
+
+    //панель шире кнопки, а кнопка на телефоне переносится — без этого она
+    //уезжает за край экрана
+    usePanelFit(panelRef, open);
 
     const range = readRange({
         from: searchParams.get('from'),
@@ -89,7 +95,7 @@ export default function DateFilter() {
             </button>
 
             {open && (
-                <div className={styles.panel} role="dialog" aria-label={T('dates.title')}>
+                <div ref={panelRef} className={styles.panel} role="dialog" aria-label={T('dates.title')}>
                     <div className={styles.presets}>
                         {PRESETS.map((name) => (
                             <button

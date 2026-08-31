@@ -45,14 +45,12 @@ import Slot from './slot';
 import SignOut from './signout';
 import ThemeToggle from './toggle';
 import SortableHeader from './sortable-header';
-import NamelessFilter from './nameless-filter';
 import ArchiveFilter from './archive-filter';
 import ShortcutsHelp from './shortcuts-help';
 import SyncAlert from './sync-alert';
 import PreviewProvider from './preview';
 import PreviewPanel from './preview-panel';
-import NoSummaryFilter from './nosummary-filter';
-import GapFilter from './gap-filter';
+import GapsMenu from './gaps-menu';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
 import DateFilter from './date-filter';
@@ -371,11 +369,19 @@ export default async function MeetingsPage({ searchParams }) {
                       порядке — поэтому id берутся с уже отобранного списка */}
                   <ExportButton ids={meetings.map((m) => m.id)} />
                   <SearchBox />
-                  <NamelessFilter count={namelessCount} />
+                  {/* четыре пробела в данных — одной кнопкой с галочками.
+                      Порознь они занимали 452 пикселя и не помещались в ряд
+                      ни на одном телефоне */}
+                  <GapsMenu
+                    counts={{
+                      nameless: namelessCount,
+                      nosummary: noSummaryCount,
+                      notype: noTypeCount,
+                      norating: noRatingCount,
+                    }}
+                  />
+                  {/* архив — не пробел в данных, а другой список, и живёт отдельно */}
                   <ArchiveFilter count={archivedCount} />
-                  <NoSummaryFilter count={noSummaryCount} />
-                  <GapFilter param="notype" word="notype.button" count={noTypeCount} />
-                  <GapFilter param="norating" word="norating.button" count={noRatingCount} />
                   <ColumnManager />
                 </div>
 
