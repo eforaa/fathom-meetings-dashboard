@@ -2,26 +2,35 @@ import { cookies } from 'next/headers';
 import { getLang } from '@/lib/i18n/server';
 import { t } from '@/lib/i18n';
 import { LangProvider } from './lang-context';
-import { IBM_Plex_Sans, IBM_Plex_Mono, Source_Serif_4 } from 'next/font/google';
+import { DM_Sans, JetBrains_Mono, Golos_Text } from 'next/font/google';
 import './globals.css';
 
-const ui = IBM_Plex_Sans({
-  subsets: ['latin', 'cyrillic'],
+//Шрифты AiVocado (DESIGN.md: DM Sans + JetBrains Mono).
+//
+//DM Sans кириллицы НЕ содержит — ни в одной сборке, я проверила файлы пакета.
+//В mind-doc за ней стоит системный шрифт, и весь русский текст там рисует
+//Segoe UI или SF. Здесь так нельзя: интерфейс почти целиком кириллический,
+//и это был бы не фирменный вид, а его отсутствие.
+//
+//Поэтому вторым в стопке — Golos Text: он уже входит в их набор шрифтов и
+//перечислен в DESIGN.md. Браузер подбирает семейство поглифно: латиница
+//(имена, AiS, Zoom) достаётся DM Sans, кириллица — Golos Text.
+const ui = DM_Sans({
+  subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-ui',
   display: 'swap',
 });
-const mono = IBM_Plex_Mono({
+const cyr = Golos_Text({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600'],
+  variable: '--font-cyr',
+  display: 'swap',
+});
+const mono = JetBrains_Mono({
   subsets: ['latin', 'cyrillic'],
   weight: ['400', '500'],
   variable: '--font-mono',
-  display: 'swap',
-});
-//serif display face for headings — the editorial redesign
-const display = Source_Serif_4({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '600'],
-  variable: '--font-display',
   display: 'swap',
 });
 
@@ -58,7 +67,7 @@ export default async function RootLayout({ children }) {
     <html
       lang={lang}
       data-theme={theme}
-      className={`${ui.variable} ${mono.variable} ${display.variable}`}
+      className={`${ui.variable} ${cyr.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <body>

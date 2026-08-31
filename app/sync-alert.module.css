@@ -19,7 +19,7 @@
    теряется */
 .bar[data-level='stale'],
 .bar[data-level='failing'] {
-  background: light-dark(#fdf2f1, #231716);
+  background: light-dark(#f9ece2, #2c211a);
 }
 
 .dot {
