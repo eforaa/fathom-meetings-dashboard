@@ -319,9 +319,11 @@ export default async function MeetingsPage({ searchParams }) {
         </nav>
 
         <div className={styles.headerActions}>
-          <SignOut email={user?.email} />
           <LangSwitch />
           <ThemeToggle />
+          {/* выход — в самом правом углу, напротив названия: край строки
+              находят не глядя, а язык с темой трогают куда реже */}
+          <SignOut email={user?.email} />
         </div>
       </header>
 
