@@ -175,3 +175,31 @@
 .dot[data-type='onboarding'] { background: var(--type-onboarding); }
 .dot[data-type='other'] { background: var(--type-other); }
 .dot[data-type='__untyped'] { background: var(--ink-25); }
+
+/* Телефон.
+
+   Сводка занимала 281px — больше трети экрана, — и человек, открывший
+   приложение, видел статистику и две с половиной встречи. Цифры остаются,
+   но встают в одну строку; разбивка по типам уходит: это разбор, а не
+   действие, и ради неё не стоит отодвигать сам список. На широком экране
+   она никуда не делась. */
+@media (max-width: 860px) {
+  .summary {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+  }
+
+  .total {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+
+  .figures {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 8px;
+  }
+
+  .split {
+    display: none;
+  }
+}
