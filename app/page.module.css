@@ -88,10 +88,10 @@
   color: var(--sage);
 }
 
+/* активный раздел отмечается цветом, а не чертой: черта под ссылкой в шапке
+   читается как подчёркивание текста, а не как признак страницы */
 .settingsLink[data-active='true'] {
   color: var(--ink);
-  border-bottom: 1px solid var(--sage);
-  padding-bottom: 2px;
 }
 
 /* page body */
@@ -755,13 +755,21 @@
      Двумя строками всё помещается целиком и листать нечего:
        строка 1 — название, выход, языки, тема (311px из 375);
        строка 2 — разделы (297px из 343). */
-  .header {
-    height: auto;
-    flex-wrap: wrap;
-    padding: 8px 16px;
-    row-gap: 6px;
-  }
-
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    /* Ссылки разделов стоят второй строкой, и нижняя граница шапки шла ровно
+       под ними — читалось как подчёркивание текста. Линия убрана, а фон стал
+       плотным: сквозь прозрачную полосу просвечивал бы прокручиваемый
+       список, и край шапки пропал бы вовсе. */
+    padding: 8px 16px 14px;
+    row-gap: 14px;
+    border-bottom: none;
+    background: var(--paper);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   @media (max-width: 360px) {
     .header {
       padding: 8px 12px;
