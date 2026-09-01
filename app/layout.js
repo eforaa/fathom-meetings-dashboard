@@ -2,29 +2,23 @@ import { cookies } from 'next/headers';
 import { getLang } from '@/lib/i18n/server';
 import { t } from '@/lib/i18n';
 import { LangProvider } from './lang-context';
-import { DM_Sans, JetBrains_Mono, Golos_Text } from 'next/font/google';
+import { DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
-//Шрифты AiVocado (DESIGN.md: DM Sans + JetBrains Mono).
+//Шрифты ровно как в mind-doc: стопка «DM Sans → системный» из его
+//globals.css, буква в букву.
 //
-//DM Sans кириллицы НЕ содержит — ни в одной сборке, я проверила файлы пакета.
-//В mind-doc за ней стоит системный шрифт, и весь русский текст там рисует
-//Segoe UI или SF. Здесь так нельзя: интерфейс почти целиком кириллический,
-//и это был бы не фирменный вид, а его отсутствие.
+//Что это значит на деле: в DM Sans нет кириллицы — ни в одной сборке, я
+//проверила файлы пакета. Поэтому латиница (имена, AiS, Zoom) достаётся
+//DM Sans, а кириллица — системному шрифту: SF на телефоне, Segoe UI или
+//Arial на компьютере. Ровно так же выглядит сам mind-doc.
 //
-//Поэтому вторым в стопке — Golos Text: он уже входит в их набор шрифтов и
-//перечислен в DESIGN.md. Браузер подбирает семейство поглифно: латиница
-//(имена, AiS, Zoom) достаётся DM Sans, кириллица — Golos Text.
+//Golos Text отсюда убран сознательно. Он кириллицу закрывал, но делал
+//Fathom НЕ похожим на mind-doc — а похожесть здесь и была задачей.
 const ui = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-ui',
-  display: 'swap',
-});
-const cyr = Golos_Text({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600'],
-  variable: '--font-cyr',
   display: 'swap',
 });
 const mono = JetBrains_Mono({
@@ -67,7 +61,7 @@ export default async function RootLayout({ children }) {
     <html
       lang={lang}
       data-theme={theme}
-      className={`${ui.variable} ${cyr.variable} ${mono.variable}`}
+      className={`${ui.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <body>

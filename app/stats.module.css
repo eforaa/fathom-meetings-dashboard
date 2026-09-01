@@ -47,7 +47,7 @@
 }
 
 .totalValue {
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: var(--text-h1);
   font-weight: 600;
   line-height: 1;
@@ -85,7 +85,7 @@
 
 .figureValue {
   margin: 0;
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.1;

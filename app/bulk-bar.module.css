@@ -79,7 +79,7 @@
 }
 
 .countValue {
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 18px;
   font-weight: 600;
   line-height: 1;

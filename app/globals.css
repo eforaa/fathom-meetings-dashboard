@@ -182,7 +182,7 @@ html {
 body {
   margin: 0;
   background: var(--paper);
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: var(--text-body);
   /* 1.6 у них; здесь 1.5 — таблица на 229 строк при 1.6 вырастает так, что
      на экран помещается на встречу меньше, а читаемости это не прибавляет */
