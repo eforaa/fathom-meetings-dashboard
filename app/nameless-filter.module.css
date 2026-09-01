@@ -7,7 +7,7 @@
   border: 1px solid var(--rule);
   border-radius: var(--btn-radius);
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 13px;
   color: var(--ink-70);
   transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
