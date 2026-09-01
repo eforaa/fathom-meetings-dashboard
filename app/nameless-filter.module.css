@@ -5,7 +5,7 @@
   padding: 4px 12px;
   background: var(--paper);
   border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  border-radius: var(--btn-radius);
   cursor: pointer;
   font-family: var(--font-sans), sans-serif;
   font-size: 13px;
