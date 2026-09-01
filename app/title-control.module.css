@@ -45,7 +45,7 @@
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 13px;
   color: var(--ink-70);
   transition: border-color 0.12s ease, color 0.12s ease;
@@ -80,7 +80,7 @@
   background: var(--paper);
   border: 1px solid var(--sage);
   border-radius: var(--radius);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--ink);
@@ -101,7 +101,7 @@
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 13px;
   color: #fff;
 }
@@ -117,7 +117,7 @@
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 13px;
   color: var(--ink-45);
 }

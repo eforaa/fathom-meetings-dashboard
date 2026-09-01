@@ -249,5 +249,35 @@ for (const [cell, order] of orders) taken.set(order, [...(taken.get(order) ?? []
 check('у каждой ячейки свёрнутой строки своё место',
     [...taken].filter(([, cells]) => cells.length > 1).map(([order]) => order), []);
 check('места розданы всем семи ячейкам', orders.size, 7);
+//--- переменная, которой нет ------------------------------------------------
+//
+//Меню выбора типа было прозрачным: сквозь него читались строки таблицы.
+//Причина не в прозрачности, а в том, что фон ему задавала переменная --bg,
+//которой в проекте не существует. CSS в таком случае не ругается и не берёт
+//запасное значение — он ВЫБРАСЫВАЕТ всё свойство. Фона просто не стало.
+//
+//Там же нашлось второе: пять файлов писали шрифт через --font-sans, которого
+//тоже нет. Они рисовались системным шрифтом вместо фирменного — и это никак
+//не проявлялось, кроме как на глаз, если знать, что искать.
+//
+//Разрешены только переменные из globals.css и две, которые приходят снаружи:
+//шрифтовые от next/font (они ставятся на <html>) и те, что задаются в разметке
+//атрибутом style — ширина колонок, фон строки, доля в полосе.
+const FROM_OUTSIDE = new Set(['--font-ui', '--font-mono', '--grid', '--row-bg', '--share']);
+
+const globalsText = readFileSync(join(APP, 'globals.css'), 'utf8');
+const declared = new Set([...globalsText.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+
+const undefinedTokens = [];
+for (const file of readdirSync(APP).filter((name) => name.endsWith('.css'))) {
+    const text = readFileSync(join(APP, file), 'utf8');
+    for (const [, name] of text.matchAll(/var\((--[a-z0-9-]+)/g)) {
+        if (declared.has(name) || FROM_OUTSIDE.has(name)) continue;
+        undefinedTokens.push(`${file}: ${name}`);
+    }
+}
+
+check('каждая переменная, на которую ссылаются стили, где-то объявлена',
+    [...new Set(undefinedTokens)], []);
 
 done();
