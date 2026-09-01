@@ -78,7 +78,7 @@
 }
 
 .settingsLink {
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 13px;
   color: var(--ink-45);
   text-decoration: none;
@@ -565,7 +565,7 @@
 }
 
 .groupLabel {
-  font-family: var(--font-ui), var(--font-cyr), system-ui, sans-serif;
+  font-family: var(--font-ui), -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 600;
 }
