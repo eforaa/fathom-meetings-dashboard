@@ -106,6 +106,44 @@
      их же указанию, «sparingly on emphasized cards» */
   --gradient-brand: linear-gradient(90deg, #4f7cff, #a87bff, #e85d9c);
 
+  /* Шкала отступов AiVocado (DESIGN.md §5). Раньше отступы здесь были
+     подобраны по месту — 12, 13, 14 в соседних файлах; теперь они берутся
+     из одного набора, как у них. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --card-padding: var(--space-4);
+  --card-padding-lg: var(--space-5);
+
+  /* Кнопки и поля ввода — их же размеры. Радиусы у кнопки и поля разные,
+     и это не случайность: поле крупнее и мягче, кнопка собраннее. */
+  --btn-padding-y: 8px;
+  --btn-padding-x: 16px;
+  --btn-radius: 10px;
+  --input-padding-y: 10px;
+  --input-padding-x: 14px;
+  --input-radius: 12px;
+
+  /* Смысловые цвета: успех, предупреждение, идея, акцент второго рода.
+     Пара «светлая подложка + тёмные чернила» у каждого — так у них
+     сделаны плашки, и так они проходят по контрасту.
+     Правило, записанное у них прямым текстом: белый текст кладётся НЕ на
+     --accent, а на затемнённый --accent-on: на самом акценте он даёт 3.7:1. */
+  --success: light-dark(#2dba8e, #4ecfa5);
+  --success-tint: light-dark(#e5f8f2, #12332a);
+  --success-ink: light-dark(#0f7a5a, #4ecfa5);
+  --idea: light-dark(#a87bff, #b99bf0);
+  --idea-tint: light-dark(#f2ecff, #2a2440);
+  --idea-ink: light-dark(#6d3fc4, #b99bf0);
+  --mind: light-dark(#e85d9c, #f08cbb);
+  --mind-tint: light-dark(#fde8f2, #3a1e2c);
+  --mind-ink: light-dark(#b01e63, #f08cbb);
+
   /* размерная шкала из DESIGN.md §3 */
   --text-h1: 28px;
   --text-h2: 22px;

@@ -2,7 +2,7 @@
     padding: 3px 8px;
     background: none;
     border: 1px dashed var(--rule);
-    border-radius: var(--radius);
+    border-radius: var(--btn-radius);
     cursor: pointer;
     font-family: var(--font-mono), monospace;
     font-size: 10px;

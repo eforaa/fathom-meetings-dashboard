@@ -14,7 +14,7 @@
   gap: 6px;
   padding: 5px 11px;
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   background: var(--paper-raised);
   font-family: var(--font-mono), monospace;
   font-size: 11px;
