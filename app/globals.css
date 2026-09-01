@@ -20,69 +20,69 @@
 
      tests/contrast.mjs measures the first three against every surface here,
      so this cannot quietly slip back. */
-  --ink: light-dark(#2c2823, #ece7de);
-  --ink-70: light-dark(#655e54, #b3aa9c);
-  --ink-45: light-dark(#6b6358, #a29889);
-  --ink-25: light-dark(#c7bfb1, #4a4337);
+  --ink: light-dark(#1a2138, #e2e8f0);
+  --ink-70: light-dark(#4a5578, #94a3b8);
+  --ink-45: light-dark(#565f78, #8b95af);
+  --ink-25: light-dark(#c3cbdd, #3b465e);
 
-  --rule: light-dark(#d8d1c4, #4a4337);
-  --rule-soft: light-dark(#e7e1d7, #3e382e);
+  --rule: light-dark(#dfe4f0, #2a3348);
+  --rule-soft: light-dark(#eceef4, #22283a);
 
-  --paper: light-dark(#e7e2da, #221f19);
-  --paper-raised: light-dark(#ffffff, #2e2a23);
-  --wash: light-dark(#f3eee6, #363128);
+  --paper: light-dark(#eef2f9, #0a0e1a);
+  --paper-raised: light-dark(#ffffff, #161d2e);
+  --wash: light-dark(#e7edf7, #1e2537);
 
   /* фон каждой второй строки. Разница нарочно на пределе заметности: полосе
      достаточно вести глаз вдоль строки при прокрутке вбок, и она не должна
      спорить с наведением, которое темнее её на ступень */
-  --row-alt: light-dark(#faf7f2, #28241e);
+  --row-alt: light-dark(#f6f8fc, #121828);
 
   /* accent — deeper, less grey teal */
-  --sage: light-dark(#a85423, #d98a56);
-  --sage-soft: light-dark(#f7eae3, #483424);
+  --sage: light-dark(#3461e6, #7d9dff);
+  --sage-soft: light-dark(#e8eeff, #1e2b4d);
 
   /* Знак на заливке акцента: галочка отметки пишется поверх --sage, и обычные
      чернила на нём не читаются. Пара подобрана так, чтобы обе темы прошли
      4.5:1 — это меряет tests/contrast.mjs */
-  --on-sage: light-dark(#ffffff, #221f19);
+  --on-sage: light-dark(#ffffff, #0a0e1a);
 
   /* Рамка всплывающей панели действий: тот же акцент, приглушённый до линии.
      Обычная --rule на панели, лежащей поверх таблицы, теряется — панель
      переставала читаться как отдельный предмет */
-  --sage-edge: light-dark(#e0c9b6, #6a4a35);
+  --sage-edge: light-dark(#b9caff, #2c3f6b);
 
   /* Иконку календаря внутри поля даты рисует сам браузер, своим чёрным. На
      тёмной бумаге её не видно, а перекрасить напрямую нельзя — только
      инверсией. Ноль в светлой теме, единица в тёмной */
   --calendar-invert: light-dark(0, 1);
-  --sage-hover: light-dark(#9c4a1c, #e5a172);
+  --sage-hover: light-dark(#2451d6, #9db4ff);
 
   /* meeting types — muted, equal chroma; each has a tint for chips */
-  --type-internal: light-dark(#5d7f96, #8fb3cc);
-  --type-internal-tint: light-dark(#e8eef2, #1e2a33);
-  --type-internal-ink: light-dark(#4a6b82, #8fb3cc);
+  --type-internal: light-dark(#4f7cff, #7d9dff);
+  --type-internal-tint: light-dark(#e8eeff, #1e2b4d);
+  --type-internal-ink: light-dark(#2451d6, #8fabff);
 
-  --type-client: light-dark(#7b6aa6, #b3a3d9);
-  --type-client-tint: light-dark(#eeeaf5, #282235);
-  --type-client-ink: light-dark(#61508c, #b3a3d9);
+  --type-client: light-dark(#e85d9c, #f08cbb);
+  --type-client-tint: light-dark(#fde8f2, #3a1e2c);
+  --type-client-ink: light-dark(#b01e63, #f08cbb);
 
-  --type-automation: light-dark(#2e7e6e, #63bda9);
-  --type-automation-tint: light-dark(#e4f0ec, #16302a);
-  --type-automation-ink: light-dark(#1f6658, #63bda9);
+  --type-automation: light-dark(#2dba8e, #4ecfa5);
+  --type-automation-tint: light-dark(#e5f8f2, #12332a);
+  --type-automation-ink: light-dark(#0f7a5a, #4ecfa5);
 
-  --type-onboarding: light-dark(#8a6d3b, #cba76a);
-  --type-onboarding-tint: light-dark(#f3ece0, #2f2717);
-  --type-onboarding-ink: light-dark(#6f5527, #cba76a);
+  --type-onboarding: light-dark(#f5944e, #e0a35f);
+  --type-onboarding-tint: light-dark(#fff3e8, #3a2a18);
+  --type-onboarding-ink: light-dark(#b45309, #e0a35f);
 
-  --type-other: light-dark(#8c857a, #a29889);
-  --type-other-tint: light-dark(#efece6, #2a2620);
-  --type-other-ink: light-dark(#655e54, #a29889);
+  --type-other: light-dark(#a87bff, #b99bf0);
+  --type-other-tint: light-dark(#f2ecff, #2a2440);
+  --type-other-ink: light-dark(#6d3fc4, #b99bf0);
 
   /* "needs a name" state */
-  --warn: light-dark(#6f5527, #d9b06a);
-  --warn-tint: light-dark(#f3e6d6, #3a2e18);
-  --warn-row: light-dark(#faf7f2, #2a251c);
-  --warn-dot: #c08a3b;
+  --warn: light-dark(#8f4308, #e0a35f);
+  --warn-tint: light-dark(#fff3e8, #3a2a18);
+  --warn-row: light-dark(#fbfcfe, #101728);
+  --warn-dot: #f5944e;
 
   --error: light-dark(#b91c1c, #f0837a);
 
@@ -96,15 +96,15 @@
      ВЫПАДАЮЩИЕ МЕНЮ стеклянными не делаются — намеренно, и это их правило:
      меню всплывает поверх занятого места, и сквозь него читался бы список
      под ним. Меню остаются на --paper-raised. */
-  --glass-bg: light-dark(rgb(255 255 255 / 0.92), rgb(46 42 35 / 0.92));
-  --glass-border: light-dark(#d8d1c4, #4a4337);
-  --glass-shadow: light-dark(rgb(44 40 35 / 0.08), rgb(0 0 0 / 0.4));
+  --glass-bg: light-dark(rgb(255 255 255 / 0.72), rgb(15 20 35 / 0.72));
+  --glass-border: light-dark(#dfe4f0, #2a3348);
+  --glass-shadow: light-dark(rgb(100 120 180 / 0.08), rgb(0 0 0 / 0.3));
   /* блик по внутреннему краю: он и делает край карточки «стеклянным» */
   --glass-inset: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03));
 
   /* фирменная полоса: терракота → охра → зелёный. Ставится скупо — по
      их же указанию, «sparingly on emphasized cards» */
-  --gradient-brand: linear-gradient(90deg, #c0612b, #8a6d3b, #2e7e6e);
+  --gradient-brand: linear-gradient(90deg, #4f7cff, #a87bff, #e85d9c);
 
   /* размерная шкала из DESIGN.md §3 */
   --text-h1: 28px;
@@ -117,11 +117,11 @@
   /* one soft card shadow + a hairline ring, used instead of 1px borders */
   --ring: inset 0 0 0 1px var(--glass-border);
   --shadow-card: 0 2px 24px var(--glass-shadow), inset 0 0 0 1px var(--glass-inset);
-  --shadow-panel: 0 14px 28px -10px light-dark(rgb(44 40 35 / 0.18), rgb(0 0 0 / 0.55)),
-    0 2px 6px -2px light-dark(rgb(44 40 35 / 0.09), rgb(0 0 0 / 0.45));
+  --shadow-panel: 0 14px 28px -10px light-dark(rgb(100 120 180 / 0.20), rgb(0 0 0 / 0.6)),
+    0 2px 6px -2px light-dark(rgb(100 120 180 / 0.10), rgb(0 0 0 / 0.5));
 
-  --radius: 10px;
-  --radius-lg: 12px;
+  --radius: 12px;
+  --radius-lg: 16px;
 
   --tint: 11%;
 }
