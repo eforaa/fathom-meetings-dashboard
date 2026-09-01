@@ -279,5 +279,25 @@ for (const file of readdirSync(APP).filter((name) => name.endsWith('.css'))) {
 
 check('каждая переменная, на которую ссылаются стили, где-то объявлена',
     [...new Set(undefinedTokens)], []);
+//--- стекло там, где под ним текст -------------------------------------------
+//
+//Панель просмотра и меню выбора типа всплывают ПОВЕРХ списка. Стеклянный фон
+//на них означает буквы на буквах: сквозь панель читались строки таблицы.
+//
+//Правило записано у mind-doc прямым текстом и стоит того, чтобы его стеречь:
+//стекло — для карточек, лежащих на фоне страницы; всё, что поднято над
+//содержимым, красится непрозрачным --menu-bg. position: relative сюда не
+//относится — он ничего не поднимает.
+const floating = blocks(readFileSync(join(APP, 'preview-panel.module.css'), 'utf8'))
+    .concat(readdirSync(APP)
+        .filter((name) => name.endsWith('.css'))
+        .flatMap((name) => blocks(readFileSync(join(APP, name), 'utf8'))
+            .map((rule) => ({ ...rule, file: name }))))
+    .filter((rule) => /position:\s*(fixed|sticky|absolute)/.test(rule.body))
+    .filter((rule) => /background:\s*var\(--glass-bg\)/.test(rule.body))
+    .map((rule) => `${rule.file ?? 'preview-panel.module.css'}: ${rule.selector}`);
+
+check('всплывающее поверх содержимого не бывает стеклянным',
+    [...new Set(floating)], []);
 
 done();
