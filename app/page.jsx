@@ -54,6 +54,8 @@ import GapsMenu from './gaps-menu';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
 import SavedViews from './saved-views';
+import ViewToggle from './view-toggle';
+import CardsView from './cards-view';
 import ExportButton from './export-button';
 import Stats from './stats';
 import styles from './page.module.css';
@@ -267,6 +269,23 @@ export default async function MeetingsPage({ searchParams }) {
     : null;
   const flat = tree ? flattenTree(tree) : null;
   const outlineMeta = flat ? flat.map((entry) => ({ id: entry.key, path: entry.path })) : null;
+
+  //вид «карточки» (?view=cards): тот же отобранный и отсортированный список,
+  //показанный плитками вместо таблицы. Группировка в карточках не строится —
+  //это плоский список, поэтому карточки берут meetings, а не flat
+  const cardView = sp.view === 'cards';
+  const cards = cardView
+    ? meetings.map((m) => ({
+        id: m.id,
+        title: meetingTitle(m, lang),
+        when: `${formatDate(m.date, lang)} · ${formatTime(m.date, lang)}`,
+        duration: m.duration_minutes == null ? null : formatDuration(m.duration_minutes, lang),
+        types: meetingTypes(m).map((key) => ({ key, label: typeLabel(key, lang) })),
+        summary: meetingSummary(m),
+        people: (peopleOf.get(m.id) ?? []).length,
+        importance: m.importance ?? 0,
+      }))
+    : [];
   //the gutter takes one 22px column per grouping level; the head shifts to match
   const gutterPad = groupTags.length ? groupTags.length * 22 : 0;
 
@@ -371,6 +390,8 @@ export default async function MeetingsPage({ searchParams }) {
                   {/* именованные виды: вся строка запроса под именем в
                       localStorage, применить = вернуться на неё */}
                   <SavedViews owner={user?.email} />
+                  {/* таблица ⇄ карточки; режим живёт в ?view, чтобы делиться ссылкой */}
+                  <ViewToggle />
                   {/* четыре пробела в данных — одной кнопкой с галочками.
                       Порознь они занимали 452 пикселя и не помещались в ряд
                       ни на одном телефоне */}
@@ -390,9 +411,12 @@ export default async function MeetingsPage({ searchParams }) {
                 {/* отметка строк — одно состояние на таблицу: шапка, строки и
                     панель действий смотрят в него, а строки остаются серверной
                     разметкой */}
-                <PreviewProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
+                <PreviewProvider ids={(cardView ? meetings.map((m) => m.id) : flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
                 <div className={styles.withPreview}>
                 <SelectionProvider ids={(flat ? flat.map((entry) => entry.meeting.id) : meetings.map((m) => m.id))}>
+                {cardView ? (
+                  <CardsView cards={cards} />
+                ) : (
                 <div
                   className={styles.tableScroll}
                   data-table-scroll
@@ -451,6 +475,7 @@ export default async function MeetingsPage({ searchParams }) {
                     </RowNav>
                   </div>
                 </div>
+                )}
 
                 <BulkBar
                   //кнопка архива появляется, только когда колонка есть в базе:
