@@ -51,6 +51,8 @@ import SyncAlert from './sync-alert';
 import PreviewProvider from './preview';
 import PreviewPanel from './preview-panel';
 import GapsMenu from './gaps-menu';
+import FilterConditions from './filter-conditions';
+import { decodeConditions, matchesModel } from '@/lib/filter-conditions';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
 import SavedViews from './saved-views';
@@ -204,7 +206,29 @@ export default async function MeetingsPage({ searchParams }) {
   const inDates = filterByRange(searched, range);
 
   const filtered = applyColumnFilters(inDates, peopleOf, columnFilters, lang);
-  const sorted = applySlots(filtered, peopleOf, slots, lang);
+
+  //конструктор фильтров (?cond=): условия «И/ИЛИ» поверх колоночных. Запись
+  //нормализуется под чистую либу — так её правила проверяются тестом, не зная
+  //формата встречи
+  const condModel = decodeConditions(sp.cond ?? null);
+  const byConditions = condModel.items.length
+    ? filtered.filter((meeting) =>
+        matchesModel(
+          {
+            title: meetingTitle(meeting, lang),
+            summary: meetingSummary(meeting) || '',
+            types: meetingTypes(meeting),
+            importance: meeting.importance ?? 0,
+            duration: meeting.duration_minutes ?? null,
+            people: (peopleOf.get(meeting.id) ?? []).length,
+            date: meeting.date,
+          },
+          condModel,
+        ),
+      )
+    : filtered;
+
+  const sorted = applySlots(byConditions, peopleOf, slots, lang);
 
   //Показать ровно эти встречи (?only=id~id).
   //
@@ -405,6 +429,10 @@ export default async function MeetingsPage({ searchParams }) {
                       notype: noTypeCount,
                       norating: noRatingCount,
                     }}
+                  />
+                  {/* условия «И/ИЛИ» поверх колоночных фильтров */}
+                  <FilterConditions
+                    types={MEETING_TYPES.map((key) => ({ key, label: typeLabel(key, lang) }))}
                   />
                   {/* архив — не пробел в данных, а другой список, и живёт отдельно */}
                   <ArchiveFilter count={archivedCount} />
