@@ -1,0 +1,84 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 4px 0 8px;
+}
+
+/* карточка — стеклянная поверхность проекта: та же подпись, что у остальных
+   приподнятых элементов. Кнопка целиком, потому что вся карточка ведёт в
+   панель просмотра */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--glass-bg, var(--paper-raised));
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border: 1px solid var(--glass-border, var(--rule));
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+.card:hover {
+  border-color: var(--sage);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-panel);
+}
+
+.title {
+  font-family: var(--font-ui), -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-mono, ui-monospace), monospace;
+  font-size: 11.5px;
+  color: var(--ink-45);
+}
+
+.types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.type {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--wash);
+  font-size: 11.5px;
+  color: var(--ink-70);
+}
+/* цвет типа — те же тинты, что у чипов в таблице */
+.type[data-type='internal_planning'] { background: var(--type-internal-tint); color: var(--type-internal-ink); }
+.type[data-type='client_meeting'] { background: var(--type-client-tint); color: var(--type-client-ink); }
+.type[data-type='automation'] { background: var(--type-automation-tint); color: var(--type-automation-ink); }
+.type[data-type='onboarding'] { background: var(--type-onboarding-tint); color: var(--type-onboarding-ink); }
+.type[data-type='other'] { background: var(--type-other-tint); color: var(--type-other-ink); }
+
+.stars {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--warn, #e0a92f);
+}
+
+.summary {
+  font-size: 13px;
+  color: var(--ink-70);
+  line-height: 1.5;
+  /* три строки и многоточие: карточка — обзор, а не полный конспект */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

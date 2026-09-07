@@ -1,0 +1,130 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 24px 24px;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* стеклянная панель — та же подпись, что у карточек: полупрозрачная бумага
+   с размытием, тонкой рамкой и мягкой тенью */
+.panel {
+  width: min(560px, 100%);
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-bg, var(--paper));
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border: 1px solid var(--glass-border, var(--rule));
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-panel, 0 20px 60px rgba(0, 0, 0, 0.3));
+  overflow: hidden;
+}
+
+.input {
+  flex: none;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-ui), -apple-system, sans-serif;
+  font-size: 16px;
+  color: var(--ink);
+}
+.input::placeholder { color: var(--ink-45); }
+.input:focus { outline: none; }
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.group { display: contents; }
+
+.section {
+  display: block;
+  padding: 10px 12px 4px;
+  font-family: var(--font-mono, ui-monospace), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius, 10px);
+  font-family: var(--font-ui), -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+/* активная строка — заливка --wash, как наведение в таблице. Клавиатура и
+   мышь ведут один и тот же курсор, поэтому подсветка одна на оба способа */
+.row[data-active='true'] { background: var(--wash); }
+
+.rowText {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  flex: none;
+  font-family: var(--font-mono, ui-monospace), monospace;
+  font-size: 12px;
+  color: var(--ink-45);
+}
+
+.empty {
+  margin: 0;
+  padding: 22px 20px;
+  font-size: 13.5px;
+  color: var(--ink-45);
+}
+
+.footer {
+  flex: none;
+  display: flex;
+  gap: 16px;
+  padding: 9px 16px;
+  border-top: 1px solid var(--rule);
+  font-size: 11.5px;
+  color: var(--ink-45);
+}
+.footer span { display: inline-flex; align-items: center; gap: 5px; }
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 1px 5px;
+  background: var(--wash);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  font-family: var(--font-mono, ui-monospace), monospace;
+  font-size: 10.5px;
+  color: var(--ink-70);
+}

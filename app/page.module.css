@@ -47,8 +47,15 @@
 
 .brandName {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
+  /* фирменный вордмарк AI-researcher: имя залито трёхцветным градиентом
+     --gradient-brand через background-clip. Декоративный текст (название
+     бренда), не контентный — контраст здесь не требуется. */
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .brandKicker {

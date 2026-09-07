@@ -1,0 +1,32 @@
+/* сегментный переключатель: две кнопки в одной обойме, активная залита
+   акцентом. Оформление в ряд к соседям над таблицей */
+.box {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--btn-radius);
+  background: var(--paper);
+}
+
+.btn {
+  padding: 3px 11px;
+  border: none;
+  border-radius: calc(var(--btn-radius) - 3px);
+  background: none;
+  font-family: var(--font-ui), -apple-system, sans-serif;
+  font-size: 12.5px;
+  color: var(--ink-45);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.btn:hover { color: var(--ink); }
+
+.btn[data-active='true'] {
+  background: var(--sage);
+  color: var(--on-sage, #fff);
+}
+
+@media (max-width: 860px) {
+  .btn { padding: 3px 9px; font-size: 12px; }
+}

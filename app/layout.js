@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getLang } from '@/lib/i18n/server';
 import { t } from '@/lib/i18n';
 import { LangProvider } from './lang-context';
+import CommandPalette from './command-palette';
 import { DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -65,7 +66,10 @@ export default async function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body>
-        <LangProvider lang={lang}>{children}</LangProvider>
+        <LangProvider lang={lang}>
+          {children}
+          <CommandPalette />
+        </LangProvider>
       </body>
     </html>
   );
