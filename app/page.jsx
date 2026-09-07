@@ -53,6 +53,7 @@ import PreviewPanel from './preview-panel';
 import GapsMenu from './gaps-menu';
 import Shortcuts from './shortcuts';
 import SearchBox from './search-box';
+import SavedViews from './saved-views';
 import ExportButton from './export-button';
 import Stats from './stats';
 import styles from './page.module.css';
@@ -367,6 +368,9 @@ export default async function MeetingsPage({ searchParams }) {
                       порядке — поэтому id берутся с уже отобранного списка */}
                   <ExportButton ids={meetings.map((m) => m.id)} />
                   <SearchBox />
+                  {/* именованные виды: вся строка запроса под именем в
+                      localStorage, применить = вернуться на неё */}
+                  <SavedViews owner={user?.email} />
                   {/* четыре пробела в данных — одной кнопкой с галочками.
                       Порознь они занимали 452 пикселя и не помещались в ряд
                       ни на одном телефоне */}
