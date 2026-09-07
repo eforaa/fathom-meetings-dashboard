@@ -18,6 +18,7 @@ const NAV = [
     { key: 'home', href: '/', label: 'palette.home' },
     { key: 'people', href: '/people', label: 'nav.people' },
     { key: 'records', href: '/records', label: 'nav.records' },
+    { key: 'bin', href: '/bin', label: 'bin.nav' },
     { key: 'settings', href: '/settings', label: 'nav.settings' },
     { key: 'connect', href: '/connect', label: 'nav.connect' },
 ];

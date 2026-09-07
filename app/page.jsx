@@ -330,6 +330,9 @@ export default async function MeetingsPage({ searchParams }) {
           <Link href="/records" className={styles.settingsLink}>
             {t(lang, 'nav.records')}
           </Link>
+          <Link href="/bin" className={styles.settingsLink}>
+            {t(lang, 'bin.nav')}
+          </Link>
           <Link href="/settings" className={styles.settingsLink}>
             {t(lang, 'nav.settings')}
           </Link>
