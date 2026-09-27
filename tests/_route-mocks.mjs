@@ -13,11 +13,16 @@ export const mock = {
     user: { email: 'owner@x.io' },
     // canned rows the fake query builder resolves to
     rows: { single: { custom_fields: {} }, maybeSingle: null, list: [] },
+    // per-table overrides of the same three shapes, e.g.
+    //   mock.byTable = { meeting_groups: { list: [...], maybeSingle: {...} } }
+    // needed once a handler touches more than one table in a single call
+    byTable: {},
     // recorded database interactions, in order
     calls: [],
     reset() {
         this.user = { email: 'owner@x.io' };
         this.rows = { single: { custom_fields: {} }, maybeSingle: null, list: [] };
+        this.byTable = {};
         this.calls = [];
     },
 };
@@ -66,10 +71,17 @@ function builder(table) {
 
     const resolveWith = (kind) => {
         record.terminal = kind;
+        // a test can answer per table instead of once for the whole process:
+        // the group code reads meeting_groups, meeting_group_members and
+        // meetings inside ONE call, and a single canned list cannot be all three
+        const canned = mock.byTable?.[table];
+        const pick = (which) =>
+            canned && Object.hasOwn(canned, which) ? canned[which] : mock.rows[which];
+
         const data =
-            kind === 'single' ? mock.rows.single
-                : kind === 'maybeSingle' ? mock.rows.maybeSingle
-                    : mock.rows.list;
+            kind === 'single' ? pick('single')
+                : kind === 'maybeSingle' ? pick('maybeSingle')
+                    : pick('list');
         return Promise.resolve({ data, error: null, count: Array.isArray(data) ? data.length : null });
     };
 
@@ -80,6 +92,9 @@ function builder(table) {
         delete: step('delete'),
         upsert: step('upsert'),
         eq: step('eq'),
+        neq: step('neq'),
+        is: step('is'),
+        not: step('not'),
         or: step('or'),
         in: step('in'),
         gte: step('gte'),
@@ -105,6 +120,14 @@ export const db = {
 export function filteredByOwner(value) {
     return mock.calls.some((c) =>
         c.chain.some((s) => s.name === 'eq' && s.args[0] === 'owner_email' && s.args[1] === value));
+}
+// helper: every recorded call against one table
+export function callsTo(table) {
+    return mock.calls.filter((c) => c.table === table);
+}
+// helper: did any call against `table` chain a step named `name`?
+export function didStep(table, name) {
+    return callsTo(table).some((c) => c.chain.some((s) => s.name === name));
 }
 // helper: the value passed to an eq('owner_email', ?) in the first call
 export function ownerFilterValues() {

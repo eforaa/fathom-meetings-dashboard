@@ -1,0 +1,287 @@
+/* Папки встреч — дерево в боковой панели.
+   Тот же стеклянный лист, что у панели сортировки: они стоят в одной колонке
+   друг под другом, и разный материал читался бы как два разных приложения. */
+
+.panel {
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-card), var(--ring);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 13px 6px;
+}
+
+.title {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+/* «+» заводит папку верхнего уровня. Подпапка заводится из меню строки —
+   там уже понятно, внутрь чего */
+.add {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-45);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.add:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.error {
+  margin: 0;
+  padding: 4px 13px 6px;
+  font-size: 11px;
+  color: var(--error);
+}
+
+/* выход из фильтра. Отдельной строкой, а не повторным нажатием на папку:
+   второе нажатие на выбранную папку тоже снимает фильтр, но об этом надо
+   догадаться */
+.all {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 0 8px 4px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  font-size: 12px;
+  color: var(--ink-70);
+  cursor: pointer;
+}
+
+.all:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.all[data-on='true'] {
+  background: var(--sage-soft);
+  color: var(--sage);
+  font-weight: 500;
+}
+
+.tree {
+  margin: 0;
+  padding: 0 8px 10px;
+  list-style: none;
+}
+
+.item {
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 26px;
+}
+
+.twist {
+  width: 14px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 9px;
+  color: var(--ink-45);
+  cursor: pointer;
+}
+
+.twistGap {
+  width: 14px;
+  flex-shrink: 0;
+}
+
+/* сама папка: имя слева, счётчик справа. Счётчик — общий по поддереву, потому
+   что нажатие открывает именно поддерево; сколько лежит ровно здесь,
+   показывает подсказка */
+.node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 7px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ink-70);
+  cursor: pointer;
+}
+
+.node:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.node[data-on='true'] {
+  background: var(--sage-soft);
+  color: var(--sage);
+  font-weight: 500;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  flex-shrink: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  color: var(--ink-45);
+}
+
+.node[data-on='true'] .count {
+  color: var(--sage);
+}
+
+/* «⋯» вместо полосы из четырёх иконок: на 280 пикселях ширины они съели бы
+   имя папки целиком */
+.more {
+  width: 20px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink-45);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.row:hover .more,
+.more:focus-visible,
+.more[aria-expanded='true'] {
+  opacity: 1;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0 4px 18px;
+  padding: 4px;
+  border-radius: 9px;
+  background: var(--menu-bg);
+  box-shadow: var(--shadow-card), var(--ring);
+}
+
+.menuItem {
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  font-size: 12px;
+  color: var(--ink-70);
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.danger {
+  color: var(--error);
+}
+
+/* подтверждение стоит на месте строки, а не поверх дерева: перекрыть список
+   ради вопроса «удалить?» значит спрятать то, о чём спрашивают */
+.confirm {
+  margin: 2px 0 6px 18px;
+  padding: 8px;
+  border-radius: 9px;
+  background: var(--warn-tint);
+}
+
+.confirmText {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.confirmRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.confirmYes,
+.confirmNo {
+  padding: 4px 9px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.confirmYes {
+  background: var(--error);
+  color: var(--paper-raised);
+}
+
+.confirmNo {
+  background: transparent;
+  color: var(--ink-70);
+}
+
+.input,
+.picker {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 7px;
+  border: 1px solid var(--sage-edge);
+  border-radius: 7px;
+  background: var(--paper-raised);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0 13px 12px;
+  font-size: 12px;
+  color: var(--ink-70);
+}
+
+.emptyHint {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-45);
+}

@@ -24,6 +24,13 @@ import {
   flattenTree,
 } from '@/lib/tags';
 import { peopleByMeeting } from '@/lib/people';
+import {
+  listGroups,
+  listMemberships,
+  membershipByGroup,
+  pickGroupId,
+} from '@/lib/groups';
+import { FOLDER_KEY, UNGROUPED, folderMeetingIds, groupPath, buildGroupTree, flattenGroupTree } from '@/lib/group-tree';
 import { createClientForServer } from '@/lib/supabase-auth';
 import { getLang } from '@/lib/i18n/server';
 import { t, plural } from '@/lib/i18n';
@@ -60,6 +67,7 @@ import ViewToggle from './view-toggle';
 import CardsView from './cards-view';
 import ExportButton from './export-button';
 import Stats from './stats';
+import GroupTree from './group-tree';
 import styles from './page.module.css';
 
 //a meeting longer than a day is broken data, not a real call — leave it out of
@@ -176,6 +184,30 @@ export default async function MeetingsPage({ searchParams }) {
   //состояние сбора: нужно ровно для предупреждения над списком, поэтому
   //спрашивается одной строкой и ничего больше не тянет
   const account = user?.email ? await getAccount(user.email) : null;
+
+  //Папки: дерево, которое человек сложил руками, и что в нём лежит.
+  //
+  //Читается целиком и один раз: дерево короткое, а считать по нему приходится
+  //много — счётчики в панели, отбор списка, путь над таблицей. До применения
+  //db/meeting-groups.sql оба запроса возвращают пустоту и говорят об этом в
+  //лог, так что страница работает и без миграции — просто без папок.
+  const groups = await listGroups(user?.email);
+  const memberRows = groups.length ? await listMemberships(user?.email) : [];
+  const membership = membershipByGroup(memberRows);
+  //чужой или выдуманный id в ссылке — это «фильтра нет», а не ошибка и не
+  //чужой список
+  const ungrouped = sp[FOLDER_KEY] === UNGROUPED;
+  const folderId = ungrouped ? UNGROUPED : pickGroupId(groups, sp[FOLDER_KEY]);
+  //выбранная папка показывает и свои встречи, и всё, что в её подпапках:
+  //иначе рубрика выглядит пустой при полных детях
+  const inFolder = folderMeetingIds(groups, membership, folderId, all);
+  //панель действий над пачкой показывает папки плоским списком с глубиной:
+  //«Acme» под «Клиентами» не должна читаться как ещё одна папка верхнего уровня
+  const flatGroups = flattenGroupTree(buildGroupTree(groups)).map(({ group, depth }) => ({
+    id: group.id,
+    name: group.name,
+    depth,
+  }));
   const gridStyle = {
     '--grid': [BUILTIN_GRID, ...columns.map((column) => trackWidth(column.type))].join(' '),
   };
@@ -205,7 +237,10 @@ export default async function MeetingsPage({ searchParams }) {
   const range = readRange({ from: sp.from, to: sp.to });
   const inDates = filterByRange(searched, range);
 
-  const filtered = applyColumnFilters(inDates, peopleOf, columnFilters, lang);
+  //отбор по папке стоит здесь же, среди дешёвых: множество id уже собрано
+  const byFolder = inFolder ? inDates.filter((meeting) => inFolder.has(meeting.id)) : inDates;
+
+  const filtered = applyColumnFilters(byFolder, peopleOf, columnFilters, lang);
 
   //конструктор фильтров (?cond=): условия «И/ИЛИ» поверх колоночных. Запись
   //нормализуется под чистую либу — так её правила проверяются тестом, не зная
@@ -383,6 +418,15 @@ export default async function MeetingsPage({ searchParams }) {
           {/* sorting sits beside the meetings, on the left */}
           <aside className={styles.sidebar}>
             {stats && <Stats {...stats} lang={lang} />}
+            {/* папки стоят НАД уровнями группировки: они решают, какие встречи
+                вообще в списке, а группировка — как разложить то, что осталось.
+                Порядок на экране повторяет порядок применения */}
+            <GroupTree
+              groups={groups}
+              //Map по сети в клиентский компонент не ездит — обычный объект
+              members={Object.fromEntries(membership)}
+              selected={folderId}
+            />
             <Slot slots={slots} facetsBySlot={facetsBySlot} groups={groupTags} />
           </aside>
 
@@ -400,6 +444,18 @@ export default async function MeetingsPage({ searchParams }) {
                   <span className={styles.count}>
                     {t(lang, 'home.count', { shown: meetings.length, total: all.length })}
                   </span>
+
+                  {/* какая папка сейчас выбрана — и выход из неё. Без этой
+                      плашки отбор виден только в боковой панели, а на узком
+                      экране она уезжает наверх и из виду пропадает */}
+                  {folderId && (
+                    <Link href="/" className={styles.onlyChip} title={t(lang, 'groups.clearFilter')}>
+                      {t(lang, 'groups.filtered', {
+                        path: ungrouped ? t(lang, 'groups.ungrouped') : groupPath(groups, folderId).map((group) => group.name).join(' › '),
+                      })}
+                      <span aria-hidden="true">×</span>
+                    </Link>
+                  )}
 
                   {/* из вида «только эти» должен быть выход, иначе человек
                       остаётся в списке из трёх встреч и не понимает, куда
@@ -514,6 +570,11 @@ export default async function MeetingsPage({ searchParams }) {
                   //не приходит вовсе
                   canArchive={all.some((m) => 'archived' in m)}
                   inArchive={showArchived}
+                  //папки уже разложены деревом; панели нужен плоский список с
+                  //глубиной, чтобы «Acme» под «Клиентами» не читалось как ещё
+                  //одна папка верхнего уровня
+                  groups={flatGroups}
+                  inGroup={folderId && !ungrouped ? { id: folderId, name: groupPath(groups, folderId).at(-1)?.name ?? '' } : null}
                   types={MEETING_TYPES.map((key) => ({ key, label: typeLabel(key, lang) }))}
                   typesById={Object.fromEntries(all.map((m) => [m.id, meetingTypes(m)]))}
                   words={{
@@ -542,6 +603,14 @@ export default async function MeetingsPage({ searchParams }) {
                     retry: t(lang, 'bulk.retry'),
                     undo: t(lang, 'bulk.undo'),
                     undone: t(lang, 'bulk.undone'),
+                    toGroup: t(lang, 'bulk.toGroup'),
+                    shortGroup: t(lang, 'bulk.shortGroup'),
+                    //{name} подставляет сама панель: какая папка выбрана, знает
+                    //только она — шаблон приходит уже переведённым
+                    fromGroup: t(lang, 'bulk.fromGroup'),
+                    doneGrouped: t(lang, 'bulk.doneGrouped'),
+                    doneUngrouped: t(lang, 'bulk.doneUngrouped'),
+                    noGroups: t(lang, 'bulk.noGroups'),
                   }}
                 />
                 </SelectionProvider>
