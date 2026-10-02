@@ -1,0 +1,46 @@
+name: Hourly Fathom collection
+
+on:
+  schedule:
+    # Offset from the top of the hour to reduce scheduler congestion.
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: fathom-production-ingest
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Collect meetings
+        env:
+          FATHOM_CRON_SECRET: ${{ secrets.FATHOM_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FATHOM_CRON_SECRET" ]; then
+            echo 'Missing FATHOM_CRON_SECRET repository secret.'
+            exit 1
+          fi
+          response=$(mktemp)
+          trap 'rm -f "$response"' EXIT
+          curl --silent --show-error --fail --max-time 180 \
+            --header "Authorization: Bearer $FATHOM_CRON_SECRET" \
+            --output "$response" \
+            https://fathom-soritng.vercel.app/api/cron/ingest
+          python3 - "$response" <<'PY'
+          import json, sys
+          with open(sys.argv[1]) as response:
+              result = json.load(response)
+          if not result.get('ok'):
+              sys.exit('Collection endpoint reported failure; inspect the application sync log.')
+          accounts = result.get('perAccount', [])
+          if any(account.get('error') for account in accounts):
+              sys.exit('At least one account failed; inspect the application sync log.')
+          print('Fathom collection completed successfully.')
+          PY
