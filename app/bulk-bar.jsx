@@ -18,7 +18,18 @@ import styles from './bulk-bar.module.css';
 
 const TOAST_MS = 8000;
 
-export default function BulkBar({ types, typesById, words, canArchive = false, inArchive = false }) {
+export default function BulkBar({
+    types,
+    typesById,
+    words,
+    canArchive = false,
+    inArchive = false,
+    //папки плоским списком с глубиной; inGroup — та, по которой сейчас отбор,
+    //и только она даёт кнопку «убрать из папки»: убирать из папки, которую не
+    //видно, — это действие вслепую
+    groups = [],
+    inGroup = null,
+}) {
     const { count, ids, clear, setApplying } = useSelection();
     const [refreshLater] = useDeferredRefresh();
 
@@ -154,14 +165,62 @@ export default function BulkBar({ types, typesById, words, canArchive = false, i
             inArchive ? words.doneUnarchived : words.doneArchived,
         );
 
+    //Папки живут не в meetings, а в своей таблице членства, поэтому идут своим
+    //маршрутом. Ответ у него тот же формы, что у пакетной правки, — плашка
+    //результата умеет читать только её, и заводить вторую было бы лишним.
+    //
+    //Отмены у этого действия нет намеренно: обратное действие — соседняя
+    //кнопка, и «убрать из папки» человек нажмёт быстрее, чем найдёт «отменить».
+    async function sendGroup(groupId, action, describe) {
+        if (!groupId) return;
+
+        setBusy(true);
+        setApplying(true);
+        setMenu(null);
+        const payload = { ids, action };
+        lastRequest.current = { group: groupId, payload, describe };
+
+        try {
+            const response = await fetch(`/api/groups/${groupId}/meetings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) throw new Error(String(response.status));
+
+            const answer = await response.json();
+            //чужая или исчезнувшая встреча называется отдельно — так же, как в
+            //пакетной правке: «12 добавлено, 1 не ваша» понятнее отказа
+            setResult({
+                changed: answer.added ?? answer.removed ?? [],
+                unchanged: answer.unchanged ?? [],
+                failed: answer.rejected ?? [],
+                describe,
+            });
+            clear();
+            refreshLater();
+        } catch {
+            setResult({ error: true, describe });
+        } finally {
+            setBusy(false);
+            setApplying(false);
+        }
+    }
+
     const undo = () => {
         if (!result?.previous?.length) return;
         send({ restore: result.previous }, words.undone);
     };
 
+    //«повторить» должно повторять то же самое, а не что-то похожее: у правки
+    //папок другой маршрут, и отправить её телом обычной правки значит молча
+    //ничего не сделать
     const retry = () => {
         const again = lastRequest.current;
-        if (again) send(again.payload, again.describe);
+        if (!again) return;
+        if (again.group) sendGroup(again.group, again.payload.action, again.describe);
+        else send(again.payload, again.describe);
     };
 
     //сколько отмеченных встреч уже несут этот тип — счётчик рядом с пунктом
@@ -317,6 +376,73 @@ export default function BulkBar({ types, typesById, words, canArchive = false, i
                             >
                                 {words.clearPriority}
                             </button>
+                        </div>
+                    )}
+                </span>
+
+                <span className={styles.menuBox}>
+                    <button
+                        type="button"
+                        className={styles.action}
+                        disabled={busy}
+                        aria-expanded={menu === 'group'}
+                        aria-haspopup="menu"
+                        ref={menu === 'group' ? triggerRef : null}
+                        onClick={() => setMenu(menu === 'group' ? null : 'group')}
+                    >
+                        <span className={styles.long}>{words.toGroup}</span>
+                        <span className={styles.short}>{words.shortGroup}</span>
+                        <span aria-hidden="true">▾</span>
+                    </button>
+
+                    {menu === 'group' && (
+                        <div className={styles.menu} role="menu" ref={menuRef}>
+                            {groups.length === 0 ? (
+                                //папок ещё нет — меню должно сказать, где их
+                                //завести, а не оказаться пустым прямоугольником
+                                <span className={styles.item}>{words.noGroups}</span>
+                            ) : (
+                                groups.map((group) => (
+                                    <button
+                                        key={group.id}
+                                        type="button"
+                                        role="menuitem"
+                                        className={styles.item}
+                                        //вложенность показана отступом: имена
+                                        //подпапок часто повторяются от проекта
+                                        //к проекту, и плоский список их путает
+                                        style={group.depth ? { paddingLeft: 10 + group.depth * 12 } : undefined}
+                                        onClick={() =>
+                                            sendGroup(
+                                                group.id,
+                                                'add',
+                                                words.doneGrouped.replace('{name}', group.name),
+                                            )
+                                        }
+                                    >
+                                        {group.name}
+                                    </button>
+                                ))
+                            )}
+
+                            {/* убрать можно только из той папки, по которой
+                                сейчас отбор: иначе непонятно, из какой */}
+                            {inGroup && (
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    className={styles.item}
+                                    onClick={() =>
+                                        sendGroup(
+                                            inGroup.id,
+                                            'remove',
+                                            words.doneUngrouped.replace('{name}', inGroup.name),
+                                        )
+                                    }
+                                >
+                                    {words.fromGroup.replace('{name}', inGroup.name)}
+                                </button>
+                            )}
                         </div>
                     )}
                 </span>

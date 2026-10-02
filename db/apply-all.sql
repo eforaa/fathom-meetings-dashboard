@@ -195,8 +195,114 @@ create index if not exists sync_runs_email_started_idx
 alter table custom_columns enable row level security;
 
 -- ---------------------------------------------------------------------------
--- 7. Поля показа и люди — см. db/display-fields.sql и db/people.sql.
+-- 7. Папки встреч: дерево у каждого владельца + членство встреч в папках.
+--    Рассуждения целиком — в db/meeting-groups.sql; здесь та же схема, чтобы
+--    новая база поднималась одним скриптом.
+--
+--    Циклы в дереве база не запрещает (на путь ограничение не выражается);
+--    сторож стоит в lib/group-tree.js и вызывается и маршрутом, и коннектором.
+--    Удаление папки НЕ трогает встречи: каскад уносит только строки членства.
+-- ---------------------------------------------------------------------------
+create table if not exists meeting_groups (
+  id uuid primary key default gen_random_uuid(),
+  owner_email text not null,
+  name text not null,
+  parent_id uuid references meeting_groups (id) on delete set null,
+  position int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists meeting_groups_owner_idx
+  on meeting_groups (owner_email);
+create index if not exists meeting_groups_owner_parent_idx
+  on meeting_groups (owner_email, parent_id);
+
+create table if not exists meeting_group_members (
+  group_id uuid not null references meeting_groups (id) on delete cascade,
+  meeting_id uuid not null references meetings (id) on delete cascade,
+  owner_email text not null,
+  added_at timestamptz not null default now(),
+  primary key (group_id, meeting_id)
+);
+
+create index if not exists meeting_group_members_owner_meeting_idx
+  on meeting_group_members (owner_email, meeting_id);
+create index if not exists meeting_group_members_group_idx
+  on meeting_group_members (group_id);
+
+alter table meeting_groups enable row level security;
+alter table meeting_group_members enable row level security;
+
+-- ---------------------------------------------------------------------------
+-- 8. Поля показа и люди — см. db/display-fields.sql и db/people.sql.
 --    Здесь только напоминание: эти два файла применяются отдельно, потому что
 --    первый переписывает все строки meetings (вычисляемая колонка), а второй
 --    требует последующего заполнения через tools/people-sync.mjs.
 -- ---------------------------------------------------------------------------
+
+
+-- Serialize hierarchy edits per owner and enforce ownership/cycles at the
+-- database boundary too. UI and MCP requests may arrive concurrently.
+create or replace function public.guard_meeting_group_tree()
+returns trigger language plpgsql set search_path = public, pg_temp as $$
+declare
+  cursor_id uuid;
+  cursor_owner text;
+  parent_depth int := 0;
+  branch_height int := 0;
+  visited uuid[] := array[]::uuid[];
+begin
+  if tg_op = 'DELETE' then
+    perform pg_advisory_xact_lock(hashtextextended(old.owner_email, 137));
+    return old;
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended(new.owner_email, 137));
+  if tg_op = 'UPDATE' and new.owner_email is distinct from old.owner_email then
+    raise exception 'Group owner cannot be changed';
+  end if;
+  if btrim(new.name) = '' or char_length(new.name) > 60 then
+    raise exception 'Group name must contain 1 to 60 characters';
+  end if;
+  cursor_id := new.parent_id;
+  while cursor_id is not null loop
+    if cursor_id = new.id or cursor_id = any(visited) then
+      raise exception 'Group hierarchy cannot contain a cycle';
+    end if;
+    visited := array_append(visited, cursor_id);
+    select owner_email, parent_id into cursor_owner, cursor_id
+      from public.meeting_groups where id = cursor_id;
+    if not found or cursor_owner is distinct from new.owner_email then
+      raise exception 'Parent group not found';
+    end if;
+    parent_depth := parent_depth + 1;
+  end loop;
+  with recursive descendants as (
+    select id, 0 as depth, array[id] as path from public.meeting_groups where id = new.id
+    union all
+    select g.id, d.depth + 1, d.path || g.id
+      from public.meeting_groups g join descendants d on g.parent_id = d.id
+      where not g.id = any(d.path)
+  ) select coalesce(max(depth), 0) into branch_height from descendants;
+  if parent_depth + branch_height >= 10 then
+    raise exception 'Groups cannot nest deeper than 10 levels';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists meeting_groups_tree_guard on public.meeting_groups;
+create trigger meeting_groups_tree_guard before insert or update or delete
+  on public.meeting_groups for each row execute function public.guard_meeting_group_tree();
+
+create or replace function public.guard_meeting_group_membership()
+returns trigger language plpgsql set search_path = public, pg_temp as $$
+begin
+  if not exists(select 1 from public.meeting_groups where id = new.group_id and owner_email = new.owner_email)
+    or not exists(select 1 from public.meetings where id = new.meeting_id and owner_email = new.owner_email) then
+    raise exception 'Group and meeting must belong to the same owner';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists meeting_group_members_owner_guard on public.meeting_group_members;
+create trigger meeting_group_members_owner_guard before insert or update
+  on public.meeting_group_members for each row execute function public.guard_meeting_group_membership();
