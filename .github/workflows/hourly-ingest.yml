@@ -1,9 +1,17 @@
 name: Hourly Fathom collection
 
 on:
-  schedule:
-    # Offset from the top of the hour to reduce scheduler congestion.
-    - cron: '7 * * * *'
+  # Расписание приостановлено 13.10.2026. База Supabase ушла в ограничение по
+  # размеру (exceed_db_size_quota), и часовой прогон — один из подозреваемых:
+  # он переписывает список участников при каждом заходе, а каждая перезапись
+  # оставляет мёртвую строку.
+  #
+  # Отдельно и важнее: адрес ниже ведёт на fathom-soritng.vercel.app — это
+  # ПОСТОРОННИЙ проект, а не наш сайт (fathom-meetings-dashboard.vercel.app).
+  # Перед возвратом расписания адрес обязательно исправить.
+  #
+  # schedule:
+  #   - cron: '7 * * * *'
   workflow_dispatch:
 
 permissions: {}
