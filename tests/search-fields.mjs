@@ -37,6 +37,17 @@ const fallbackFields = [...queries.matchAll(/`([a-z_]+)\.ilike\.\$\{like\}`/g)]
 const indexedFields = [...migration.matchAll(/coalesce\(([a-z_]+), ''\)/g)]
     .map((m) => m[1]);
 
+//apply-all.sql поднимает базу с нуля — именно его накатывают на НОВЫЙ проект.
+//Он тоже создаёт search_doc, и если расшифровки вернутся сюда, новая база
+//повторит аварию 13.10.2026 на пустом месте. Поэтому проверяем и его.
+const fromScratch = readFileSync('db/apply-all.sql', 'utf8')
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('--'))
+    .join('\n');
+
+const scratchFields = [...fromScratch.matchAll(/coalesce\(([a-z_]+), ''\)/g)]
+    .map((m) => m[1]);
+
 // --- расшифровка не ищется нигде -------------------------------------------
 
 isTrue(
@@ -47,6 +58,17 @@ isTrue(
 isTrue(
     'индекс не хранит расшифровки — ради этого всё и затевалось',
     !indexedFields.includes('raw_transcript'),
+);
+
+isTrue(
+    'и установка с нуля тоже их не хранит — иначе новый проект повторит аварию',
+    !scratchFields.includes('raw_transcript'),
+);
+
+check(
+    'установка с нуля создаёт ровно тот же набор полей, что и миграция',
+    scratchFields,
+    indexedFields,
 );
 
 // --- оба пути ищут по одному и тому же ---------------------------------------
